@@ -1,0 +1,61 @@
+{
+  "pages": [
+    "pages/training/training",
+    "pages/mine/mine"
+  ],
+  "subpackages": [
+    {
+      "name": "packageA",
+      "root": "packageA",
+      "pages": [
+        "onboarding/onboarding",
+        "plan/plan",
+        "workout/workout",
+        "stats/stats",
+        "library/library",
+        "body/body",
+        "reminder/reminder",
+        "legal/legal",
+        "badges/badges"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/training/training": {
+      "network": "all",
+      "packages": [
+        "packageA"
+      ]
+    }
+  },
+  "window": {
+    "navigationBarBackgroundColor": "#111827",
+    "navigationBarTitleText": "轻练打卡健身",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f6f8",
+    "backgroundTextStyle": "dark"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#10b981",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/training/training",
+        "text": "训练",
+        "iconPath": "assets/icons/training.png",
+        "selectedIconPath": "assets/icons/training-active.png"
+      },
+      {
+        "pagePath": "pages/mine/mine",
+        "text": "我的",
+        "iconPath": "assets/icons/mine.png",
+        "selectedIconPath": "assets/icons/mine-active.png"
+      }
+    ]
+  },
+  "usingComponents": {},
+  "sitemapLocation": "sitemap.json",
+  "style": "v2"
+}

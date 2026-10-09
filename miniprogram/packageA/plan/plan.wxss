@@ -1,0 +1,238 @@
+/* packageA/plan/plan.wxss */
+.page {
+  padding: 24rpx 24rpx 48rpx;
+}
+
+.state-box {
+  text-align: center;
+  padding: 200rpx 0;
+  color: var(--color-text-secondary);
+}
+
+.state-icon {
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+}
+
+.state-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: 12rpx;
+}
+
+/* 失败卡片：把原因直接显示出来 */
+.err-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  margin-top: 48rpx;
+  border: 2rpx solid #fecaca;
+}
+
+.err-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+.err-msg {
+  font-size: var(--font-size-sm);
+  color: #7f1d1d;
+  background: #fef2f2;
+  border-radius: var(--radius-base);
+  padding: 20rpx;
+  margin: 16rpx 0 24rpx;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+/* 空态下的排查线索 */
+.debug-box {
+  margin: 32rpx 0 24rpx;
+  padding: 20rpx;
+  background: #f3f4f6;
+  border-radius: var(--radius-base);
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #4b5563;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.day-empty {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  padding-top: 24rpx;
+}
+
+/* 计划头部 */
+.plan-hero {
+  background: linear-gradient(135deg, #111827 0%, #059669 140%);
+  color: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 40rpx 32rpx;
+}
+
+.plan-name {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+}
+
+.plan-summary {
+  font-size: var(--font-size-base);
+  opacity: 0.85;
+  margin-top: 12rpx;
+  line-height: 1.6;
+}
+
+.plan-meta {
+  display: inline-block;
+  font-size: var(--font-size-sm);
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999rpx;
+  padding: 8rpx 24rpx;
+  margin-top: 24rpx;
+}
+
+/* 周切换 tabs */
+.week-tabs {
+  white-space: nowrap;
+  margin-top: 32rpx;
+}
+
+.week-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  background: #ffffff;
+  border-radius: var(--radius-base);
+  border: 3rpx solid transparent;
+  padding: 16rpx 32rpx;
+  margin-right: 16rpx;
+  transition: all 0.2s;
+}
+
+.week-tab.active {
+  border-color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.week-tab-num {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.week-tab-focus {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 4rpx;
+}
+
+/* 训练日卡片 */
+.day-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  margin-top: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+}
+
+.day-header {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+/* 折叠状态记忆在 js（collapsedDays），头部始终可点 */
+.day-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  min-width: 0;
+}
+
+.day-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.day-focus {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.1);
+  border-radius: 999rpx;
+  padding: 4rpx 20rpx;
+}
+
+.day-count {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  white-space: nowrap;
+}
+
+.day-arrow {
+  font-size: 24rpx;
+  color: var(--color-text-light);
+  transition: transform 0.2s ease;
+}
+
+.day-arrow.folded {
+  transform: rotate(-90deg);
+}
+
+.day-body {
+  border-top: 1rpx solid var(--color-border);
+  margin-top: 24rpx;
+}
+
+.day-start {
+  margin-left: auto;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--color-primary);
+  border-radius: 999rpx;
+  padding: 10rpx 28rpx;
+}
+
+.day-start:active {
+  opacity: 0.85;
+}
+
+.ex-row {
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.ex-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.ex-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.ex-detail {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 8rpx;
+}
+
+.ex-tip {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 12rpx 20rpx;
+  margin-top: 12rpx;
+  line-height: 1.5;
+}
+
+/* 底部 */
+.plan-footer {
+  margin-top: 40rpx;
+}

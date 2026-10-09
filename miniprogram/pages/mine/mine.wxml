@@ -1,0 +1,187 @@
+<!--pages/mine/mine.wxml — 我的 -->
+<view class="page">
+
+  <!-- 用户卡（padding-top = 状态栏高度 + 14px 呼吸空间） -->
+  <view class="user-card" style="padding-top: {{statusBarHeight + 14}}px;">
+    <image wx:if="{{avatar}}" class="user-avatar-img" src="{{avatar}}" mode="aspectFill" />
+    <view wx:else class="user-avatar">{{hasProfile ? '🏋️' : '😊'}}</view>
+    <view class="user-info">
+      <view class="user-name">{{displayName}}</view>
+      <view class="user-desc" wx:if="{{hasProfile}}">
+        {{profile.goal}} · {{profile.level}} · 每周 {{profile.daysPerWeek}} 练
+      </view>
+      <view class="user-desc" wx:else>完成建档，解锁专属训练计划</view>
+    </view>
+    <view class="user-edit" bindtap="openEdit">编辑</view>
+  </view>
+
+  <!-- 档案概览（已建档时展示） -->
+  <view wx:if="{{hasProfile}}" class="stats-row">
+    <view class="stat-item">
+      <view class="stat-value">{{profile.heightCm}}</view>
+      <view class="stat-label">身高 cm</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-value">{{weightText}}</view>
+      <view class="stat-label">体重 {{unit}}</view>
+    </view>
+    <view class="stat-item">
+      <view class="stat-value">{{profile.age}}</view>
+      <view class="stat-label">年龄</view>
+    </view>
+  </view>
+
+  <!-- 菜单 -->
+  <view class="menu-group">
+    <view class="menu-item" bindtap="goOnboarding">
+      <text class="menu-icon">📝</text>
+      <text class="menu-text">{{hasProfile ? '编辑身体档案' : '开始建档'}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goStats">
+      <text class="menu-icon">📊</text>
+      <text class="menu-text">数据看板</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goBadges">
+      <text class="menu-icon">🏅</text>
+      <text class="menu-text">成就徽章</text>
+      <text class="menu-sub">{{badgeCount}}/{{badgeTotal}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goLibrary">
+      <text class="menu-icon">🏃</text>
+      <text class="menu-text">动作库</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goFavorites">
+      <text class="menu-icon">♥</text>
+      <text class="menu-text">我的收藏</text>
+      <text wx:if="{{favCount}}" class="menu-badge">{{favCount}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goReminder">
+      <text class="menu-icon">🔔</text>
+      <text class="menu-text">训练提醒</text>
+      <text class="menu-sub">{{reminderText}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goBody">
+      <text class="menu-icon">⚖️</text>
+      <text class="menu-text">身体记录</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="showTodo">
+      <text class="menu-icon">💬</text>
+      <text class="menu-text">意见反馈</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 偏好设置 -->
+  <view class="menu-group">
+    <view class="menu-item">
+      <text class="menu-icon">⚙️</text>
+      <text class="menu-text">重量单位</text>
+      <view class="seg">
+        <view
+          class="seg-item {{unit === 'kg' ? 'active' : ''}}"
+          data-unit="kg"
+          bindtap="onUnitTap"
+        >kg</view>
+        <view
+          class="seg-item {{unit === 'lb' ? 'active' : ''}}"
+          data-unit="lb"
+          bindtap="onUnitTap"
+        >lb</view>
+      </view>
+    </view>
+    <view class="menu-item" bindtap="onRestTap">
+      <text class="menu-icon">⏱</text>
+      <text class="menu-text">组间休息</text>
+      <text class="menu-sub">{{restText}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="onClearData">
+      <text class="menu-icon">🗑</text>
+      <text class="menu-text danger">清空训练数据</text>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 关于（协议与隐私是提审必查项，放在固定入口而不是埋在长文里） -->
+  <view class="menu-group">
+    <view class="menu-item" bindtap="goLegal" data-type="agreement">
+      <text class="menu-icon">📄</text>
+      <text class="menu-text">用户协议</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item" bindtap="goLegal" data-type="privacy">
+      <text class="menu-icon">🔒</text>
+      <text class="menu-text">隐私政策</text>
+      <text class="menu-sub {{legalWarn ? 'warn' : ''}}">{{legalStatus}}</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-item">
+      <text class="menu-icon">🏷</text>
+      <text class="menu-text">当前版本</text>
+      <text class="menu-sub">{{appVersion}}</text>
+    </view>
+  </view>
+
+  <!-- 素材署名：RepDB 免费档许可证强制要求「可见署名」，删掉即违约 -->
+  <view class="credits">
+    <view class="credits-title">素材与数据来源</view>
+    <view class="credits-line">Exercise data by RepDB (repdb.co) · Free Tier License</view>
+    <view class="credits-line">动作演示由 RepDB 起始/顶峰姿势本地合成</view>
+  </view>
+
+  <view class="disclaimer">训练建议仅供参考，不构成医疗建议</view>
+
+  <view class="legal-links">
+    <text class="legal-link" bindtap="goLegal" data-type="agreement">《用户协议》</text>
+    <text class="legal-sep">·</text>
+    <text class="legal-link" bindtap="goLegal" data-type="privacy">《隐私政策》</text>
+  </view>
+
+  <!-- 头像 / 昵称编辑弹层 -->
+  <view wx:if="{{showEdit}}" class="mask" bindtap="closeEdit">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">头像与昵称</view>
+        <view class="sheet-close" bindtap="closeEdit">×</view>
+      </view>
+
+      <!-- chooseAvatar：微信头像选择能力（基础库 2.21.2+） -->
+      <view class="avatar-row">
+        <image wx:if="{{editAvatar}}" class="avatar-preview" src="{{editAvatar}}" mode="aspectFill" />
+        <view wx:else class="avatar-preview avatar-empty">😊</view>
+        <view class="avatar-acts">
+          <button class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">选择微信头像</button>
+          <view wx:if="{{editAvatar}}" class="avatar-reset" bindtap="onResetAvatar">恢复默认</view>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field-label">昵称</text>
+        <!-- type="nickname" 会用微信昵称填充候选 -->
+        <input
+          class="field-input"
+          type="nickname"
+          value="{{editNickname}}"
+          placeholder="填一个昵称"
+          placeholder-class="field-ph"
+          maxlength="16"
+          bindchange="onNicknameInput"
+          bindinput="onNicknameInput"
+        />
+      </view>
+
+      <view class="sheet-tip">昵称与头像仅自己可见，用于「我的」页展示</view>
+
+      <view class="btn-primary sheet-save {{savingProfile ? 'disabled' : ''}}" bindtap="saveProfileInfo">
+        {{savingProfile ? '保存中…' : '保存'}}
+      </view>
+    </view>
+  </view>
+</view>

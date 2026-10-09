@@ -1,0 +1,25 @@
+/* styles/variables.wxss — 设计变量（一处修改全局生效） */
+page {
+  --color-primary: #10b981;      /* 主色：活力绿 */
+  --color-primary-dark: #059669;
+  --color-accent: #f59e0b;      /* 强调色：能量橙 */
+  --color-danger: #ef4444;
+  --color-text: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-text-light: #9ca3af;
+  --color-bg: #f5f6f8;
+  --color-card: #ffffff;
+  --color-border: #e5e7eb;
+
+  --font-size-sm: 24rpx;
+  --font-size-base: 28rpx;
+  --font-size-lg: 32rpx;
+  --font-size-xl: 40rpx;
+
+  --spacing-sm: 16rpx;
+  --spacing-base: 24rpx;
+  --spacing-lg: 32rpx;
+
+  --radius-base: 12rpx;
+  --radius-lg: 20rpx;
+}

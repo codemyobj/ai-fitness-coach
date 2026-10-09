@@ -1,0 +1,357 @@
+/* packageA/body/body.wxss — 身体记录 */
+.page {
+  padding: 24rpx 24rpx 48rpx;
+}
+
+.state-box {
+  text-align: center;
+  padding: 200rpx 0;
+  color: var(--color-text-secondary);
+}
+
+.state-icon {
+  font-size: 80rpx;
+  margin-bottom: 16rpx;
+}
+
+.err-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  margin-top: 48rpx;
+  border: 2rpx solid #fecaca;
+}
+
+.err-title {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+.err-msg {
+  font-size: var(--font-size-sm);
+  color: #7f1d1d;
+  background: #fef2f2;
+  border-radius: var(--radius-base);
+  padding: 20rpx;
+  margin: 16rpx 0 24rpx;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.card-stat {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+/* 1. 概览 */
+.bd-grid {
+  display: flex;
+}
+
+.bd-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+}
+
+.bd-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+.bd-value.down {
+  color: var(--color-primary);
+}
+
+.bd-value.up {
+  color: var(--color-accent);
+}
+
+.bd-value.flat {
+  color: var(--color-text-light);
+  font-size: 32rpx;
+}
+
+.bd-unit {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: var(--color-text-light);
+  margin-left: 4rpx;
+}
+
+.bd-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: 8rpx;
+}
+
+.bd-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 16rpx 20rpx;
+  margin-top: 12rpx;
+  line-height: 1.6;
+}
+
+/* 2. 趋势柱状图 */
+.bd-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 220rpx;
+  margin-top: 16rpx;
+}
+
+.bd-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.bd-bar-wrap {
+  width: 26rpx;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bd-bar {
+  width: 100%;
+  background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+  border-radius: 8rpx 8rpx 0 0;
+}
+
+.bd-bar-val {
+  font-size: 18rpx;
+  color: var(--color-text-secondary);
+  margin-top: 8rpx;
+}
+
+.bd-bar-label {
+  font-size: 18rpx;
+  color: var(--color-text-light);
+  margin-top: 2rpx;
+}
+
+/* 3. 记录列表 */
+.rec-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.rec-row:last-child {
+  border-bottom: none;
+}
+
+.rec-date {
+  width: 150rpx;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+.rec-main {
+  flex: 1;
+}
+
+.rec-weight {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.rec-fat {
+  font-weight: 400;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.rec-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: 6rpx;
+}
+
+.rec-delta {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  margin: 0 16rpx;
+}
+
+.rec-delta.down {
+  color: var(--color-primary);
+}
+
+.rec-delta.up {
+  color: var(--color-accent);
+}
+
+.rec-delta.flat {
+  color: var(--color-text-light);
+}
+
+.rec-del {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  padding: 8rpx 12rpx;
+}
+
+.empty-box {
+  text-align: center;
+  padding: 40rpx 0 20rpx;
+}
+
+.empty-tip {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.empty-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: 8rpx;
+}
+
+.add-btn {
+  margin-top: 8rpx;
+}
+
+.disclaimer {
+  font-size: 22rpx;
+  color: var(--color-text-light);
+  text-align: center;
+  margin-top: 32rpx;
+}
+
+/* 弹层 */
+.mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  z-index: 100;
+}
+
+.sheet {
+  width: 100%;
+  background: #ffffff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 32rpx 32rpx 48rpx;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.sheet-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sheet-close {
+  width: 52rpx;
+  height: 52rpx;
+  line-height: 48rpx;
+  text-align: center;
+  font-size: 36rpx;
+  color: var(--color-text-light);
+  background: var(--color-bg);
+  border-radius: 50%;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.field-label {
+  width: 170rpx;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+/* 需要「输入框 + 下方提示」的表单行（体重的单位范围提示） */
+.field-col {
+  align-items: flex-start;
+}
+
+.field-col .field-label {
+  padding-top: 20rpx;
+}
+
+.field-main {
+  flex: 1;
+}
+
+.field-hint {
+  display: block;
+  font-size: 20rpx;
+  color: var(--color-text-light);
+  margin-top: 8rpx;
+}
+
+.field-input {
+  flex: 1;
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 18rpx 20rpx;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  min-height: 68rpx;
+  line-height: 1.4;
+}
+
+.field-ph {
+  color: var(--color-text-light);
+}
+
+.sheet .btn-primary {
+  margin-top: 20rpx;
+}
+
+.sheet-tip {
+  font-size: 22rpx;
+  color: var(--color-text-light);
+  text-align: center;
+  margin-top: 20rpx;
+}

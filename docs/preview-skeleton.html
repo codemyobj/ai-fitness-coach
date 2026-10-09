@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>骨架屏 · 视觉预览（6 个页面 + 延迟显示演示）</title>
+<style>
+  /* rpx → px 按 1rpx = 0.5px 换算，375px 宽模拟 iPhone，与小程序真机一致。
+     下方 .sk-* 样式由 components/skeleton/skeleton.wxss 自动转换而来。 */
+  :root {
+    --color-primary: #10b981;
+    --color-primary-dark: #059669;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-card: #ffffff;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text); }
+  .head { max-width: 1240px; margin: 0 auto 22px; }
+  .head h1 { font-size: 20px; margin: 0 0 8px; }
+  .head p { font-size: 13px; color: #4b5563; line-height: 21px; margin: 0 0 6px; }
+  .head code { background: #e5e7eb; border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+  h2.sec { max-width: 1240px; margin: 34px auto 14px; font-size: 16px; }
+  h2.sec span { font-size: 12px; font-weight: 400; color: #6b7280; margin-left: 8px; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; align-items: flex-start;
+          max-width: 1240px; margin: 0 auto; }
+  .col { flex: 0 0 auto; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 10px; overflow: hidden;
+           box-shadow: 0 8px 26px rgba(0,0,0,.13); position: relative; height: 600px; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; width: 375px; }
+  .navbar { height: 44px; display: flex; align-items: center; justify-content: center;
+    background: #fff; font-size: 16px; font-weight: 600; border-bottom: 1px solid #f0f1f3; }
+  .screen { padding: 12px 12px 0; height: calc(100% - 44px); overflow: hidden; }
+  .screen-hero { padding: 0; height: 100%; }
+  .hero { background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 130%); color: #fff;
+    padding: 52px 16px 28px; border-radius: 0 0 20px 20px; }
+  .hero-date { font-size: 12px; opacity: .7; }
+  .hero-title { font-size: 22px; font-weight: 700; margin-top: 6px; }
+  .hero-sub { font-size: 13px; opacity: .8; margin-top: 4px; }
+
+  /* 骨架屏「待命」占位 */
+  .sk-hold { min-height: 160px; }
+
+/* components/skeleton/skeleton.wxss — 骨架屏
+   卡片尺寸刻意与 app.wxss 的 .card 对齐（圆角 10px / 内边距 16px / 左右外边距 16px），
+   这样骨架屏换成真实内容时不会出现跳动。 */
+
+.sk-page {
+  padding-bottom: 12px;
+}
+
+.sk-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  margin: 12px 16px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* 身体记录页的卡片是「页面内边距 + 只有下边距」，跟随时保持一致 */
+.sk-page.sk-body .sk-card {
+  margin: 0 0 12px;
+}
+
+/* 不带白卡外框的区块（深色 hero / 横向胶囊），尺寸与页面里的真实区块一致 */
+.sk-bare {
+  display: block;
+}
+
+/* ---------- 基础灰块 + 微光动画 ---------- */
+.sk {
+  background: #e8eaee;
+  border-radius: 5px;
+}
+
+.sh {
+  background-image: linear-gradient(90deg, #e8eaee 25%, #f2f3f6 37%, #e8eaee 63%);
+  background-size: 400% 100%;
+  animation: sk-shine 1.4s ease-in-out infinite;
+}
+
+/* 深色底上的微光（hero 内部），用半透明白叠加而不是灰 */
+.sh-dark {
+  background-color: rgba(255, 255, 255, 0.2);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.14) 25%,
+    rgba(255, 255, 255, 0.32) 37%,
+    rgba(255, 255, 255, 0.14) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shine 1.4s ease-in-out infinite;
+}
+
+@keyframes sk-shine {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* ---------- 深色头部（训练计划 / 跟练打卡） ---------- */
+.sk-hero {
+  background: linear-gradient(135deg, #111827 0%, #059669 140%);
+  border-radius: var(--radius-lg);
+  padding: 20px 16px;
+}
+
+.sk-hero-line {
+  height: 13px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+}
+
+.sk-hero-line:last-child {
+  margin-bottom: 0;
+}
+
+.sk-hero-track {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  margin-top: 13px;
+  overflow: hidden;
+}
+
+.sk-hero-track-inner {
+  width: 38%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+/* ---------- 卡片标题 ---------- */
+.sk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 13px;
+}
+
+.sk-t {
+  height: 14px;
+  border-radius: 4px;
+}
+
+/* ---------- 文本行 ---------- */
+.sk-lines {
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-line {
+  height: 12px;
+  border-radius: 4px;
+  margin-bottom: 9px;
+}
+
+.sk-lines .sk-line:last-child,
+.sk-row-main .sk-line:last-child {
+  margin-bottom: 0;
+}
+
+.sk-line-sm {
+  width: 38px;
+  height: 10px;
+  margin-bottom: 0;
+}
+
+/* 浅绿底区块（训练首页「今日安排」的实际底色是 rgba(16,185,129,.1) 渐变） */
+.sk-tint {
+  background: rgba(16, 185, 129, 0.09);
+  border: 0.5px solid rgba(16, 185, 129, 0.22);
+  border-radius: var(--radius-base);
+  padding: 12px 14px;
+  margin-bottom: 10px;
+}
+
+/* ---------- 进度环（本周目标） ---------- */
+.sk-ring-wrap {
+  display: flex;
+  align-items: center;
+  padding: 4px 0 12px;
+}
+
+.sk-ring {
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sk-ring-lines {
+  flex: 1;
+  min-width: 0;
+  margin-left: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-ring-lines .sk-line:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 四格数据 ---------- */
+.sk-grid {
+  display: flex;
+}
+
+.sk-grid-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sk-num {
+  width: 38px;
+  height: 22px;
+  border-radius: 5px;
+  margin-bottom: 8px;
+}
+
+/* ---------- 徽章栅格（成就徽章页）
+   尺寸对齐真实版式：2 列、列间距 8px、方块内边距 10px、图标 32px */
+.sk-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -4px;
+}
+
+.sk-tile {
+  width: calc(50% - 8px);
+  margin: 4px;
+  padding: 10px;
+  background: #f7f8fa;
+  border-radius: var(--radius-base);
+  box-sizing: border-box;
+}
+
+.sk-tile-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-bottom: 9px;
+}
+
+.sk-tile .sk-line {
+  margin-bottom: 6px;
+}
+
+.sk-tile .sk-line:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 柱状图 ---------- */
+.sk-chart {
+  display: flex;
+  align-items: flex-end;
+  height: 120px;
+}
+
+.sk-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sk-bar {
+  width: 13px;
+  min-height: 8px;
+  border-radius: 4px 4px 0 0;
+}
+
+/* ---------- 热力图 ---------- */
+.sk-heat {
+  display: flex;
+}
+
+.sk-heat-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-cell {
+  height: 11px;
+  margin: 1px;
+  border-radius: 2px;
+}
+
+/* ---------- 日历 ---------- */
+.sk-cal {
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-cal-row {
+  display: flex;
+}
+
+.sk-cal-cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+.sk-sq {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+}
+
+/* ---------- 列表行 ---------- */
+.sk-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-row {
+  display: flex;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.sk-row + .sk-row,
+.sk-kv-row + .sk-kv-row {
+  border-top: 1px solid #f1f2f4;
+}
+
+.sk-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-base);
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.sk-lead {
+  flex-shrink: 0;
+  margin: 0 10px 0 0;
+}
+
+.sk-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sk-row-main .sk-line {
+  margin-bottom: 8px;
+}
+
+/* ---------- 键值行 ---------- */
+.sk-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 0;
+}
+
+.sk-kv-row .sk-line {
+  margin-bottom: 0;
+}
+
+/* ---------- 周打卡圆点 ---------- */
+.sk-dots {
+  display: flex;
+  padding: 2px 0 10px;
+}
+
+.sk-dot-item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.sk-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+
+/* ---------- 工具入口 ---------- */
+.sk-tools {
+  display: flex;
+}
+
+.sk-tool {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sk-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  margin-bottom: 8px;
+}
+
+/* ---------- 横向标签条 ---------- */
+.sk-tabs {
+  display: flex;
+}
+
+/* 计划页的周切换：横向胶囊，间距跟随 .week-tabs 的 margin-top: 16px */
+.sk-bare .sk-tabs {
+  margin-top: 16px;
+}
+
+.sk-pill {
+  width: 70px;
+  height: 48px;
+  border-radius: var(--radius-base);
+  margin-right: 8px;
+}
+
+/* ---------- 组数输入块 ---------- */
+.sk-sets {
+  display: flex;
+  margin-top: 4px;
+}
+
+.sk-chip {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-base);
+  margin-right: 8px;
+}
+
+/* ---------- 按钮 / 进度条 ---------- */
+.sk-btn {
+  height: 38px;
+  border-radius: 24px;
+  flex: 1;
+}
+
+.sk-btns {
+  display: flex;
+  margin-top: 13px;
+}
+
+.sk-btns .sk-btn + .sk-btn {
+  margin-left: 10px;
+}
+
+.sk-btn-full {
+  margin-top: 13px;
+}
+
+.sk-progress {
+  height: 8px;
+  border-radius: 4px;
+  margin-bottom: 11px;
+}
+
+
+  /* ---------- 演示区 ---------- */
+  .demo { max-width: 1240px; margin: 0 auto; display: flex; gap: 26px; flex-wrap: wrap;
+          justify-content: center; align-items: flex-start; }
+  .panel { background: #fff; border-radius: 10px; padding: 16px 18px; width: 375px;
+           box-shadow: 0 8px 26px rgba(0,0,0,.1); }
+  .panel h3 { margin: 0 0 6px; font-size: 15px; }
+  .panel p { font-size: 12.5px; color: #4b5563; line-height: 20px; margin: 0 0 14px; }
+  .btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { border: none; border-radius: 999px; padding: 9px 16px; font-size: 13px; font-weight: 600;
+         cursor: pointer; background: var(--color-primary); color: #fff; }
+  .btn.ghost { background: #fff; color: var(--color-primary); border: 1px solid var(--color-primary); }
+  .btn:active { opacity: .85; }
+  .log { margin-top: 14px; font-size: 12px; line-height: 20px; color: #374151;
+         background: #f8fafc; border: 1px solid #eef1f4; border-radius: 8px; padding: 10px 12px;
+         min-height: 92px; font-variant-numeric: tabular-nums; }
+  .log b.good { color: var(--color-primary-dark); }
+  .log b.warn { color: #b45309; }
+  .verdict { margin-top: 12px; font-size: 12.5px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>骨架屏 · 视觉预览</h1>
+  <p>页面结构与样式由 <code>utils/skeleton.js</code> 的 <code>buildSpec()</code> + <code>components/skeleton/skeleton.wxss</code> 自动生成（rpx→px ×0.5），与小程序渲染一致，改了代码这里会跟着变。</p>
+  <p>卡片圆角 / 内边距 / 左右外边距刻意与 <code>app.wxss</code> 的 <code>.card</code> 对齐，骨架屏换成真实内容时不会跳动。微光动画是真实在跑的。</p>
+</div>
+
+<h2 class="sec">① 六个页面的首屏骨架屏 <span>一个组件 + variant 切换，7 种版式</span></h2>
+<div class="wrap">
+  <div class="col">
+    <div class="phone">
+      
+      <div class="screen screen-hero">
+        <div class="hero"><div class="hero-date">2026年10月8日 星期四</div>
+               <div class="hero-title">下午好，健身搭子</div>
+               <div class="hero-sub">今天也要元气满满地动起来 💪</div></div>
+        <div class="sk-page sk-training"><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:70px"></div><div class="sk sh sk-t" style="width:52px"></div></div><div class="sk-lines sk-tint"><div class="sk sh sk-line" style="width:42%"></div><div class="sk sh sk-line" style="width:58%"></div><div class="sk sh sk-line" style="width:76%"></div></div><div class="sk-lines"><div class="sk sh sk-line" style="width:62%"></div></div><div class="sk-btns"><div class="sk sh sk-btn"></div><div class="sk sh sk-btn"></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:70px"></div><div class="sk sh sk-t" style="width:28px"></div></div><div class="sk-ring-wrap"><div class="sk sh sk-ring"></div><div class="sk-ring-lines"><div class="sk sh sk-line" style="width:64%"></div><div class="sk sh sk-line" style="width:46%"></div></div></div><div class="sk-dots"><div class="sk-dot-item"><div class="sk sh sk-dot"></div></div><div class="sk-dot-item"><div class="sk sh sk-dot"></div></div><div class="sk-dot-item"><div class="sk sh sk-dot"></div></div><div class="sk-dot-item"><div class="sk sh sk-dot"></div></div><div class="sk-dot-item"><div class="sk sh sk-dot"></div></div><div class="sk-dot-item"><div class="sk sh sk-dot"></div></div><div class="sk-dot-item"><div class="sk sh sk-dot"></div></div></div><div class="sk-lines"><div class="sk sh sk-line" style="width:95px"></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:46px"></div></div><div class="sk-tools"><div class="sk-tool"><div class="sk sh sk-icon"></div><div class="sk sh sk-line sk-line-sm"></div></div><div class="sk-tool"><div class="sk sh sk-icon"></div><div class="sk sh sk-line sk-line-sm"></div></div></div></div></div>
+      </div>
+    </div>
+    <div class="cap">训练首页（主包）</div>
+  </div>
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">数据看板</div>
+      <div class="screen ">
+        
+        <div class="sk-page sk-stats"><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:74px"></div></div><div class="sk-grid"><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div></div><div class="sk-lines"><div class="sk sh sk-line" style="width:74%"></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:84px"></div><div class="sk sh sk-t" style="width:48px"></div></div><div class="sk-chart"><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:42%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:68%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:55%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:84%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:61%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:76%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:48%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:90%"></div></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:84px"></div><div class="sk sh sk-t" style="width:44px"></div></div><div class="sk-heat"><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div><div class="sk-heat-col"><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div><div class="sk sh sk-cell"></div></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:74px"></div><div class="sk sh sk-t" style="width:28px"></div></div><div class="sk-cal"><div class="sk-cal-row"><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div></div><div class="sk-cal-row"><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div></div><div class="sk-cal-row"><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div></div><div class="sk-cal-row"><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div></div><div class="sk-cal-row"><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div><div class="sk-cal-cell"><div class="sk sh sk-sq"></div></div></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:74px"></div></div><div class="sk-rows"><div class="sk-row"><div class="sk sh sk-line sk-lead" style="width:58px"></div><div class="sk-row-main"><div class="sk sh sk-line" style="width:46%"></div><div class="sk sh sk-line" style="width:68%"></div></div></div><div class="sk-row"><div class="sk sh sk-line sk-lead" style="width:58px"></div><div class="sk-row-main"><div class="sk sh sk-line" style="width:46%"></div><div class="sk sh sk-line" style="width:68%"></div></div></div><div class="sk-row"><div class="sk sh sk-line sk-lead" style="width:58px"></div><div class="sk-row-main"><div class="sk sh sk-line" style="width:46%"></div><div class="sk sh sk-line" style="width:68%"></div></div></div></div></div></div>
+      </div>
+    </div>
+    <div class="cap">数据看板 · 5 张卡</div>
+  </div>
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">身体记录</div>
+      <div class="screen ">
+        
+        <div class="sk-page sk-body"><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:74px"></div><div class="sk sh sk-t" style="width:36px"></div></div><div class="sk-grid"><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div><div class="sk-grid-item"><div class="sk sh sk-num"></div><div class="sk sh sk-line sk-line-sm"></div></div></div><div class="sk-lines"><div class="sk sh sk-line" style="width:68%"></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:84px"></div><div class="sk sh sk-t" style="width:44px"></div></div><div class="sk-chart"><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:58%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:74%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:46%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:82%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:64%"></div></div><div class="sk-bar-col"><div class="sk sh sk-bar" style="height:70%"></div></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:74px"></div></div><div class="sk-rows"><div class="sk-row"><div class="sk sh sk-line sk-lead" style="width:62px"></div><div class="sk-row-main"><div class="sk sh sk-line" style="width:52%"></div><div class="sk sh sk-line" style="width:38%"></div></div></div><div class="sk-row"><div class="sk sh sk-line sk-lead" style="width:62px"></div><div class="sk-row-main"><div class="sk sh sk-line" style="width:52%"></div><div class="sk sh sk-line" style="width:38%"></div></div></div><div class="sk-row"><div class="sk sh sk-line sk-lead" style="width:62px"></div><div class="sk-row-main"><div class="sk sh sk-line" style="width:52%"></div><div class="sk sh sk-line" style="width:38%"></div></div></div><div class="sk-row"><div class="sk sh sk-line sk-lead" style="width:62px"></div><div class="sk-row-main"><div class="sk sh sk-line" style="width:52%"></div><div class="sk sh sk-line" style="width:38%"></div></div></div></div><div class="sk sh sk-btn sk-btn-full"></div></div></div>
+      </div>
+    </div>
+    <div class="cap">身体记录 · 卡片间距与其他页不同（已跟随）</div>
+  </div>
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">训练计划</div>
+      <div class="screen ">
+        
+        <div class="sk-page sk-plan"><div class="sk-bare"><div class="sk-hero"><div class="sh-dark sk-hero-line" style="width:54%"></div><div class="sh-dark sk-hero-line" style="width:82%"></div><div class="sh-dark sk-hero-line" style="width:40%"></div></div></div><div class="sk-bare"><div class="sk-tabs"><div class="sk sh sk-pill"></div><div class="sk sh sk-pill"></div><div class="sk sh sk-pill"></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:66px"></div><div class="sk sh sk-t" style="width:48px"></div></div><div class="sk-rows"><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:66px"></div><div class="sk sh sk-t" style="width:48px"></div></div><div class="sk-rows"><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:66px"></div><div class="sk sh sk-t" style="width:48px"></div></div><div class="sk-rows"><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div><div class="sk-row"><div class="sk-row-main"><div class="sk sh sk-line" style="width:44%"></div><div class="sk sh sk-line" style="width:66%"></div></div></div></div></div></div>
+      </div>
+    </div>
+    <div class="cap">训练计划 · 头部 + 周切换 + 3 个训练日</div>
+  </div>
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">跟练打卡</div>
+      <div class="screen ">
+        
+        <div class="sk-page sk-workout"><div class="sk-bare"><div class="sk-hero"><div class="sh-dark sk-hero-line" style="width:62%"></div><div class="sh-dark sk-hero-line" style="width:44%"></div><div class="sk-hero-track"><div class="sh-dark sk-hero-track-inner"></div></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:100px"></div><div class="sk sh sk-t" style="width:38px"></div></div><div class="sk-sets"><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:100px"></div><div class="sk sh sk-t" style="width:38px"></div></div><div class="sk-sets"><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:100px"></div><div class="sk sh sk-t" style="width:38px"></div></div><div class="sk-sets"><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div><div class="sk sh sk-chip"></div></div></div></div>
+      </div>
+    </div>
+    <div class="cap">跟练打卡 · 进度 + 3 个动作</div>
+  </div>
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">训练提醒</div>
+      <div class="screen ">
+        
+        <div class="sk-page sk-card"><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:74px"></div><div class="sk sh sk-t" style="width:40px"></div></div><div class="sk-rows"><div class="sk-kv-row"><div class="sk sh sk-line" style="width:75px"></div><div class="sk sh sk-line" style="width:55px"></div></div><div class="sk-kv-row"><div class="sk sh sk-line" style="width:75px"></div><div class="sk sh sk-line" style="width:55px"></div></div><div class="sk-kv-row"><div class="sk sh sk-line" style="width:75px"></div><div class="sk sh sk-line" style="width:55px"></div></div></div><div class="sk sh sk-btn sk-btn-full"></div></div><div class="sk-card"><div class="sk-head"><div class="sk sh sk-t" style="width:48px"></div></div><div class="sk-lines"><div class="sk sh sk-line" style="width:100%"></div><div class="sk sh sk-line" style="width:86%"></div></div><div class="sk sh sk-btn sk-btn-full"></div></div></div>
+      </div>
+    </div>
+    <div class="cap">训练提醒 · 设置 / 自检两张卡</div>
+  </div></div>
+
+<h2 class="sec">② 为什么要「延迟 180ms」才显示 <span>点按钮看真实时序（下面这块逻辑与 utils/skeleton.js 的闸门一致）</span></h2>
+<div class="demo">
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">数据看板</div>
+      <div class="screen" id="demoScreen"></div>
+    </div>
+    <div class="cap">真机上一次「加载」全过程</div>
+  </div>
+  <div class="panel">
+    <h3>对比两种加载耗时</h3>
+    <p>已有聚合缓存的页面命中时可能 10ms 就返回。如果立刻画骨架屏，结果就是<b>闪一下</b>——比留白更刺眼。</p>
+    <div class="btns">
+      <button class="btn ghost" id="btnFast">模拟缓存命中（80ms）</button>
+      <button class="btn" id="btnSlow">模拟真的慢（900ms）</button>
+      <button class="btn ghost" id="btnFail">模拟加载失败</button>
+    </div>
+    <div class="log" id="demoLog">点上面任一按钮开始。</div>
+    <div class="verdict" id="demoVerdict"></div>
+  </div>
+</div>
+
+<script>
+  // 与 utils/skeleton.js 完全一致的闸门规则（shouldShow + 180ms 定时器）
+  var DELAY = 180;
+  var statsHtml = "<div class=\"sk-page sk-stats\"><div class=\"sk-card\"><div class=\"sk-head\"><div class=\"sk sh sk-t\" style=\"width:74px\"></div></div><div class=\"sk-grid\"><div class=\"sk-grid-item\"><div class=\"sk sh sk-num\"></div><div class=\"sk sh sk-line sk-line-sm\"></div></div><div class=\"sk-grid-item\"><div class=\"sk sh sk-num\"></div><div class=\"sk sh sk-line sk-line-sm\"></div></div><div class=\"sk-grid-item\"><div class=\"sk sh sk-num\"></div><div class=\"sk sh sk-line sk-line-sm\"></div></div><div class=\"sk-grid-item\"><div class=\"sk sh sk-num\"></div><div class=\"sk sh sk-line sk-line-sm\"></div></div></div><div class=\"sk-lines\"><div class=\"sk sh sk-line\" style=\"width:74%\"></div></div></div><div class=\"sk-card\"><div class=\"sk-head\"><div class=\"sk sh sk-t\" style=\"width:84px\"></div><div class=\"sk sh sk-t\" style=\"width:48px\"></div></div><div class=\"sk-chart\"><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:42%\"></div></div><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:68%\"></div></div><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:55%\"></div></div><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:84%\"></div></div><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:61%\"></div></div><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:76%\"></div></div><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:48%\"></div></div><div class=\"sk-bar-col\"><div class=\"sk sh sk-bar\" style=\"height:90%\"></div></div></div></div><div class=\"sk-card\"><div class=\"sk-head\"><div class=\"sk sh sk-t\" style=\"width:84px\"></div><div class=\"sk sh sk-t\" style=\"width:44px\"></div></div><div class=\"sk-heat\"><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div><div class=\"sk-heat-col\"><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div><div class=\"sk sh sk-cell\"></div></div></div></div><div class=\"sk-card\"><div class=\"sk-head\"><div class=\"sk sh sk-t\" style=\"width:74px\"></div><div class=\"sk sh sk-t\" style=\"width:28px\"></div></div><div class=\"sk-cal\"><div class=\"sk-cal-row\"><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div></div><div class=\"sk-cal-row\"><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div></div><div class=\"sk-cal-row\"><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div></div><div class=\"sk-cal-row\"><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div></div><div class=\"sk-cal-row\"><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div><div class=\"sk-cal-cell\"><div class=\"sk sh sk-sq\"></div></div></div></div></div><div class=\"sk-card\"><div class=\"sk-head\"><div class=\"sk sh sk-t\" style=\"width:74px\"></div></div><div class=\"sk-rows\"><div class=\"sk-row\"><div class=\"sk sh sk-line sk-lead\" style=\"width:58px\"></div><div class=\"sk-row-main\"><div class=\"sk sh sk-line\" style=\"width:46%\"></div><div class=\"sk sh sk-line\" style=\"width:68%\"></div></div></div><div class=\"sk-row\"><div class=\"sk sh sk-line sk-lead\" style=\"width:58px\"></div><div class=\"sk-row-main\"><div class=\"sk sh sk-line\" style=\"width:46%\"></div><div class=\"sk sh sk-line\" style=\"width:68%\"></div></div></div><div class=\"sk-row\"><div class=\"sk sh sk-line sk-lead\" style=\"width:58px\"></div><div class=\"sk-row-main\"><div class=\"sk sh sk-line\" style=\"width:46%\"></div><div class=\"sk sh sk-line\" style=\"width:68%\"></div></div></div></div></div></div>";
+  var screen = document.getElementById('demoScreen');
+  var logEl = document.getElementById('demoLog');
+  var verdictEl = document.getElementById('demoVerdict');
+  var timer = null;
+  var startedAt = 0;
+  var skeletonShown = false;
+
+  function now() { return Date.now(); }
+  function line(s) {
+    logEl.innerHTML += (logEl.innerHTML ? '<br>' : '') + s;
+  }
+  function reset() {
+    if (timer) { clearTimeout(timer); timer = null; }
+    screen.innerHTML = '';
+    logEl.innerHTML = '';
+    verdictEl.textContent = '';
+    skeletonShown = false;
+  }
+
+  function start() {
+    reset();
+    startedAt = now();
+    line('0ms　开始加载，此时屏幕上<b>什么都不画</b>');
+    timer = setTimeout(function () {
+      timer = null;
+      skeletonShown = true;
+      screen.innerHTML = statsHtml;
+      line(DELAY + 'ms　仍在等待 → 显示骨架屏');
+    }, DELAY);
+  }
+
+  function done() {
+    var cost = now() - startedAt;
+    if (timer) { clearTimeout(timer); timer = null; }
+    screen.innerHTML = '<div style="padding:44px 0;text-align:center;color:#6b7280;font-size:13px">' +
+      '（这里换成真实的看板内容）</div>';
+    line(cost + 'ms　数据到达 → 渲染真实内容');
+    if (skeletonShown) {
+      verdictEl.innerHTML = '<b class="warn">骨架屏出现了 → 用户看到「骨架 → 内容」的过渡</b>';
+    } else {
+      verdictEl.innerHTML = '<b class="good">全程没出现骨架屏 → 不闪，直接出内容 ✅</b>';
+    }
+  }
+
+  function fail(message) {
+    var cost = now() - startedAt;
+    if (timer) { clearTimeout(timer); timer = null; }
+    screen.innerHTML = '<div style="margin:12px 16px;background:#fff;border:1px solid #fecaca;' +
+      'border-radius:10px;padding:16px"><div style="color:#b91c1c;font-weight:700;font-size:15px">⚠️ 看板加载失败</div>' +
+      '<div style="color:#7f1d1d;font-size:12.5px;margin:8px 0 14px">' + message + '</div>' +
+      '<div style="background:#10b981;color:#fff;border-radius:999px;text-align:center;padding:11px;' +
+      'font-size:15px;font-weight:600">重新加载</div></div>';
+    line(cost + 'ms　请求失败 → 错误卡（错误只在失败时清，成功后不留残影）');
+    verdictEl.innerHTML = skeletonShown
+      ? '<b class="warn">骨架屏 → 错误卡</b>'
+      : '<b class="good">全程没出现骨架屏 → 直接出错误卡</b>';
+  }
+
+  document.getElementById('btnFast').addEventListener('click', function () {
+    start();
+    setTimeout(done, 80);
+  });
+  document.getElementById('btnSlow').addEventListener('click', function () {
+    start();
+    setTimeout(done, 900);
+  });
+  document.getElementById('btnFail').addEventListener('click', function () {
+    start();
+    setTimeout(function () { fail('网络请求超时，请检查网络后重试'); }, 620);
+  });
+</script>
+</body>
+</html>

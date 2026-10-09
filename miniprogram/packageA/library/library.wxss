@@ -1,0 +1,372 @@
+/* packageA/library/library.wxss — 动作库 */
+.page {
+  padding: 24rpx 24rpx 48rpx;
+}
+
+/* 搜索 */
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 48rpx;
+  padding: 0 72rpx 0 28rpx;
+  height: 76rpx;
+}
+
+.search-input {
+  flex: 1;
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  height: 76rpx;
+}
+
+.search-ph {
+  color: var(--color-text-light);
+}
+
+.search-clear {
+  position: absolute;
+  right: 20rpx;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 40rpx;
+  text-align: center;
+  font-size: 34rpx;
+  color: var(--color-text-light);
+  background: var(--color-bg);
+  border-radius: 50%;
+}
+
+/* 收藏入口 */
+.fav-bar {
+  display: flex;
+  align-items: center;
+  margin-top: 18rpx;
+}
+
+.fav-chip {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 24rpx;
+  border-radius: 48rpx;
+  background: #ffffff;
+  border: 2rpx solid var(--color-border);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.fav-chip-on {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 2rpx solid #fca5a5;
+  font-weight: 600;
+}
+
+.fav-ico {
+  font-size: 28rpx;
+  margin-right: 8rpx;
+  color: #ef4444;
+}
+
+.fav-num {
+  margin-left: 8rpx;
+  font-size: 22rpx;
+  color: #b91c1c;
+}
+
+.fav-hint {
+  flex: 1;
+  margin-left: 16rpx;
+  font-size: 22rpx;
+  color: var(--color-text-light);
+}
+
+/* 分类 tabs */
+.tab-scroll {
+  white-space: nowrap;
+  margin-top: 20rpx;
+}
+
+.tab-row {
+  display: inline-flex;
+  padding: 4rpx 0;
+}
+
+.tab {
+  padding: 12rpx 28rpx;
+  margin-right: 12rpx;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  background: #ffffff;
+  border-radius: 48rpx;
+  border: 2rpx solid transparent;
+}
+
+.tab-active {
+  color: #065f46;
+  background: rgba(16, 185, 129, 0.12);
+  border: 2rpx solid var(--color-primary);
+  font-weight: 600;
+}
+
+/* 器械 chips */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 16rpx;
+}
+
+.chip {
+  padding: 8rpx 20rpx;
+  margin: 0 12rpx 12rpx 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: #ffffff;
+  border-radius: var(--radius-base);
+  border: 2rpx solid var(--color-border);
+}
+
+.chip-active {
+  color: var(--color-primary);
+  border: 2rpx solid var(--color-primary);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.result-tip {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin: 4rpx 4rpx 16rpx;
+}
+
+/* 列表卡片 */
+.ex-card {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 20rpx 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.ex-card:active {
+  background: #fafafa;
+}
+
+.ex-thumb {
+  width: 128rpx;
+  height: 128rpx;
+  flex-shrink: 0;
+  background: #f9fafb;
+  border-radius: var(--radius-base);
+  margin-right: 20rpx;
+}
+
+.ex-info {
+  flex: 1;
+  min-width: 0;
+}
+
+
+.ex-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ex-name {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.ex-stars {
+  font-size: var(--font-size-sm);
+  color: var(--color-accent);
+  letter-spacing: 2rpx;
+}
+
+.ex-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 14rpx;
+}
+
+/* 卡片右侧的收藏按钮（catchtap 不会触发打开详情） */
+.ex-fav {
+  width: 64rpx;
+  height: 64rpx;
+  line-height: 64rpx;
+  text-align: center;
+  font-size: 40rpx;
+  color: #d1d5db;
+  flex-shrink: 0;
+  margin-left: 8rpx;
+}
+
+.ex-fav-on {
+  color: #ef4444;
+}
+
+.ex-fav:active {
+  transform: scale(1.15);
+}
+
+.tag {
+  font-size: 22rpx;
+  color: #065f46;
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 8rpx;
+  padding: 6rpx 14rpx;
+  margin-right: 10rpx;
+}
+
+.tag-plain {
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+}
+
+/* 空态 */
+.empty-box {
+  text-align: center;
+  padding: 80rpx 0 40rpx;
+}
+
+.empty-tip {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+}
+
+.empty-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: 8rpx;
+}
+
+.empty-btn {
+  display: inline-block;
+  margin-top: 28rpx;
+  padding: 16rpx 48rpx;
+}
+
+/* 详情弹层 */
+.mask {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: flex-end;
+  z-index: 100;
+}
+
+.sheet {
+  width: 100%;
+  background: #ffffff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 32rpx 32rpx 48rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sheet-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.sheet-acts {
+  display: flex;
+  align-items: center;
+}
+
+.sheet-fav {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border-radius: 48rpx;
+  padding: 10rpx 24rpx;
+  margin-right: 16rpx;
+}
+
+.sheet-fav-on {
+  color: #b91c1c;
+  background: #fef2f2;
+  font-weight: 600;
+}
+
+.sheet-close {
+  width: 52rpx;
+  height: 52rpx;
+  line-height: 48rpx;
+  text-align: center;
+  font-size: 36rpx;
+  color: var(--color-text-light);
+  background: var(--color-bg);
+  border-radius: 50%;
+}
+
+.sec {
+  margin-top: 28rpx;
+}
+
+.sheet-gif {
+  width: 360rpx;
+  height: 360rpx;
+  display: block;
+  margin: 20rpx auto 0;
+  background: #f9fafb;
+  border-radius: var(--radius-base);
+}
+
+.sec-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 10rpx;
+}
+
+.sec-body {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 20rpx 24rpx;
+}
+
+.sec-body.warn {
+  color: #92400e;
+  background: #fffbeb;
+}
+
+.alt-row {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.alt {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  background: var(--color-bg);
+  border-radius: 8rpx;
+  padding: 10rpx 18rpx;
+  margin: 0 12rpx 12rpx 0;
+}
+
+.sheet-tip {
+  font-size: 22rpx;
+  color: var(--color-text-light);
+  text-align: center;
+  margin-top: 24rpx;
+}

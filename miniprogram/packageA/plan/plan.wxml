@@ -1,0 +1,107 @@
+<!--packageA/plan/plan.wxml — 训练计划详情 -->
+<view class="page">
+
+  <!-- 首屏骨架屏：延迟 180ms 才出现，30s 缓存命中时不闪 -->
+  <skeleton wx:if="{{skVisible}}" variant="plan" />
+
+  <!-- 失败：把原因显示出来 + 重试（不再白屏） -->
+  <view wx:elif="{{loadError}}" class="err-card">
+    <view class="err-title">⚠️ 计划加载失败</view>
+    <view class="err-msg">{{loadError}}</view>
+    <view class="btn-primary" bindtap="retry">重新加载</view>
+  </view>
+
+  <!-- 有数据才渲染内容：下拉刷新时旧内容留在屏上 -->
+  <block wx:elif="{{plan}}">
+    <!-- 计划头部 -->
+    <view class="plan-hero">
+      <view class="plan-name">{{plan.planName || '训练计划'}}</view>
+      <view class="plan-summary">{{plan.summary}}</view>
+      <view class="plan-meta">{{plan.weeks}} 周 · {{totalDays}} 天/周</view>
+    </view>
+
+    <!-- 周切换 -->
+    <scroll-view class="week-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{plan.structure}}"
+        wx:key="weekIndex"
+        class="week-tab {{currentWeekIndex === index ? 'active' : ''}}"
+        data-index="{{index}}"
+        bindtap="onWeekTap"
+      >
+        <view class="week-tab-num">W{{item.weekIndex}}</view>
+        <view class="week-tab-focus">{{item.focus}}</view>
+      </view>
+    </scroll-view>
+
+    <!-- 训练日卡片（点头部可折叠/展开动作列表） -->
+    <view
+      wx:for="{{currentWeek.days}}"
+      wx:for-item="day"
+      wx:key="dayIndex"
+      class="day-card"
+    >
+      <view
+        class="day-header"
+        data-week="{{currentWeekIndex}}"
+        data-day="{{day.dayIndex}}"
+        bindtap="toggleDay"
+      >
+        <view class="day-title-wrap">
+          <view class="day-title">Day {{day.dayIndex}}</view>
+          <view class="day-focus">{{day.focus}}</view>
+        </view>
+        <view class="day-count" wx:if="{{day.exercises.length}}">{{day.exercises.length}} 个动作</view>
+        <view
+          class="day-start"
+          data-week="{{currentWeekIndex}}"
+          data-day="{{day.dayIndex}}"
+          catchtap="goWorkout"
+        >开始跟练</view>
+        <view class="day-arrow {{collapsedDays['w' + currentWeekIndex + 'd' + day.dayIndex] ? 'folded' : ''}}">▾</view>
+      </view>
+
+      <view wx:if="{{!collapsedDays['w' + currentWeekIndex + 'd' + day.dayIndex]}}" class="day-body">
+        <view
+          wx:for="{{day.exercises}}"
+          wx:for-item="ex"
+          wx:key="exerciseId"
+          class="ex-row"
+        >
+          <view class="ex-main">
+            <view class="ex-name">{{ex.name}}</view>
+            <view class="ex-detail">{{ex.sets}} 组 × {{ex.reps}} 次 · 休息 {{ex.restSec}}s</view>
+            <view wx:if="{{ex.tips}}" class="ex-tip">💡 {{ex.tips}}</view>
+          </view>
+        </view>
+
+        <view wx:if="{{!day.exercises.length}}" class="day-empty">这天没有安排动作（休息日）</view>
+      </view>
+    </view>
+
+    <view wx:if="{{!currentWeek.days.length}}" class="state-box">
+      <view>这一周还没有编排训练日</view>
+    </view>
+
+    <!-- 底部操作 -->
+    <view class="plan-footer safe-area-bottom">
+      <view class="btn-primary {{regenerating ? 'disabled' : ''}}" bindtap="regenerate">
+        {{regenerating ? '编排中…' : '换一份计划'}}
+      </view>
+    </view>
+  </block>
+
+  <!-- 空态（含排查线索）/ 骨架屏就绪前的占位 -->
+  <view wx:else class="state-box">
+    <block wx:if="{{loading}}">
+      <view class="sk-hold"></view>
+    </block>
+    <block wx:else>
+      <view class="state-icon">📋</view>
+      <view>还没有训练计划</view>
+      <view class="state-sub">回到「训练」页生成一份</view>
+      <view wx:if="{{debugMode && debugInfo}}" class="debug-box">{{debugInfo}}</view>
+      <view class="btn-ghost" bindtap="retry">刷新</view>
+    </block>
+  </view>
+</view>

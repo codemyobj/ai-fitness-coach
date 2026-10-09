@@ -1,0 +1,380 @@
+/* pages/training/training.wxss */
+.page {
+  padding-bottom: 48rpx;
+}
+
+/* 顶部 hero 区 */
+.hero {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 130%);
+  color: #ffffff;
+  padding: 48rpx 32rpx 56rpx;
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+.hero-date {
+  font-size: var(--font-size-sm);
+  opacity: 0.7;
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: 700;
+  margin-top: 12rpx;
+}
+
+.hero-sub {
+  font-size: var(--font-size-base);
+  opacity: 0.8;
+  margin-top: 8rpx;
+}
+
+/* 建档引导卡 */
+.onboarding-card {
+  text-align: center;
+  padding: 56rpx 48rpx;
+  margin-top: -32rpx;
+}
+
+/* 登录状态卡 */
+.state-card {
+  text-align: center;
+  padding: 56rpx 48rpx;
+  margin-top: -32rpx;
+}
+
+.state-loading {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+.state-icon {
+  font-size: 72rpx;
+  margin-bottom: 12rpx;
+}
+
+.onboarding-icon {
+  font-size: 80rpx;
+}
+
+.onboarding-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin: 16rpx 0 12rpx;
+}
+
+.onboarding-desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  margin-bottom: 40rpx;
+  line-height: 1.6;
+}
+
+/* 卡片头 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+.card-tag {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.1);
+  padding: 6rpx 20rpx;
+  border-radius: 999rpx;
+}
+
+.card-stat {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* 计划占位 */
+.plan-placeholder {
+  text-align: center;
+  padding: 32rpx 0 40rpx;
+}
+
+.empty-tip {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.empty-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: 8rpx;
+}
+
+/* 今日安排块（浅绿底，和"更多"里的灰底工具块区分开） */
+.today-box {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.02));
+  border: 1rpx solid rgba(16, 185, 129, 0.24);
+  border-radius: var(--radius-base);
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+}
+
+/* 今日已打卡：底色加重，一眼看出"今天这节已经过了" */
+.today-box.is-done {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18), rgba(16, 185, 129, 0.05));
+  border-color: rgba(16, 185, 129, 0.42);
+}
+
+.today-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.today-status {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+
+.today-check {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.today-focus {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 12rpx;
+}
+
+.today-focus-empty {
+  font-size: var(--font-size-base);
+  font-weight: 400;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.today-meta {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 8rpx;
+}
+
+/* 所属计划一行（点击进计划详情） */
+.plan-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 22rpx 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.plan-line:active {
+  opacity: 0.7;
+}
+
+.plan-line-name {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.plan-line-arrow {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-left: 16rpx;
+}
+
+/* 计划双按钮 */
+.plan-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.plan-actions-item {
+  flex: 1;
+}
+
+/* 本周打卡：进度环 + 文字概览 */
+.week-overview {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0 24rpx;
+}
+
+/* 环身底色 = 兜底色：conic-gradient 在极老设备上不生效时，
+   至少还是一圈灰环 + 中间的百分比数字，信息不丢 */
+.ring {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-hole {
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: var(--color-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-num {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.week-info {
+  flex: 1;
+  min-width: 0;
+  margin-left: 28rpx;
+}
+
+.week-info-main {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+.week-info-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 10rpx;
+}
+
+.week-info-tip {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-dark);
+  margin-top: 10rpx;
+}
+
+.hl {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* 本周打卡条 */
+.week-bar {
+  display: flex;
+  justify-content: space-between;
+  padding: 8rpx 16rpx;
+}
+
+/* 卡片底部跳转链接（去数据看板） */
+.card-link {
+  margin-top: 16rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid var(--color-border);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.card-link:active {
+  opacity: 0.7;
+}
+
+.week-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.week-dot {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 2rpx solid var(--color-border);
+}
+
+.week-dot.checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.week-dot.today {
+  border-color: var(--color-primary);
+  border-width: 4rpx;
+}
+
+/* 本周还没到的日子：降透明度，避免看着像漏打卡 */
+.week-item.is-future {
+  opacity: 0.4;
+}
+
+.week-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.week-label.is-today {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+/* 更多工具 */
+.tool-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.tool-item {
+  flex: 1;
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 24rpx 0;
+  text-align: center;
+}
+
+.tool-item:active {
+  opacity: 0.7;
+}
+
+.tool-icon {
+  display: block;
+  font-size: 40rpx;
+  margin-bottom: 8rpx;
+}
+
+.tool-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+}
+
+/* 成就徽章入口的进度角标（x/13） */
+.tool-badge {
+  display: block;
+  font-size: 20rpx;
+  color: var(--color-primary-dark);
+  margin-top: 6rpx;
+}
+
+/* 免责声明 */
+.disclaimer {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--color-text-light);
+  margin-top: 40rpx;
+}

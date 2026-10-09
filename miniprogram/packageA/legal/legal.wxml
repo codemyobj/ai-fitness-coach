@@ -1,0 +1,53 @@
+<!--packageA/legal/legal.wxml — 用户协议 / 隐私政策 -->
+<view class="page {{showAgreeBar ? 'has-bar' : ''}}">
+
+  <!-- 文档头：标题 + 版本信息（版本与生效日期必须展示，是合规硬要求） -->
+  <view class="doc-head">
+    <view class="doc-title">{{doc.title}}</view>
+    <view class="doc-meta">版本 {{version}} · 生效日期 {{effective}} · 更新于 {{updated}}</view>
+    <view class="doc-summary">{{doc.summary}}</view>
+  </view>
+
+  <!-- 两份文档切换 -->
+  <view class="doc-tabs">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="type"
+      wx:for-item="tb"
+      class="doc-tab {{tb.type === type ? 'active' : ''}}"
+      data-type="{{tb.type}}"
+      bindtap="switchTab"
+    >{{tb.label}}</view>
+  </view>
+
+  <!-- 分节正文 -->
+  <view class="card sec-card" wx:for="{{doc.sections}}" wx:key="h" wx:for-item="sec">
+    <view class="sec-h">{{sec.h}}</view>
+
+    <view wx:for="{{sec.ps}}" wx:key="*this" wx:for-item="p" class="sec-p">{{p}}</view>
+
+    <!-- 收集清单表格（仅隐私政策第二节） -->
+    <view wx:if="{{sec.table}}" class="tbl">
+      <view class="tbl-row" wx:for="{{dataItems}}" wx:key="name" wx:for-item="it">
+        <view class="tbl-top">
+          <text class="tbl-name">{{it.name}}</text>
+          <text class="tbl-tag {{it.required ? 'req' : 'opt'}}">{{it.required ? '必需' : '可选'}}</text>
+        </view>
+        <view class="tbl-line"><text class="tbl-k">内容</text><text class="tbl-v">{{it.detail}}</text></view>
+        <view class="tbl-line"><text class="tbl-k">用途</text><text class="tbl-v">{{it.purpose}}</text></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 页脚：再次固定版本信息，长文拉到底也能看到 -->
+  <view class="doc-foot">
+    <view class="foot-line">{{doc.title}} {{version}}</view>
+    <view class="foot-line">生效日期 {{effective}} · 更新于 {{updated}}</view>
+  </view>
+
+  <!-- 从建档流程进入时的同意条 -->
+  <view wx:if="{{showAgreeBar}}" class="agree-bar safe-area-bottom">
+    <view wx:if="{{agreed}}" class="agree-tip">你已同意本协议</view>
+    <view class="btn-primary" bindtap="onAgree">{{agreed ? '返回建档' : '我已阅读并同意'}}</view>
+  </view>
+</view>

@@ -1,0 +1,164 @@
+<!--packageA/workout/workout.wxml — 跟练页 -->
+<view class="page">
+
+  <!-- 首屏骨架屏：延迟 180ms 才出现，缓存命中时不闪 -->
+  <skeleton wx:if="{{skVisible}}" variant="workout" />
+
+  <!-- 失败：把原因显示出来 + 重试（不再只弹「加载失败」） -->
+  <view wx:elif="{{loadError}}" class="err-card">
+    <view class="err-title">⚠️ 加载失败</view>
+    <view class="err-msg">{{loadError}}</view>
+    <view class="btn-primary" bindtap="retry">重新加载</view>
+  </view>
+
+  <!-- 有训练内容才渲染：避免骨架屏就绪前闪出空壳 -->
+  <block wx:elif="{{day}}">
+    <!-- 顶部：训练概况 + 计时 -->
+    <view class="wk-hero">
+      <view class="wk-hero-top">
+        <view>
+          <view class="wk-title">Day {{day.dayIndex}} · {{day.focus}}</view>
+          <view class="wk-sub">{{finishedCount}}/{{totalCount}} 个动作已完成</view>
+        </view>
+        <view class="wk-timer">⏱ {{elapsedText}}</view>
+      </view>
+      <!-- 进度条 -->
+      <view class="wk-progress">
+        <view class="wk-progress-inner" style="width: {{totalCount ? (finishedCount / totalCount * 100) : 0}}%;"></view>
+      </view>
+    </view>
+
+    <!-- 已完成打卡提示 -->
+    <view wx:if="{{alreadyChecked}}" class="checked-banner">
+      ✅ 今天已经完成打卡啦，休息也是很重要的训练部分
+    </view>
+
+    <!-- 动作列表 -->
+    <view
+      wx:for="{{day.exercises}}"
+      wx:for-item="ex"
+      wx:key="exerciseId"
+      class="ex-card"
+    >
+      <view class="ex-head">
+        <view class="ex-head-main">
+          <view class="ex-name">{{ex.name}}</view>
+          <view class="ex-target">{{ex.sets}} 组 × {{ex.reps}} 次</view>
+        </view>
+        <view class="ex-tips-btn" data-id="{{ex.exerciseId}}" bindtap="onShowTips">要点</view>
+      </view>
+
+      <set-input
+        sets="{{ex.sets}}"
+        reps="{{ex.reps}}"
+        allowWeight="{{ex.allowWeight}}"
+        data-id="{{ex.exerciseId}}"
+        bindchange="onSetChange"
+      />
+    </view>
+
+    <!-- 组间休息倒计时：固定在底部悬浮（spacer 撑出等高占位，避免压住打卡按钮） -->
+    <view wx:if="{{restActive}}" class="rest-spacer"></view>
+    <view wx:if="{{restActive}}" class="rest-fixed">
+      <view class="rest-card {{restDone ? 'is-done' : ''}} {{restPaused ? 'is-paused' : ''}}">
+        <view class="rest-row">
+          <!-- 点数字 = 暂停 / 继续 -->
+          <view class="rest-tap" bindtap="toggleRest">
+            <text class="rest-icon">{{restDone ? '✅' : (restPaused ? '▶' : '⏸')}}</text>
+            <text class="rest-num">{{restText}}</text>
+          </view>
+          <view class="rest-mid">
+            <view class="rest-title">{{restDone ? '休息结束，继续下一组' : (restPaused ? '已暂停' : '组间休息')}}</view>
+            <view class="rest-next">{{restNext}}</view>
+          </view>
+          <view class="rest-mini" data-delta="-15" bindtap="adjustRest">−15s</view>
+          <view class="rest-mini" data-delta="15" bindtap="adjustRest">+15s</view>
+          <view class="rest-skip" bindtap="hideRest">跳过</view>
+        </view>
+        <view class="rest-bar">
+          <view class="rest-bar-inner" style="width: {{restPercent}}%;"></view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部打卡 -->
+    <view class="wk-footer safe-area-bottom">
+      <view
+        class="btn-primary {{allDone && !alreadyChecked ? '' : 'disabled'}}"
+        bindtap="onFinish"
+      >
+        {{alreadyChecked ? '今日已打卡' : (allDone ? '完成打卡' : '完成所有动作后可打卡')}}
+      </view>
+    </view>
+  </block>
+
+  <!-- 没找到训练内容（含排查线索）/ 骨架屏就绪前的占位 -->
+  <view wx:else class="state-box">
+    <block wx:if="{{loading}}">
+      <view class="sk-hold"></view>
+    </block>
+    <block wx:else>
+      <view class="state-icon">🏋️</view>
+      <view>没有找到训练内容</view>
+      <view class="state-sub">请先生成训练计划</view>
+      <view wx:if="{{debugMode && debugInfo}}" class="debug-box">{{debugInfo}}</view>
+      <view class="btn-ghost" bindtap="retry">刷新</view>
+    </block>
+  </view>
+
+  <!-- 动作要点弹层（含动作示范图） -->
+  <view wx:if="{{showTips}}" class="tips-mask" bindtap="onCloseTips">
+    <view class="tips-sheet" catchtap="noop">
+      <view class="tips-head">
+        <view class="tips-title">{{tipEx.name}}</view>
+        <view class="tips-close" bindtap="onCloseTips">×</view>
+      </view>
+
+      <image
+        wx:if="{{tipEx.anim}}"
+        class="tips-gif"
+        src="{{tipEx.anim}}"
+        mode="aspectFit"
+      />
+      <image
+        wx:elif="{{tipEx.demo}}"
+        class="tips-gif"
+        src="{{tipEx.demo}}"
+        mode="aspectFit"
+      />
+
+      <view class="tips-sec">
+        <view class="tips-sec-title">要点</view>
+        <view class="tips-sec-body">{{tipEx.tips}}</view>
+      </view>
+
+      <view class="tips-sec" wx:if="{{tipEx.mistakes}}">
+        <view class="tips-sec-title">常见错误</view>
+        <view class="tips-sec-body warn">{{tipEx.mistakes}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 打卡后的「订阅明日提醒」引导（不遮住返回路径，可直接跳过） -->
+  <view wx:if="{{showRemind}}" class="tips-mask" bindtap="onRemindSkip">
+    <view class="tips-sheet" catchtap="noop">
+      <view class="remind-icon">🔔</view>
+      <view class="remind-title">明天还要提醒你来训练吗？</view>
+      <view class="remind-desc">微信对健身类小程序只开放一次性订阅：授权 1 次可收到 1 条提醒。</view>
+
+      <picker mode="selector" range="{{remindHourLabels}}" value="{{remindHourIndex}}" bindchange="onRemindHourChange">
+        <view class="remind-row">
+          <text class="remind-row-label">提醒时间</text>
+          <view class="remind-row-value">{{remindHourText}}<text class="remind-arrow">›</text></view>
+        </view>
+      </picker>
+
+      <view wx:if="{{remindTip}}" class="remind-tip">{{remindTip}}</view>
+
+      <view class="btn-primary {{remindWorking ? 'disabled' : ''}}" bindtap="onRemindSubscribe">
+        {{remindWorking ? '请求授权…' : '订阅明日提醒'}}
+      </view>
+      <view class="btn-ghost remind-skip" bindtap="onRemindSkip">不用了</view>
+    </view>
+  </view>
+</view>

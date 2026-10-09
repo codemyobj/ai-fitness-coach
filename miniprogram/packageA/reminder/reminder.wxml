@@ -1,0 +1,80 @@
+<!--packageA/reminder/reminder.wxml — 训练提醒设置-->
+<view class="page">
+
+  <!-- 机制说明：微信对健身类只给一次性订阅，必须先把规则讲清楚 -->
+  <view class="note-card">
+    <view class="note-title">训练提醒是怎么工作的</view>
+    <view class="note-line">· 微信对这类小程序只开放「一次性订阅」：授权 1 次 = 能收到 1 条提醒</view>
+    <view class="note-line">· 每次完成打卡后 App 会顺带问一句，顺手确认就够下一天用</view>
+    <view class="note-line">· 当天已经打过卡就不会再发，额度不会浪费</view>
+  </view>
+
+  <!-- 模板未配置：给出明确指引，避免"点了没反应" -->
+  <view wx:if="{{!configured}}" class="card warn-card">
+    <view class="warn-title">⚠️ 提醒模板未配置</view>
+    <view class="warn-line">请到「微信公众平台 → 功能 → 订阅消息」选用一个模板，然后把模板 ID 填到两处：</view>
+    <view class="warn-code">miniprogram/services/reminder.js → TEMPLATE_ID</view>
+    <view class="warn-code">云函数 sendReminder → 环境变量 REMINDER_TEMPLATE_ID</view>
+    <view class="warn-line">完整步骤见 docs/REMINDER-SETUP.md</view>
+  </view>
+
+  <!-- 首屏骨架屏：延迟 180ms 才出现，云端记录读得快时不闪 -->
+  <skeleton wx:if="{{skVisible}}" variant="card" />
+
+  <!-- 读取失败 -->
+  <view wx:elif="{{loadError}}" class="card state-card">
+    <view class="state-text">{{loadError}}</view>
+    <view class="btn-ghost state-btn" bindtap="retry">重试</view>
+  </view>
+
+  <!-- 云端记录到手才渲染，避免骨架屏就绪前闪出「未开启 / 0 次」 -->
+  <block wx:elif="{{loaded}}">
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">提醒设置</text>
+        <text class="status-tag {{enabled ? (needRenew ? 'tag-warn' : 'tag-on') : ''}}">{{statusText}}</text>
+      </view>
+
+      <!-- 提醒时间 -->
+      <picker mode="selector" range="{{hourLabels}}" value="{{hourIndex}}" bindchange="onHourChange">
+        <view class="row">
+          <text class="row-label">提醒时间</text>
+          <view class="row-value">{{hourText}}<text class="row-arrow">›</text></view>
+        </view>
+      </picker>
+
+      <!-- 剩余次数：这个功能最核心的信息 -->
+      <view class="row">
+        <text class="row-label">剩余提醒次数</text>
+        <view class="row-value">{{quotaText}}</view>
+      </view>
+
+      <!-- 最近发送 -->
+      <view wx:if="{{record && record.lastSentDate}}" class="row">
+        <text class="row-label">最近一次提醒</text>
+        <view class="row-value">{{record.lastSentDate}}</view>
+      </view>
+
+      <view wx:if="{{tip}}" class="tip-text">{{tip}}</view>
+
+      <view class="btn-primary {{working ? 'disabled' : ''}}" bindtap="onPrimary">
+        {{enabled ? '续订 1 次提醒' : '开启训练提醒'}}
+      </view>
+      <view wx:if="{{enabled}}" class="btn-ghost action-second" bindtap="doDisable">关闭提醒</view>
+    </view>
+
+    <!-- 自检：验证模板 + 字段映射 + 云函数整条链路 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">自检</text>
+      </view>
+      <view class="tip-text">改完模板与云函数配置后，点下面按钮立刻给自己发一条，验证链路是否打通（会消耗 1 次订阅额度）。</view>
+      <view class="btn-ghost {{working ? 'disabled' : ''}}" bindtap="onTestSend">发送测试提醒</view>
+    </view>
+  </block>
+
+  <!-- 骨架屏就绪前的占位（不画内容，避免闪出空数值） -->
+  <view wx:else class="sk-hold"></view>
+
+  <view class="disclaimer">提醒通过微信订阅消息下发，实际到达时间受系统通知权限影响</view>
+</view>

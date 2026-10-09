@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>我的页完善 · 视觉预览（头像昵称 / 单位 / 清空数据）</title>
+<style>
+  /* rpx → px 按 1rpx = 0.5px 换算，375px 宽模拟 iPhone */
+  :root {
+    --color-primary: #10b981;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text); }
+  .wrap { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; align-items: flex-start; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 22px; overflow: hidden;
+           box-shadow: 0 10px 32px rgba(0,0,0,.14); position: relative; flex: 0 0 auto; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; }
+  .statusbar { height: 20px; background: #111827; }
+  .user-card {
+    display: flex; align-items: center; color: #fff; padding: 14px 16px 24px;
+    background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 130%);
+  }
+  .user-avatar { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+  .user-avatar-img { width: 60px; height: 60px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg,#34d399,#0ea5e9); display: flex; align-items: center;
+    justify-content: center; font-size: 26px; }
+  .user-info { margin-left: 14px; flex: 1; }
+  .user-name { font-size: 20px; font-weight: 700; }
+  .user-desc { font-size: 13px; opacity: .8; margin-top: 4px; }
+  .user-edit { flex-shrink: 0; font-size: 12px; border: 1px solid rgba(255,255,255,.5);
+    border-radius: 24px; padding: 4px 12px; }
+  .stats-row { display: flex; background: #fff; margin: 12px 16px; border-radius: 10px; padding: 16px 0;
+    box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .stat-item { flex: 1; text-align: center; border-right: 1px solid var(--color-border); }
+  .stat-item:last-child { border-right: none; }
+  .stat-value { font-size: 20px; font-weight: 700; color: var(--color-primary); }
+  .stat-label { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
+  .menu-group { background: #fff; margin: 0 16px 12px; border-radius: 10px; overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .menu-item { display: flex; align-items: center; padding: 16px; border-bottom: 1px solid var(--color-border); }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-icon { font-size: 18px; margin-right: 12px; }
+  .menu-text { flex: 1; font-size: 14px; }
+  .menu-text.danger { color: #ef4444; }
+  .menu-badge { font-size: 10px; color: var(--color-text-light); background: var(--color-bg);
+    padding: 2px 8px; border-radius: 999px; margin-right: 6px; }
+  .menu-arrow { color: var(--color-text-light); font-size: 18px; }
+  .seg { display: flex; border: 1px solid var(--color-border); border-radius: 24px; overflow: hidden; }
+  .seg-item { padding: 4px 14px; font-size: 12px; color: var(--color-text-secondary); background: #fff; }
+  .seg-item.active { color: #fff; background: var(--color-primary); font-weight: 600; }
+  .credits { margin: 16px 12px 0; padding: 12px; background: var(--color-bg); border-radius: 6px; }
+  .credits-title { font-size: 12px; font-weight: 500; margin-bottom: 6px; }
+  .credits-line { font-size: 11px; color: var(--color-text-light); line-height: 1.6; }
+  .disclaimer { text-align: center; font-size: 11px; color: var(--color-text-light); margin-top: 20px; }
+
+  /* 编辑弹层 */
+  .mask { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; }
+  .sheet { width: 100%; background: #fff; border-radius: 10px 10px 0 0; padding: 16px 16px 24px; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; }
+  .sheet-title { font-size: 18px; font-weight: 700; }
+  .sheet-close { width: 26px; height: 26px; line-height: 24px; text-align: center; font-size: 18px;
+    color: var(--color-text-light); background: var(--color-bg); border-radius: 50%; }
+  .avatar-row { display: flex; align-items: center; margin-top: 16px; }
+  .avatar-preview { width: 70px; height: 70px; border-radius: 50%; background: var(--color-bg);
+    display: flex; align-items: center; justify-content: center; font-size: 32px;
+    background: linear-gradient(135deg,#34d399,#0ea5e9); }
+  .avatar-acts { margin-left: 14px; flex: 1; }
+  .avatar-btn { display: inline-block; font-size: 12px; color: var(--color-primary);
+    background: rgba(16,185,129,.1); border-radius: 24px; padding: 6px 12px; }
+  .avatar-reset { font-size: 11px; color: var(--color-text-light); margin-top: 8px; }
+  .field { display: flex; align-items: center; margin-top: 16px; }
+  .field-label { width: 60px; font-size: 14px; color: var(--color-text-secondary); }
+  .field-input { flex: 1; background: var(--color-bg); border-radius: 6px; padding: 9px 10px; font-size: 14px; }
+  .sheet-tip { font-size: 11px; color: var(--color-text-light); margin-top: 8px; }
+  .sheet-save { margin-top: 16px; background: var(--color-primary); color: #fff; text-align: center;
+    border-radius: 24px; padding: 12px 0; font-size: 16px; font-weight: 600; }
+
+  /* 模拟系统弹窗（wx.showModal 样式） */
+  .modal { position: absolute; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: center;
+    justify-content: center; padding: 0 40px; }
+  .modal-box { width: 100%; background: #fff; border-radius: 12px; overflow: hidden; text-align: center; }
+  .modal-title { font-size: 16px; font-weight: 600; padding: 20px 20px 8px; }
+  .modal-body { font-size: 13px; color: #4b5563; line-height: 1.6; padding: 0 20px 18px; white-space: pre-line; }
+  .modal-acts { display: flex; border-top: 1px solid var(--color-border); }
+  .modal-btn { flex: 1; padding: 12px 0; font-size: 16px; }
+  .modal-btn + .modal-btn { border-left: 1px solid var(--color-border); }
+  .modal-btn.danger { color: #ef4444; font-weight: 600; }
+
+  .notes { width: 340px; font-size: 13px; line-height: 1.85; color: #374151; }
+  .notes h2 { font-size: 15px; margin: 0 0 8px; }
+  .notes ul { padding-left: 18px; margin: 6px 0 14px; }
+  .notes code { background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1px 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ① 我的页 -->
+  <div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="user-card">
+        <div class="user-avatar-img">🧑‍💻</div>
+        <div class="user-info">
+          <div class="user-name">小日子</div>
+          <div class="user-desc">减脂塑形 · 新手 · 每周 3 练</div>
+        </div>
+        <div class="user-edit">编辑</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-item"><div class="stat-value">175</div><div class="stat-label">身高 cm</div></div>
+        <div class="stat-item"><div class="stat-value">150.8</div><div class="stat-label">体重 lb</div></div>
+        <div class="stat-item"><div class="stat-value">28</div><div class="stat-label">年龄</div></div>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-item"><span class="menu-icon">📝</span><span class="menu-text">编辑身体档案</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item"><span class="menu-icon">📊</span><span class="menu-text">数据看板</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item"><span class="menu-icon">🏃</span><span class="menu-text">动作库</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item"><span class="menu-icon">♥</span><span class="menu-text">我的收藏</span><span class="menu-badge">2</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item"><span class="menu-icon">⚖️</span><span class="menu-text">身体记录</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item"><span class="menu-icon">💬</span><span class="menu-text">意见反馈</span><span class="menu-arrow">›</span></div>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-item">
+          <span class="menu-icon">⚙️</span><span class="menu-text">重量单位</span>
+          <div class="seg"><div class="seg-item">kg</div><div class="seg-item active">lb</div></div>
+        </div>
+        <div class="menu-item"><span class="menu-icon">🗑</span><span class="menu-text danger">清空训练数据</span><span class="menu-arrow">›</span></div>
+      </div>
+
+      <div class="credits">
+        <div class="credits-title">素材与数据来源</div>
+        <div class="credits-line">Exercise data by RepDB (repdb.co) · Free Tier License</div>
+        <div class="credits-line">动作演示由 RepDB 起始/顶峰姿势本地合成</div>
+      </div>
+      <div class="disclaimer">训练建议仅供参考，不构成医疗建议</div>
+    </div>
+    <div class="cap">① 我的页：头像昵称可编辑 + 重量单位切换 + 清空数据</div>
+  </div>
+
+  <!-- ② 编辑头像昵称 -->
+  <div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="user-card" style="filter:blur(.4px)">
+        <div class="user-avatar-img">🧑‍💻</div>
+        <div class="user-info"><div class="user-name">小日子</div><div class="user-desc">减脂塑形 · 新手 · 每周 3 练</div></div>
+        <div class="user-edit">编辑</div>
+      </div>
+      <div class="stats-row"><div class="stat-item"><div class="stat-value">175</div><div class="stat-label">身高 cm</div></div>
+        <div class="stat-item"><div class="stat-value">150.8</div><div class="stat-label">体重 lb</div></div>
+        <div class="stat-item"><div class="stat-value">28</div><div class="stat-label">年龄</div></div></div>
+      <div class="menu-group" style="opacity:.6">
+        <div class="menu-item"><span class="menu-icon">📝</span><span class="menu-text">编辑身体档案</span><span class="menu-arrow">›</span></div>
+        <div class="menu-item"><span class="menu-icon">📊</span><span class="menu-text">数据看板</span><span class="menu-arrow">›</span></div>
+      </div>
+
+      <div class="mask">
+        <div class="sheet">
+          <div class="sheet-head">
+            <div class="sheet-title">头像与昵称</div>
+            <div class="sheet-close">×</div>
+          </div>
+          <div class="avatar-row">
+            <div class="avatar-preview">🧑‍💻</div>
+            <div class="avatar-acts">
+              <div class="avatar-btn">选择微信头像</div>
+              <div class="avatar-reset">恢复默认</div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label">昵称</div>
+            <div class="field-input">小日子</div>
+          </div>
+          <div class="sheet-tip">昵称与头像仅自己可见，用于「我的」页展示</div>
+          <div class="sheet-save">保存</div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">② 点头像卡「编辑」：微信头像选择 + 昵称输入</div>
+  </div>
+
+  <!-- ③ 清空数据二次确认 -->
+  <div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="user-card">
+        <div class="user-avatar-img">🧑‍💻</div>
+        <div class="user-info"><div class="user-name">小日子</div><div class="user-desc">减脂塑形 · 新手 · 每周 3 练</div></div>
+        <div class="user-edit">编辑</div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-item"><span class="menu-icon">⚙️</span><span class="menu-text">重量单位</span>
+          <div class="seg"><div class="seg-item active">kg</div><div class="seg-item">lb</div></div></div>
+        <div class="menu-item"><span class="menu-icon">🗑</span><span class="menu-text danger">清空训练数据</span><span class="menu-arrow">›</span></div>
+      </div>
+
+      <div class="modal">
+        <div class="modal-box">
+          <div class="modal-title">再次确认</div>
+          <div class="modal-body">真的要清空吗？清空后无法找回。</div>
+          <div class="modal-acts">
+            <div class="modal-btn">取消</div>
+            <div class="modal-btn danger">确认清空</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">③ 清空数据：两道确认（第二道红色按钮）</div>
+  </div>
+
+  <div class="notes">
+    <h2>这一版做了什么</h2>
+    <ul>
+      <li><b>头像 + 昵称</b>：用户卡右上「编辑」→ 弹层里用微信官方
+        <code>open-type="chooseAvatar"</code> 和 <code>&lt;input type="nickname"&gt;</code>。
+        头像临时文件用 <code>saveFile</code> 落到本地用户目录（<code>USER_DATA_PATH</code>），重启不丢；
+        昵称本地存一份，有云档案时同步到 <code>profiles</code>（失败不阻塞）。</li>
+      <li><b>重量单位 kg / lb</b>：数据库永远存 kg，只在输入和展示两个边界换算。
+        影响的页面：我的（档案体重）、身体记录（概览 / 趋势 / 列表 / 输入框与范围提示）、数据看板（训练容量）、建档（体重输入）。</li>
+      <li><b>清空训练数据</b>：删云端 <code>workout_logs / body_records / chat_messages / plans</code>，
+        档案、收藏、设置保留。两道确认，单次上限 500 条（超了会提示再点一次）。</li>
+      <li><b>「编辑身体档案」</b>本来就有回填逻辑，这次顺手把体重输入也接上单位换算。</li>
+    </ul>
+    <h2>为什么这么设计</h2>
+    <ul>
+      <li>换单位<b>不迁移历史数据</b>：一份数据只有一种含义（kg），不会出现「旧数据是 kg、新数据是 lb」的混乱</li>
+      <li>头像存本地而不是云存储：个人展示用，省云存储空间和上传等待；换设备重选一次即可</li>
+      <li>清空数据走客户端分批删除（<code>_id</code> 逐条 <code>remove</code>），
+        不新增云函数、不用重新部署；每批 20 条、单集合上限 500 条，防异常数据卡死</li>
+      <li>lb 输入范围提示跟着单位走（44-661 lb），不会出现「提示 20-300 但你填的是磅」的错位</li>
+    </ul>
+    <h2>新增服务</h2>
+    <ul>
+      <li><code>services/units.js</code> — 单位偏好与换算（含输入范围、格式化）</li>
+      <li><code>services/userinfo.js</code> — 头像落盘、昵称清洗与云同步</li>
+      <li><code>services/data.js</code> — 分批清理云端数据（带进度回调与上限保护）</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

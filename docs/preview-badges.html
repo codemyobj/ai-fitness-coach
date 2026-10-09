@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>成就徽章 · 视觉预览</title>
+<style>
+  /* 本文件由 tools/gen-badges-preview.js 生成，请勿手改 —— 改 services/badges.js 后重跑脚本 */
+  :root {
+    --color-primary: #10b981;
+    --color-primary-dark: #059669;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-card: #ffffff;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text); }
+  h1.pagetitle { text-align: center; font-size: 18px; margin: 0 0 6px; }
+  .pagesub { text-align: center; font-size: 12px; color: #6b7280; margin-bottom: 22px; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; align-items: flex-start; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 22px; overflow: hidden;
+    box-shadow: 0 10px 32px rgba(0,0,0,.14); position: relative; }
+  .navbar { height: 40px; background: #111827; color: #fff; display: flex; align-items: center;
+    justify-content: center; font-size: 15px; font-weight: 600; }
+  .screen { height: 700px; overflow-y: auto; position: relative; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; max-width: 375px; line-height: 1.6; }
+  .state-tag { position: absolute; top: 10px; right: 12px; z-index: 2; background: rgba(0,0,0,.62); color: #fff;
+    font-size: 11px; padding: 3px 10px; border-radius: 999px; }
+
+  .hero { background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 135%);
+    padding: 20px 16px 22px; color: #fff; }
+  .hero-row { display: flex; align-items: center; }
+  .hero-main { flex: 1; }
+  .hero-num { font-size: 32px; font-weight: 700; line-height: 1.1; }
+  .hero-total { font-size: 14px; font-weight: 400; opacity: .65; margin-left: 4px; }
+  .hero-label { font-size: 12px; opacity: .75; margin-top: 4px; }
+  .hero-badge { font-size: 32px; opacity: .9; }
+  .hero-track { height: 6px; border-radius: 4px; background: rgba(255,255,255,.2);
+    margin-top: 14px; overflow: hidden; }
+  .hero-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, #34d399, #10b981); }
+
+  .body { padding-bottom: 30px; }
+  .new-card { display: flex; align-items: center; margin: 12px 16px 0; padding: 10px 12px;
+    background: linear-gradient(135deg, #fef3c7, #fde68a); border: 1px solid #fcd34d; border-radius: var(--radius-base); }
+  .new-icon { font-size: 16px; margin-right: 6px; }
+  .new-text { flex: 1; font-size: 12px; color: #92400e; line-height: 1.5; }
+
+  .card { background: #fff; border-radius: var(--radius-lg); padding: 14px 16px 16px;
+    margin: 12px 16px; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .next-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .next-label { font-size: 12px; color: var(--color-text-secondary); }
+  .next-remain { font-size: 12px; color: var(--color-primary-dark); font-weight: 600; }
+  .next-body { display: flex; align-items: center; }
+  .next-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--color-bg);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+    flex-shrink: 0; margin-right: 12px; }
+  .next-main { flex: 1; min-width: 0; }
+  .next-name { font-size: 14px; font-weight: 600; }
+  .next-desc { font-size: 12px; color: var(--color-text-secondary); margin-top: 3px; }
+  .next-bar { height: 6px; border-radius: 4px; background: var(--color-border); margin-top: 8px; overflow: hidden; }
+  .next-fill { height: 100%; border-radius: 4px; background: var(--color-primary); }
+  .all-done-card { display: flex; align-items: center; justify-content: center; padding: 20px 16px; }
+  .all-done-icon { font-size: 20px; margin-right: 8px; }
+  .all-done-text { font-size: 14px; font-weight: 600; }
+
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .card-title { font-size: 16px; font-weight: 600; }
+  .card-stat { font-size: 12px; color: var(--color-text-light); }
+
+  .tiles { display: flex; flex-wrap: wrap; margin: -4px; }
+  .tile { width: calc(50% - 8px); margin: 4px; padding: 10px;
+    background: #f7f8fa; border: 1px solid transparent; border-radius: var(--radius-base); }
+  .tile.on { background: #fff; border-color: rgba(16,185,129,.35); box-shadow: 0 1px 5px rgba(16,185,129,.08); }
+  .tile.is-new { border-color: var(--color-primary); background: #ecfdf5; }
+  .tile-icon { width: 32px; height: 32px; border-radius: 50%; background: #e9ebef;
+    display: flex; align-items: center; justify-content: center; font-size: 17px;
+    margin-bottom: 8px; filter: grayscale(1); opacity: .55; }
+  .tile.on .tile-icon { background: #ecfdf5; filter: none; opacity: 1; }
+  .tile-name { font-size: 14px; font-weight: 600; color: var(--color-text-light); }
+  .tile.on .tile-name { color: var(--color-text); }
+  .tile-desc { font-size: 11px; color: var(--color-text-light); line-height: 1.5; margin-top: 3px; min-height: 33px; }
+  .tile-bar { height: 4px; border-radius: 3px; background: #e2e4e8; margin-top: 6px; overflow: hidden; }
+  .tile-fill { height: 100%; border-radius: 3px; background: var(--color-primary); }
+  .tile-foot { font-size: 10px; color: var(--color-text-light); margin-top: 6px; }
+  .tile-unlocked { color: var(--color-primary-dark); }
+  .footnote { text-align: center; font-size: 11px; color: var(--color-text-light); margin-top: 16px; padding: 0 24px; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <h1 class="pagetitle">成就徽章 · 视觉预览</h1>
+  <div class="pagesub">由 tools/gen-badges-preview.js 从 services/badges.js 真实定义生成 ·
+    共 13 枚 / 7 个分组</div>
+  <div class="wrap">
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">成就徽章</div>
+      <div class="screen scroll">
+        <span class="state-tag">刚开始练</span>
+        
+    <div class="hero">
+      <div class="hero-row">
+        <div class="hero-main">
+          <div class="hero-num">2<span class="hero-total">/ 13</span></div>
+          <div class="hero-label">已解锁徽章</div>
+        </div>
+        <div class="hero-badge">🏅</div>
+      </div>
+      <div class="hero-track"><div class="hero-fill" style="width:15%"></div></div>
+    </div>
+    <div class="body">
+      <div class="new-card"><span class="new-icon">🎉</span><span class="new-text">新解锁 2 枚：建档完成、迈出第一步</span></div>
+      <div class="card next-card">
+        <div class="next-head"><span class="next-label">下一个目标</span><span class="next-remain">还差 5 天</span></div>
+        <div class="next-body">
+          <div class="next-icon">📅</div>
+          <div class="next-main">
+            <div class="next-name">坚持一周</div>
+            <div class="next-desc">连续打卡 7 天</div>
+            <div class="next-bar"><div class="next-fill" style="width:29%"></div></div>
+          </div>
+        </div>
+      </div>
+      
+    <div class="card">
+      <div class="card-header"><span class="card-title">起步</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile on is-new">
+    <div class="tile-icon">🎯</div>
+    <div class="tile-name">建档完成</div>
+    <div class="tile-desc">完成身体档案，让计划更贴合你</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">打卡</span><span class="card-stat">4 枚</span></div>
+      <div class="tiles"><div class="tile on is-new">
+    <div class="tile-icon">🎽</div>
+    <div class="tile-name">迈出第一步</div>
+    <div class="tile-desc">完成第 1 次训练打卡</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">🔥</div>
+    <div class="tile-name">进入状态</div>
+    <div class="tile-desc">累计完成 10 次训练</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:20%"></div></div>
+       <div class="tile-foot">还差 8 次</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">💪</div>
+    <div class="tile-name">训练常客</div>
+    <div class="tile-desc">累计完成 50 次训练</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:4%"></div></div>
+       <div class="tile-foot">还差 48 次</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">🏅</div>
+    <div class="tile-name">百炼成钢</div>
+    <div class="tile-desc">累计完成 100 次训练</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:2%"></div></div>
+       <div class="tile-foot">还差 98 次</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">连续</span><span class="card-stat">3 枚</span></div>
+      <div class="tiles"><div class="tile  ">
+    <div class="tile-icon">📅</div>
+    <div class="tile-name">坚持一周</div>
+    <div class="tile-desc">连续打卡 7 天</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:29%"></div></div>
+       <div class="tile-foot">还差 5 天</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">🗓</div>
+    <div class="tile-name">半月不断</div>
+    <div class="tile-desc">连续打卡 14 天</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:14%"></div></div>
+       <div class="tile-foot">还差 12 天</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">🌙</div>
+    <div class="tile-name">月度全勤</div>
+    <div class="tile-desc">连续打卡 30 天</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:7%"></div></div>
+       <div class="tile-foot">还差 28 天</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">时长</span><span class="card-stat">2 枚</span></div>
+      <div class="tiles"><div class="tile  ">
+    <div class="tile-icon">⏱</div>
+    <div class="tile-name">十小时俱乐部</div>
+    <div class="tile-desc">累计训练 10 小时</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:9%"></div></div>
+       <div class="tile-foot">还差 545 分钟</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">⌛</div>
+    <div class="tile-name">五十小时</div>
+    <div class="tile-desc">累计训练 50 小时</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:2%"></div></div>
+       <div class="tile-foot">还差 2945 分钟</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">强度</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile  ">
+    <div class="tile-icon">🧱</div>
+    <div class="tile-name">千组达成</div>
+    <div class="tile-desc">累计完成 1000 组</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:2%"></div></div>
+       <div class="tile-foot">还差 982 组</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">节奏</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile  ">
+    <div class="tile-icon">📆</div>
+    <div class="tile-name">月度活跃</div>
+    <div class="tile-desc">单月打卡满 12 次</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:17%"></div></div>
+       <div class="tile-foot">还差 10 次</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">探索</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile  ">
+    <div class="tile-icon">⭐</div>
+    <div class="tile-name">收藏家</div>
+    <div class="tile-desc">收藏 5 个动作</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:20%"></div></div>
+       <div class="tile-foot">还差 4 个</div>
+  </div></div>
+    </div>
+      <div class="footnote">徽章依据最近 365 天的训练记录判定，已解锁的徽章永久保留</div>
+    </div>
+      </div>
+    </div>
+    <div class="cap">① 建档 + 打卡 2 次：解锁 2 / 13</div>
+  </div>
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">成就徽章</div>
+      <div class="screen scroll">
+        <span class="state-tag">练了两个月</span>
+        
+    <div class="hero">
+      <div class="hero-row">
+        <div class="hero-main">
+          <div class="hero-num">6<span class="hero-total">/ 13</span></div>
+          <div class="hero-label">已解锁徽章</div>
+        </div>
+        <div class="hero-badge">🏅</div>
+      </div>
+      <div class="hero-track"><div class="hero-fill" style="width:46%"></div></div>
+    </div>
+    <div class="body">
+      <div class="new-card"><span class="new-icon">🎉</span><span class="new-text">新解锁 2 枚：十小时俱乐部、收藏家</span></div>
+      <div class="card next-card">
+        <div class="next-head"><span class="next-label">下一个目标</span><span class="next-remain">还差 4 次</span></div>
+        <div class="next-body">
+          <div class="next-icon">📆</div>
+          <div class="next-main">
+            <div class="next-name">月度活跃</div>
+            <div class="next-desc">单月打卡满 12 次</div>
+            <div class="next-bar"><div class="next-fill" style="width:67%"></div></div>
+          </div>
+        </div>
+      </div>
+      
+    <div class="card">
+      <div class="card-header"><span class="card-title">起步</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">🎯</div>
+    <div class="tile-name">建档完成</div>
+    <div class="tile-desc">完成身体档案，让计划更贴合你</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">打卡</span><span class="card-stat">4 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">🎽</div>
+    <div class="tile-name">迈出第一步</div>
+    <div class="tile-desc">完成第 1 次训练打卡</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div><div class="tile on ">
+    <div class="tile-icon">🔥</div>
+    <div class="tile-name">进入状态</div>
+    <div class="tile-desc">累计完成 10 次训练</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">💪</div>
+    <div class="tile-name">训练常客</div>
+    <div class="tile-desc">累计完成 50 次训练</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:56%"></div></div>
+       <div class="tile-foot">还差 22 次</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">🏅</div>
+    <div class="tile-name">百炼成钢</div>
+    <div class="tile-desc">累计完成 100 次训练</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:28%"></div></div>
+       <div class="tile-foot">还差 72 次</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">连续</span><span class="card-stat">3 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">📅</div>
+    <div class="tile-name">坚持一周</div>
+    <div class="tile-desc">连续打卡 7 天</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">🗓</div>
+    <div class="tile-name">半月不断</div>
+    <div class="tile-desc">连续打卡 14 天</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:64%"></div></div>
+       <div class="tile-foot">还差 5 天</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">🌙</div>
+    <div class="tile-name">月度全勤</div>
+    <div class="tile-desc">连续打卡 30 天</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:30%"></div></div>
+       <div class="tile-foot">还差 21 天</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">时长</span><span class="card-stat">2 枚</span></div>
+      <div class="tiles"><div class="tile on is-new">
+    <div class="tile-icon">⏱</div>
+    <div class="tile-name">十小时俱乐部</div>
+    <div class="tile-desc">累计训练 10 小时</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div><div class="tile  ">
+    <div class="tile-icon">⌛</div>
+    <div class="tile-name">五十小时</div>
+    <div class="tile-desc">累计训练 50 小时</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:21%"></div></div>
+       <div class="tile-foot">还差 2380 分钟</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">强度</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile  ">
+    <div class="tile-icon">🧱</div>
+    <div class="tile-name">千组达成</div>
+    <div class="tile-desc">累计完成 1000 组</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:41%"></div></div>
+       <div class="tile-foot">还差 590 组</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">节奏</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile  ">
+    <div class="tile-icon">📆</div>
+    <div class="tile-name">月度活跃</div>
+    <div class="tile-desc">单月打卡满 12 次</div>
+    <div class="tile-bar"><div class="tile-fill" style="width:67%"></div></div>
+       <div class="tile-foot">还差 4 次</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">探索</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile on is-new">
+    <div class="tile-icon">⭐</div>
+    <div class="tile-name">收藏家</div>
+    <div class="tile-desc">收藏 5 个动作</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 10月8日</div>
+  </div></div>
+    </div>
+      <div class="footnote">徽章依据最近 365 天的训练记录判定，已解锁的徽章永久保留</div>
+    </div>
+      </div>
+    </div>
+    <div class="cap">② 本次刚跨过两个阈值：新解锁 2 枚（绿色描边）</div>
+  </div>
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">成就徽章</div>
+      <div class="screen scroll">
+        <span class="state-tag">全部达成</span>
+        
+    <div class="hero">
+      <div class="hero-row">
+        <div class="hero-main">
+          <div class="hero-num">13<span class="hero-total">/ 13</span></div>
+          <div class="hero-label">已解锁徽章</div>
+        </div>
+        <div class="hero-badge">🏅</div>
+      </div>
+      <div class="hero-track"><div class="hero-fill" style="width:100%"></div></div>
+    </div>
+    <div class="body">
+      
+      <div class="card next-card all-done-card"><span class="all-done-icon">🏆</span><span class="all-done-text">全部 13 枚徽章已解锁，你就是自己的教练</span></div>
+      
+    <div class="card">
+      <div class="card-header"><span class="card-title">起步</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">🎯</div>
+    <div class="tile-name">建档完成</div>
+    <div class="tile-desc">完成身体档案，让计划更贴合你</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">打卡</span><span class="card-stat">4 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">🎽</div>
+    <div class="tile-name">迈出第一步</div>
+    <div class="tile-desc">完成第 1 次训练打卡</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div><div class="tile on ">
+    <div class="tile-icon">🔥</div>
+    <div class="tile-name">进入状态</div>
+    <div class="tile-desc">累计完成 10 次训练</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div><div class="tile on ">
+    <div class="tile-icon">💪</div>
+    <div class="tile-name">训练常客</div>
+    <div class="tile-desc">累计完成 50 次训练</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div><div class="tile on ">
+    <div class="tile-icon">🏅</div>
+    <div class="tile-name">百炼成钢</div>
+    <div class="tile-desc">累计完成 100 次训练</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">连续</span><span class="card-stat">3 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">📅</div>
+    <div class="tile-name">坚持一周</div>
+    <div class="tile-desc">连续打卡 7 天</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div><div class="tile on ">
+    <div class="tile-icon">🗓</div>
+    <div class="tile-name">半月不断</div>
+    <div class="tile-desc">连续打卡 14 天</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div><div class="tile on ">
+    <div class="tile-icon">🌙</div>
+    <div class="tile-name">月度全勤</div>
+    <div class="tile-desc">连续打卡 30 天</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">时长</span><span class="card-stat">2 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">⏱</div>
+    <div class="tile-name">十小时俱乐部</div>
+    <div class="tile-desc">累计训练 10 小时</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div><div class="tile on ">
+    <div class="tile-icon">⌛</div>
+    <div class="tile-name">五十小时</div>
+    <div class="tile-desc">累计训练 50 小时</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">强度</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">🧱</div>
+    <div class="tile-name">千组达成</div>
+    <div class="tile-desc">累计完成 1000 组</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">节奏</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">📆</div>
+    <div class="tile-name">月度活跃</div>
+    <div class="tile-desc">单月打卡满 12 次</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">探索</span><span class="card-stat">1 枚</span></div>
+      <div class="tiles"><div class="tile on ">
+    <div class="tile-icon">⭐</div>
+    <div class="tile-name">收藏家</div>
+    <div class="tile-desc">收藏 5 个动作</div>
+    <div class="tile-foot tile-unlocked">✓ 解锁于 9月28日</div>
+  </div></div>
+    </div>
+      <div class="footnote">徽章依据最近 365 天的训练记录判定，已解锁的徽章永久保留</div>
+    </div>
+      </div>
+    </div>
+    <div class="cap">③ 13 / 13，顶部换成「下一个目标」的完成态</div>
+  </div></div>
+</body>
+</html>

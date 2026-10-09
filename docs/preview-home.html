@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>训练首页数据打通 · 视觉预览（今日安排 / 周目标 / 连续打卡）</title>
+<style>
+  /* rpx → px 按 1rpx = 0.5px 换算，375px 宽模拟 iPhone */
+  :root {
+    --color-primary: #10b981;
+    --color-primary-dark: #059669;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-card: #ffffff;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text); }
+  .head { max-width: 1240px; margin: 0 auto 22px; }
+  .head h1 { font-size: 20px; margin: 0 0 8px; }
+  .head p { font-size: 13px; color: #4b5563; line-height: 21px; margin: 0 0 6px; }
+  .head code { background: #e5e7eb; border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; align-items: flex-start;
+          max-width: 1240px; margin: 0 auto; }
+  .col { flex: 0 0 auto; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 22px; overflow: hidden;
+           box-shadow: 0 10px 32px rgba(0,0,0,.14); position: relative; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; width: 375px; }
+
+  /* ---------- hero（training.wxss 的 .hero） ---------- */
+  .hero { background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 130%);
+    color: #fff; padding: 34px 16px 28px; border-radius: 0 0 20px 20px; }
+  .hero-date { font-size: 12px; opacity: .7; }
+  .hero-title { font-size: 22px; font-weight: 700; margin-top: 6px; }
+  .hero-sub { font-size: 14px; opacity: .8; margin-top: 4px; }
+
+  /* ---------- app.wxss 的 .card / 按钮 ---------- */
+  .card { background: #fff; border-radius: var(--radius-lg); padding: 16px;
+    margin: 12px 16px; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .card-title { font-size: 16px; font-weight: 600; }
+  .card-tag { font-size: 12px; color: var(--color-primary); background: rgba(16,185,129,.1);
+    padding: 3px 10px; border-radius: 999px; }
+  .card-stat { font-size: 16px; font-weight: 700; color: var(--color-primary); }
+  .btn-primary { background: var(--color-primary); color: #fff; border-radius: 24px;
+    font-size: 16px; font-weight: 600; padding: 12px 0; text-align: center; }
+  .btn-ghost { border: 1px solid var(--color-primary); color: var(--color-primary);
+    border-radius: 24px; font-size: 14px; padding: 10px 0; text-align: center; }
+  .plan-actions { display: flex; gap: 10px; }
+  .plan-actions-item { flex: 1; }
+
+  /* ---------- 今日安排块（training.wxss 的 .today-box） ---------- */
+  .today-box { background: linear-gradient(135deg, rgba(16,185,129,.1), rgba(16,185,129,.02));
+    border: 1px solid rgba(16,185,129,.24); border-radius: var(--radius-base);
+    padding: 12px 14px; margin-bottom: 10px; }
+  .today-box.is-done { background: linear-gradient(135deg, rgba(16,185,129,.18), rgba(16,185,129,.05));
+    border-color: rgba(16,185,129,.42); }
+  .today-head { display: flex; justify-content: space-between; align-items: center; }
+  .today-status { font-size: 12px; font-weight: 600; color: var(--color-primary-dark); }
+  .today-check { font-size: 12px; font-weight: 700; color: var(--color-primary); }
+  .today-focus { font-size: 18px; font-weight: 700; margin-top: 6px; }
+  .today-focus-empty { font-size: 14px; font-weight: 400; color: var(--color-text-secondary); line-height: 1.5; }
+  .today-meta { font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
+
+  .plan-line { display: flex; align-items: center; justify-content: space-between;
+    background: var(--color-bg); border-radius: var(--radius-base); padding: 11px 14px; margin-bottom: 12px; }
+  .plan-line-name { flex: 1; font-size: 14px; font-weight: 600; overflow: hidden;
+    white-space: nowrap; text-overflow: ellipsis; }
+  .plan-line-arrow { font-size: 12px; color: var(--color-primary); font-weight: 600; margin-left: 8px; }
+
+  /* ---------- 本周打卡（training.wxss 的 .week-overview / .ring） ---------- */
+  .week-overview { display: flex; align-items: center; padding: 4px 0 12px; }
+  .ring { width: 66px; height: 66px; border-radius: 50%; flex-shrink: 0;
+    background: var(--color-border); display: flex; align-items: center; justify-content: center; }
+  .ring-hole { width: 50px; height: 50px; border-radius: 50%; background: #fff;
+    display: flex; align-items: center; justify-content: center; }
+  .ring-num { font-size: 12px; font-weight: 700; color: var(--color-primary); }
+  .week-info { flex: 1; min-width: 0; margin-left: 14px; }
+  .week-info-main { font-size: 14px; }
+  .week-info-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 5px; }
+  .week-info-tip { font-size: 12px; color: var(--color-primary-dark); margin-top: 5px; }
+  .hl { font-size: 16px; font-weight: 700; color: var(--color-primary); }
+
+  .week-bar { display: flex; justify-content: space-between; padding: 4px 8px; }
+  .week-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .week-item.is-future { opacity: .4; }
+  .week-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--color-bg);
+    border: 1px solid var(--color-border); }
+  .week-dot.checked { background: var(--color-primary); border-color: var(--color-primary); }
+  .week-dot.today { border-color: var(--color-primary); border-width: 2px; }
+  .week-label { font-size: 12px; color: var(--color-text-secondary); }
+  .week-label.is-today { color: var(--color-primary); font-weight: 700; }
+
+  .card-link { margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--color-border);
+    text-align: center; font-size: 12px; color: var(--color-primary); font-weight: 600; }
+
+  .tool-row { display: flex; gap: 8px; }
+  .tool-item { flex: 1; background: var(--color-bg); border-radius: var(--radius-base);
+    padding: 12px 0; text-align: center; }
+  .tool-icon { display: block; font-size: 20px; margin-bottom: 4px; }
+  .tool-text { font-size: 14px; }
+  .disclaimer { text-align: center; font-size: 11px; color: var(--color-text-light); margin-top: 20px; }
+
+  .notes { max-width: 1240px; margin: 34px auto 0; background: #fff; border-radius: 10px; padding: 20px 22px;
+    box-shadow: 0 8px 26px rgba(0,0,0,.08); font-size: 13.5px; line-height: 23px; }
+  .notes h2 { font-size: 15px; margin: 22px 0 8px; }
+  .notes h2:first-child { margin-top: 0; }
+  .notes ul { margin: 0; padding-left: 20px; }
+  .notes li { margin-bottom: 6px; }
+  .notes code { background: #eef1f4; border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+  .bad { color: #b91c1c; font-weight: 600; }
+  .good { color: var(--color-primary-dark); font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>训练首页数据打通 · 视觉预览</h1>
+  <p>本次改了三件事：<b>①</b> 修「开始跟练」永远进第 1 周第 1 天的 bug；<b>②</b> 本周目标分母改成档案里的每周训练天数（原来是写死的 7）；<b>③</b> 新增今日安排、连续打卡天数、周目标进度环。</p>
+  <p>下面三个状态对应真实数据：新用户无计划 / 本周练了 2 天 / 今日已打卡且本周达标。样式按 <code>training.wxss</code> + <code>app.wxss</code> 的 rpx→px（×0.5）手工对齐。</p>
+</div>
+
+<div class="wrap">
+
+  <!-- ============ ① 新用户：还没有计划 ============ -->
+  <div class="col">
+    <div class="phone">
+      <div class="hero">
+        <div class="hero-date">2026年10月8日 星期四</div>
+        <div class="hero-title">下午好，健身搭子</div>
+        <div class="hero-sub">今天也要元气满满地动起来 💪</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">今日训练</div>
+          <div class="card-tag">减脂塑形</div>
+        </div>
+        <div style="text-align:center;padding:16px 0 20px">
+          <div style="font-size:14px;font-weight:600">按你的目标编排一份专属计划</div>
+          <div style="font-size:12px;color:var(--color-text-light);margin-top:4px">基于你的档案 · 4 周渐进式安排</div>
+        </div>
+        <div class="btn-primary">生成训练计划</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">本周打卡</div>
+          <div class="card-stat">0/3</div>
+        </div>
+        <div class="week-overview">
+          <div class="ring" style="background: conic-gradient(#e5e7eb 0deg 360deg)">
+            <div class="ring-hole"><div class="ring-num">0%</div></div>
+          </div>
+          <div class="week-info">
+            <div class="week-info-main">本周已练 <span class="hl">0</span> 天 · 目标 <span class="hl">3</span> 天</div>
+            <div class="week-info-sub">连续打卡 <span class="hl">0</span> 天</div>
+          </div>
+        </div>
+        <div class="week-bar">
+          <div class="week-item"><div class="week-dot"></div><div class="week-label">一</div></div>
+          <div class="week-item"><div class="week-dot"></div><div class="week-label">二</div></div>
+          <div class="week-item"><div class="week-dot"></div><div class="week-label">三</div></div>
+          <div class="week-item"><div class="week-dot today"></div><div class="week-label is-today">四</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">五</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">六</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">日</div></div>
+        </div>
+        <div class="card-link">查看数据看板 ›</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">更多</div></div>
+        <div class="tool-row">
+          <div class="tool-item"><span class="tool-icon">🏃</span><span class="tool-text">动作库</span></div>
+          <div class="tool-item"><span class="tool-icon">⚖️</span><span class="tool-text">身体记录</span></div>
+        </div>
+      </div>
+      <div class="disclaimer">训练建议仅供参考，不构成医疗建议</div>
+    </div>
+    <div class="cap">① 有档案但还没生成计划</div>
+  </div>
+
+  <!-- ============ ② 本周练了 2 天，今天第 3 节 ============ -->
+  <div class="col">
+    <div class="phone">
+      <div class="hero">
+        <div class="hero-date">2026年10月8日 星期四</div>
+        <div class="hero-title">下午好，小雷</div>
+        <div class="hero-sub">今天也要元气满满地动起来 💪</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">今日训练</div>
+          <div class="card-tag">减脂塑形</div>
+        </div>
+        <div class="today-box">
+          <div class="today-head"><div class="today-status">今天练</div></div>
+          <div class="today-focus">腿 / 臀</div>
+          <div class="today-meta">第 1/4 周 · 第 3/3 节 · 5 个动作</div>
+        </div>
+        <div class="plan-line">
+          <div class="plan-line-name">减脂塑形 · 4 周计划</div>
+          <div class="plan-line-arrow">查看全计划 ›</div>
+        </div>
+        <div class="plan-actions">
+          <div class="btn-primary plan-actions-item">开始跟练</div>
+          <div class="btn-ghost plan-actions-item">问问教练</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">本周打卡</div>
+          <div class="card-stat">2/3</div>
+        </div>
+        <div class="week-overview">
+          <div class="ring" style="background: conic-gradient(#10b981 0deg 240deg, #e5e7eb 240deg 360deg)">
+            <div class="ring-hole"><div class="ring-num">67%</div></div>
+          </div>
+          <div class="week-info">
+            <div class="week-info-main">本周已练 <span class="hl">2</span> 天 · 目标 <span class="hl">3</span> 天</div>
+            <div class="week-info-sub">连续打卡 <span class="hl">5</span> 天 · 本周 90 分钟</div>
+          </div>
+        </div>
+        <div class="week-bar">
+          <div class="week-item"><div class="week-dot checked"></div><div class="week-label">一</div></div>
+          <div class="week-item"><div class="week-dot checked"></div><div class="week-label">二</div></div>
+          <div class="week-item"><div class="week-dot"></div><div class="week-label">三</div></div>
+          <div class="week-item"><div class="week-dot today"></div><div class="week-label is-today">四</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">五</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">六</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">日</div></div>
+        </div>
+        <div class="card-link">查看数据看板 ›</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">更多</div></div>
+        <div class="tool-row">
+          <div class="tool-item"><span class="tool-icon">🏃</span><span class="tool-text">动作库</span></div>
+          <div class="tool-item"><span class="tool-icon">⚖️</span><span class="tool-text">身体记录</span></div>
+        </div>
+      </div>
+      <div class="disclaimer">训练建议仅供参考，不构成医疗建议</div>
+    </div>
+    <div class="cap">② 本周练 2 天 · 周目标 3 天（不再是写死的 /7）</div>
+  </div>
+
+  <!-- ============ ③ 今日已打卡 + 本周达标 ============ -->
+  <div class="col">
+    <div class="phone">
+      <div class="hero">
+        <div class="hero-date">2026年10月8日 星期四</div>
+        <div class="hero-title">下午好，小雷</div>
+        <div class="hero-sub">今天也要元气满满地动起来 💪</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">今日训练</div>
+          <div class="card-tag">减脂塑形</div>
+        </div>
+        <div class="today-box is-done">
+          <div class="today-head">
+            <div class="today-status">今日已完成</div>
+            <div class="today-check">✓ 已打卡</div>
+          </div>
+          <div class="today-focus">腿 / 臀</div>
+          <div class="today-meta">第 1/4 周 · 第 3/3 节 · 5 个动作</div>
+        </div>
+        <div class="plan-line">
+          <div class="plan-line-name">减脂塑形 · 4 周计划</div>
+          <div class="plan-line-arrow">查看全计划 ›</div>
+        </div>
+        <div class="plan-actions">
+          <div class="btn-primary plan-actions-item">再练一次</div>
+          <div class="btn-ghost plan-actions-item">问问教练</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">本周打卡</div>
+          <div class="card-stat">3/3</div>
+        </div>
+        <div class="week-overview">
+          <div class="ring" style="background: conic-gradient(#10b981 0deg 360deg)">
+            <div class="ring-hole"><div class="ring-num">100%</div></div>
+          </div>
+          <div class="week-info">
+            <div class="week-info-main">本周已练 <span class="hl">3</span> 天 · 目标 <span class="hl">3</span> 天</div>
+            <div class="week-info-sub">连续打卡 <span class="hl">6</span> 天 · 本周 135 分钟</div>
+            <div class="week-info-tip">目标达成 🎉 想加练也可以继续</div>
+          </div>
+        </div>
+        <div class="week-bar">
+          <div class="week-item"><div class="week-dot checked"></div><div class="week-label">一</div></div>
+          <div class="week-item"><div class="week-dot checked"></div><div class="week-label">二</div></div>
+          <div class="week-item"><div class="week-dot checked"></div><div class="week-label">三</div></div>
+          <div class="week-item"><div class="week-dot checked today"></div><div class="week-label is-today">四</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">五</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">六</div></div>
+          <div class="week-item is-future"><div class="week-dot"></div><div class="week-label">日</div></div>
+        </div>
+        <div class="card-link">查看数据看板 ›</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">更多</div></div>
+        <div class="tool-row">
+          <div class="tool-item"><span class="tool-icon">🏃</span><span class="tool-text">动作库</span></div>
+          <div class="tool-item"><span class="tool-icon">⚖️</span><span class="tool-text">身体记录</span></div>
+        </div>
+      </div>
+      <div class="disclaimer">训练建议仅供参考，不构成医疗建议</div>
+    </div>
+    <div class="cap">③ 今日已打卡 · 周目标达成 · 按钮变「再练一次」</div>
+  </div>
+
+</div>
+
+<div class="notes">
+  <h2>修掉的两个 bug</h2>
+  <ul>
+    <li><span class="bad">「开始跟练」永远进第 1 周第 1 天</span> —— <code>goWorkout()</code> 里写死 <code>week=0&amp;day=1</code>。
+      现在由 <code>services/session.js</code> 的 <code>resolveToday()</code> 推导，跳转 URL 用真实周次/节次（已加页面级断言）。</li>
+    <li><span class="bad">本周打卡分母写死 7</span> —— 档案里本来就存了「每周训练天数」（1~7），
+      选「每周 3 练」的人看到 2/7 会以为自己没达标。现在分母取 <code>plan.daysPerWeek</code>。</li>
+    <li>顺手修的第三处：原来标题写「本周」但数据其实是<b>滚动近 7 天</b>，跨周时数字对不上。
+      现在统一成自然周（周一 → 周日），未来的日子置灰。</li>
+  </ul>
+
+  <h2>「今天练哪一节」的规则：只有一个时钟</h2>
+  <ul>
+    <li>第几周 = <code>floor(累计完成课次 ÷ 每周天数)</code>，最多停在计划最后一周</li>
+    <li>周内第几节 = <code>累计完成课次 % 每周天数 + 1</code></li>
+    <li>为什么按课次而不是按日历：用户停练两周回来，不该被直接丢到第 4 周</li>
+    <li>开发中踩到的坑：一开始周次按课次、节次按「本周日历打卡数」，两个时钟会打架 ——
+      练满 3 次后周次跳到第 2 周、节次却还在第 3 节，等于跳过第 2 周前两节。
+      测试里专门留了一条 <code>周次与节次自洽</code> 的用例钉住它。</li>
+  </ul>
+
+  <h2>数据来源：0 次额外查询</h2>
+  <ul>
+    <li>首页原来单独查一次 <code>getRecentCheckinDates(7)</code>。现在改用
+      <code>stats.getHomeSummary()</code>，复用看板那批 365 天记录（30s TTL 缓存，和看板共用）。</li>
+    <li>打卡后由 <code>workout.onInvalidate</code> 广播失效，回家首页立刻是「已打卡」态。</li>
+    <li>统计接口挂掉时页面照常渲染，退化成「本周 0/N」，不会白屏。</li>
+  </ul>
+
+  <h2>兼容性说明</h2>
+  <ul>
+    <li>进度环用 <code>conic-gradient</code>（内联在 JS 里算好，可单测）。极老设备不支持时会落回
+      灰环 + 中间百分比数字，信息不丢。</li>
+    <li>骨架屏的 training 版式同步加了进度环与浅绿底「今日安排」块，首屏换成真实内容不跳动。</li>
+  </ul>
+
+  <h2>测试</h2>
+  <ul>
+    <li><code>test-session.js</code>（新）160 项 · <code>test-stats.js</code> 73 → 96 项 ·
+      <code>test-pages.js</code> 23 → 46 项 · <code>test-skeleton.js</code> 114 → 117 项</li>
+    <li>全 12 套测试通过，<code>verify.js</code> 0 错误 0 警告；主包 172.4 KB / packageA 1241.4 KB</li>
+  </ul>
+</div>
+
+</body>
+</html>

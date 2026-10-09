@@ -1,0 +1,165 @@
+<!--packageA/body/body.wxml — 身体记录 -->
+<view class="page">
+
+  <!-- 首屏骨架屏：延迟 180ms 才出现，缓存命中时不闪 -->
+  <skeleton wx:if="{{skVisible}}" variant="body" />
+
+  <!-- 失败：显示原因 + 重试 + 一键初始化数据库 -->
+  <view wx:elif="{{loadError}}" class="err-card">
+    <view class="err-title">⚠️ 加载失败</view>
+    <view class="err-msg">{{loadError}}</view>
+    <view class="btn-primary" bindtap="retry">重新加载</view>
+    <view wx:if="{{debugMode}}" class="btn-ghost" bindtap="repairDb">一键初始化数据库（排查用）</view>
+  </view>
+
+  <!-- 有数据才渲染内容：下拉刷新时旧内容留在屏上 -->
+  <block wx:elif="{{summary}}">
+
+    <!-- 1. 概览 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">身体数据</text>
+        <text class="card-stat">共 {{summary.count}} 条</text>
+      </view>
+
+      <view wx:if="{{summary.hasData}}" class="bd-grid">
+        <view class="bd-item">
+          <view class="bd-value">{{summary.latestWeight}}<text class="bd-unit">{{unit}}</text></view>
+          <view class="bd-label">最新体重</view>
+        </view>
+        <view class="bd-item">
+          <view class="bd-value {{summary.deltaClass}}">{{summary.deltaText}}</view>
+          <view class="bd-label">较上次</view>
+        </view>
+        <view class="bd-item">
+          <view class="bd-value">{{summary.minWeight}}<text class="bd-unit">{{unit}}</text></view>
+          <view class="bd-label">最低</view>
+        </view>
+        <view class="bd-item">
+          <view class="bd-value">{{summary.maxWeight}}<text class="bd-unit">{{unit}}</text></view>
+          <view class="bd-label">最高</view>
+        </view>
+      </view>
+
+      <view wx:else class="empty-box">
+        <view class="empty-tip">还没有身体记录</view>
+        <view class="empty-sub">记录体重变化，配合训练看效果</view>
+      </view>
+
+      <view wx:if="{{summary.hasData}}" class="bd-sub">
+        <text wx:if="{{summary.totalDeltaText}}">相比首次记录 {{summary.totalDeltaText}} {{unit}} · </text>
+        <text wx:if="{{summary.avgWeight !== null}}">平均 {{summary.avgWeight}} {{unit}} · </text>
+        <text wx:if="{{summary.latestDate}}">最近记录 {{summary.latestDate}}</text>
+      </view>
+    </view>
+
+    <!-- 2. 体重趋势 -->
+    <view wx:if="{{trend.hasData}}" class="card">
+      <view class="card-header">
+        <text class="card-title">体重趋势</text>
+        <text class="card-stat">最近 {{trend.count}} 次</text>
+      </view>
+      <view class="bd-chart">
+        <view wx:for="{{trend.points}}" wx:key="date" class="bd-col">
+          <view class="bd-bar-wrap">
+            <view class="bd-bar" style="height: {{item.heightPct}}%;"></view>
+          </view>
+          <view class="bd-bar-val">{{item.weightKg}}</view>
+          <view class="bd-bar-label">{{item.label}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 3. 记录列表 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">全部记录</text>
+      </view>
+
+      <view wx:if="{{!records.length}}" class="empty-box">
+        <view class="empty-tip">暂无记录</view>
+        <view class="empty-sub">点下方按钮添加第一条</view>
+      </view>
+
+      <view wx:for="{{records}}" wx:key="_id" class="rec-row">
+        <view class="rec-date">{{item.date}}</view>
+        <view class="rec-main">
+          <view class="rec-weight">
+            {{item.weightText}} {{unit}}
+            <text wx:if="{{item.fatText}}" class="rec-fat">· 体脂 {{item.fatText}}%</text>
+          </view>
+          <view wx:if="{{item.note}}" class="rec-note">{{item.note}}</view>
+        </view>
+        <view wx:if="{{item.deltaText}}" class="rec-delta {{item.deltaClass}}">{{item.deltaText}}</view>
+        <view class="rec-del" data-id="{{item._id}}" catchtap="onDeleteTap">删除</view>
+      </view>
+    </view>
+
+    <view class="btn-primary add-btn" bindtap="onAddTap">+ 记录身体数据</view>
+
+    <view class="disclaimer">数据仅用于自我记录，不构成医疗建议</view>
+  </block>
+
+  <!-- 骨架屏就绪前的占位（不画内容，避免闪出空数值） -->
+  <view wx:else class="sk-hold"></view>
+
+  <!-- 新增记录弹层 -->
+  <view wx:if="{{showForm}}" class="mask" bindtap="onCloseForm">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">记录身体数据</view>
+        <view class="sheet-close" bindtap="onCloseForm">×</view>
+      </view>
+
+      <view class="field">
+        <text class="field-label">日期</text>
+        <picker mode="date" value="{{fDate}}" start="2020-01-01" end="{{maxDate}}" bindchange="onDateChange">
+          <view class="field-input">{{fDate}}</view>
+        </picker>
+      </view>
+
+      <view class="field field-col">
+        <text class="field-label">体重 ({{unit}})</text>
+        <view class="field-main">
+          <input
+            class="field-input"
+            type="digit"
+            value="{{fWeight}}"
+            placeholder="{{weightPh}}"
+            placeholder-class="field-ph"
+            bindinput="onInputWeight"
+          />
+          <text class="field-hint">取值范围 {{weightHint}}</text>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="field-label">体脂率 (%)</text>
+        <input
+          class="field-input"
+          type="digit"
+          value="{{fFat}}"
+          placeholder="选填，如 18.5"
+          placeholder-class="field-ph"
+          bindinput="onInputFat"
+        />
+      </view>
+
+      <view class="field">
+        <text class="field-label">备注</text>
+        <input
+          class="field-input"
+          value="{{fNote}}"
+          placeholder="选填，最多 50 字"
+          placeholder-class="field-ph"
+          bindinput="onInputNote"
+        />
+      </view>
+
+      <view class="btn-primary {{saving ? 'disabled' : ''}}" bindtap="onSave">
+        {{saving ? '保存中…' : '保存'}}
+      </view>
+      <view class="sheet-tip">同一天重复记录会自动覆盖</view>
+    </view>
+  </view>
+</view>

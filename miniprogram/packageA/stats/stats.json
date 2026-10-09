@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "skeleton": "../../components/skeleton/skeleton"
+  },
+  "navigationBarTitleText": "数据看板",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

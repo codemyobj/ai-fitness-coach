@@ -1,0 +1,187 @@
+<!--packageA/stats/stats.wxml — 数据看板 -->
+<view class="page">
+
+  <!-- 首屏骨架屏：延迟 180ms 才出现，30s 聚合缓存命中时不闪 -->
+  <skeleton wx:if="{{skVisible}}" variant="stats" />
+
+  <!-- 失败：显示原因 + 重试 -->
+  <view wx:elif="{{loadError}}" class="err-card">
+    <view class="err-title">⚠️ 看板加载失败</view>
+    <view class="err-msg">{{loadError}}</view>
+    <view class="btn-primary" bindtap="retry">重新加载</view>
+  </view>
+
+  <!-- 有数据才渲染内容：这样下拉刷新时旧内容留在屏上，不会闪空白 -->
+  <block wx:elif="{{overview}}">
+
+    <!-- 1. 累计概览 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">累计数据</text>
+      </view>
+      <view class="ov-grid">
+        <view class="ov-item">
+          <view class="ov-value">{{overview.totalCheckins}}</view>
+          <view class="ov-label">累计打卡</view>
+        </view>
+        <view class="ov-item highlight">
+          <view class="ov-value">{{overview.streak}}</view>
+          <view class="ov-label">连续天数</view>
+        </view>
+        <view class="ov-item">
+          <view class="ov-value">{{overview.monthCount}}</view>
+          <view class="ov-label">本月次数</view>
+        </view>
+        <view class="ov-item">
+          <view class="ov-value">{{overview.totalMin}}</view>
+          <view class="ov-label">累计分钟</view>
+        </view>
+      </view>
+
+      <view class="ov-sub">
+        完成 {{overview.totalSets}} 组
+        <text wx:if="{{overview.totalVolume > 0}}"> · 总容量 {{volumeText}}</text>
+        <text wx:if="{{overview.avgMin > 0}}"> · 平均每次 {{overview.avgMin}} 分钟</text>
+      </view>
+    </view>
+
+    <!-- 2. 近 8 周趋势 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">近 8 周打卡</text>
+        <text class="card-stat">最高 {{trend.maxCount}} 次/周</text>
+      </view>
+      <view class="chart">
+        <view wx:for="{{trend.weeks}}" wx:key="start" class="bar-col">
+          <view class="bar-wrap">
+            <view
+              class="bar {{item.count > 0 ? '' : 'bar-zero'}}"
+              style="height: {{item.count / trend.maxCount * 100}}%;"
+            ></view>
+          </view>
+          <view class="bar-count">{{item.count}}</view>
+          <view class="bar-label">{{item.label}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 3. 打卡热力图 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">打卡热力图</text>
+        <text class="card-stat">近 {{heat.weekCount}} 周 {{heat.activeDays}} 天</text>
+      </view>
+
+      <view class="hm">
+        <!-- 左侧星期标签（只标 一/三/五/日，避免拥挤） -->
+        <view class="hm-side">
+          <view wx:for="{{heatWeekLabels}}" wx:key="index" class="hm-side-cell">{{item}}</view>
+        </view>
+
+        <view class="hm-main">
+          <!-- 月份标签（与列对齐） -->
+          <view class="hm-months">
+            <view wx:for="{{heat.monthRow}}" wx:key="index" class="hm-month">{{item}}</view>
+          </view>
+
+          <!-- 色块矩阵：一列 = 一周 -->
+          <view class="hm-cols">
+            <view
+              wx:for="{{heat.weeks}}"
+              wx:for-item="col"
+              wx:key="id"
+              class="hm-col"
+            >
+              <view
+                wx:for="{{col.cells}}"
+                wx:for-item="cell"
+                wx:key="date"
+                class="hm-cell hm-l{{cell.level}} {{cell.isToday ? 'hm-today' : ''}} {{cell.future ? 'hm-future' : ''}} {{heatSel === cell.date ? 'hm-sel' : ''}}"
+                data-date="{{cell.date}}"
+                data-future="{{cell.future}}"
+                bindtap="onTapHeatCell"
+              ></view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="hm-foot">
+        <view class="hm-tip">{{heatTip}}</view>
+        <view class="hm-legend">
+          <text class="hm-legend-text">少</text>
+          <view class="hm-cell hm-l0"></view>
+          <view class="hm-cell hm-l1"></view>
+          <view class="hm-cell hm-l2"></view>
+          <view class="hm-cell hm-l3"></view>
+          <view class="hm-cell hm-l4"></view>
+          <text class="hm-legend-text">多</text>
+        </view>
+      </view>
+      <view wx:if="{{!heatSel}}" class="hm-hint">轻点色块查看当天训练明细</view>
+      <view wx:else class="hm-hint">{{heat.startLabel}} ~ {{heat.endLabel}}</view>
+    </view>
+
+    <!-- 4. 打卡日历 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">打卡日历</text>
+        <text class="card-stat">{{cal.monthCount}} 次</text>
+      </view>
+
+      <view class="cal-nav">
+        <view class="cal-nav-btn" bindtap="onPrevMonth">‹</view>
+        <view class="cal-title">{{calLabel}}</view>
+        <view class="cal-nav-btn {{canNextMonth ? '' : 'disabled'}}" bindtap="onNextMonth">›</view>
+      </view>
+
+      <view class="cal-head">
+        <view wx:for="{{weekLabels}}" wx:key="*this" class="cal-head-cell">{{item}}</view>
+      </view>
+
+      <view wx:for="{{cal.weeks}}" wx:for-item="week" wx:key="index" class="cal-row">
+        <view
+          wx:for="{{week}}"
+          wx:for-item="cell"
+          wx:key="index"
+          class="cal-cell {{cell && cell.checked ? 'checked' : ''}} {{cell && cell.isToday ? 'today' : ''}}"
+        >
+          <text wx:if="{{cell}}">{{cell.day}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 5. 最近训练 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">最近训练</text>
+      </view>
+
+      <view wx:if="{{!recentLogs.length}}" class="empty-box">
+        <view class="empty-tip">还没有训练记录</view>
+        <view class="empty-sub">完成第一次跟练打卡，这里就会有数据</view>
+        <view class="btn-primary" bindtap="goTrainingTab">去训练</view>
+      </view>
+
+      <view
+        wx:for="{{recentLogs}}"
+        wx:key="_id"
+        class="log-row"
+      >
+        <view class="log-date">{{item.date}}</view>
+        <view class="log-main">
+          <view class="log-focus">{{item.focus}}</view>
+          <view class="log-meta">
+            {{item.durationMin}} 分钟 · {{item.exerciseCount}} 个动作 · {{item.doneSets}} 组
+            <text wx:if="{{item.volume > 0}}"> · {{item.volumeText}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="disclaimer">数据仅用于自我记录，不构成医疗建议</view>
+  </block>
+
+  <!-- 骨架屏就绪前的占位（不画内容，避免闪出空数值） -->
+  <view wx:else class="sk-hold"></view>
+</view>

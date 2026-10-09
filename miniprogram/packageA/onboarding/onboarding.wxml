@@ -1,0 +1,130 @@
+<!--packageA/onboarding/onboarding.wxml — 身体建档向导（5 步） -->
+<view class="page">
+
+  <!-- 步骤指示器 -->
+  <view class="steps">
+    <view
+      wx:for="{{steps}}"
+      wx:key="key"
+      class="step-dot {{stepIndex >= index ? 'done' : ''}}"
+    ></view>
+  </view>
+  <view class="step-title">{{currentStep.title}}</view>
+  <view class="step-sub">{{currentStep.subtitle}}</view>
+
+  <!-- 第 1 步：训练目标 -->
+  <view wx:if="{{stepIndex === 0}}" class="options">
+    <view
+      wx:for="{{goals}}"
+      wx:key="key"
+      class="option {{form.goal === item.key ? 'selected' : ''}}"
+      data-field="goal"
+      data-value="{{item.key}}"
+      bindtap="pickOption"
+    >
+      <text class="option-icon">{{item.icon}}</text>
+      <text class="option-label">{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- 第 2 步：基本信息（性别/年龄/身高/体重） -->
+  <view wx:elif="{{stepIndex === 1}}" class="form">
+    <view class="form-row">
+      <text class="form-label">性别</text>
+      <view class="seg">
+        <view class="seg-item {{form.gender === 'male' ? 'active' : ''}}" data-field="gender" data-value="male" bindtap="pickOption">男</view>
+        <view class="seg-item {{form.gender === 'female' ? 'active' : ''}}" data-field="gender" data-value="female" bindtap="pickOption">女</view>
+      </view>
+    </view>
+    <view class="form-row">
+      <text class="form-label">年龄</text>
+      <input class="form-input" type="number" value="{{form.age}}" data-field="age" bindinput="onFieldInput" placeholder="如 28" />
+      <text class="form-unit">岁</text>
+    </view>
+    <view class="form-row">
+      <text class="form-label">身高</text>
+      <input class="form-input" type="number" value="{{form.heightCm}}" data-field="heightCm" bindinput="onFieldInput" placeholder="如 175" />
+      <text class="form-unit">cm</text>
+    </view>
+    <view class="form-row">
+      <text class="form-label">体重</text>
+      <input class="form-input" type="digit" value="{{form.weightKg}}" data-field="weightKg" bindinput="onFieldInput" placeholder="{{weightPh}}" />
+      <text class="form-unit">{{unit}}</text>
+    </view>
+  </view>
+
+  <!-- 第 3 步：训练经验 -->
+  <view wx:elif="{{stepIndex === 2}}" class="options">
+    <view
+      wx:for="{{levels}}"
+      wx:key="key"
+      class="option {{form.level === item.key ? 'selected' : ''}}"
+      data-field="level"
+      data-value="{{item.key}}"
+      bindtap="pickOption"
+    >
+      <text class="option-icon">{{item.icon}}</text>
+      <view class="option-texts">
+        <text class="option-label">{{item.label}}</text>
+        <text class="option-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第 4 步：器械条件 -->
+  <view wx:elif="{{stepIndex === 3}}" class="options">
+    <view
+      wx:for="{{equipments}}"
+      wx:key="key"
+      class="option {{form.equipment === item.key ? 'selected' : ''}}"
+      data-field="equipment"
+      data-value="{{item.key}}"
+      bindtap="pickOption"
+    >
+      <text class="option-icon">{{item.icon}}</text>
+      <view class="option-texts">
+        <text class="option-label">{{item.label}}</text>
+        <text class="option-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 第 5 步：每周频率 -->
+  <view wx:elif="{{stepIndex === 4}}" class="options days">
+    <view
+      wx:for="{{[1, 2, 3, 4, 5, 6]}}"
+      wx:key="*this"
+      class="day-option {{form.daysPerWeek === item ? 'selected' : ''}}"
+      data-field="daysPerWeek"
+      data-value="{{item}}"
+      bindtap="pickOption"
+    >
+      {{item}}
+      <text class="day-unit">天</text>
+    </view>
+    <view class="day-tip">频率会直接影响计划的强度与分化安排</view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="btn-area safe-area-bottom">
+    <!-- 同意协议：常驻可见。前几步不拦，只在「完成建档」时校验 -->
+    <view class="agree-row {{agreeShake ? 'shake' : ''}}">
+      <view class="agree-box {{agreed ? 'checked' : ''}}" bindtap="onToggleAgree">
+        <text wx:if="{{agreed}}" class="agree-tick">✓</text>
+      </view>
+      <view class="agree-text" bindtap="onToggleAgree">
+        我已阅读并同意
+        <text class="agree-link" data-type="agreement" catchtap="goLegal">《用户协议》</text>
+        和
+        <text class="agree-link" data-type="privacy" catchtap="goLegal">《隐私政策》</text>
+      </view>
+    </view>
+
+    <view class="btn-row">
+      <view wx:if="{{stepIndex > 0}}" class="btn-ghost back" bindtap="prevStep">上一步</view>
+      <view class="btn-primary next {{canNext ? '' : 'disabled'}}" bindtap="nextStep">
+        {{stepIndex === steps.length - 1 ? '完成建档' : '下一步'}}
+      </view>
+    </view>
+  </view>
+</view>

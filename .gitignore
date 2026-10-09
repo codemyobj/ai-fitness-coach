@@ -1,0 +1,30 @@
+# ---------- 依赖 ----------
+node_modules/
+miniprogram_npm/
+
+# ---------- 微信开发者工具本地配置 ----------
+project.private.config.json
+
+# ---------- 第三方素材数据集（授权限制，禁止入仓）----------
+# RepDB 免费档：允许 App 内使用，但禁止将素材作为数据集二次分发
+tools/raw/
+tools/dataset/
+tools/repdb/
+tools/exercises-full.json
+# Gym Visual 旧素材备份：该源声明仅限教学/非商用，不可公开
+tools/_backup-gymvisual/
+tools/_bak-prelicense/
+# 本地生成的中间图（角标表 / 调试图 / 动画帧）
+tools/*.png
+
+# ---------- 后台截图（含账号信息，仅本地留档）----------
+docs/*.jpg
+docs/Snipaste_*.png
+
+# ---------- 误建的空文件 ----------
+对应版本*
+
+# ---------- 系统文件 ----------
+.DS_Store
+Thumbs.db
+*.log

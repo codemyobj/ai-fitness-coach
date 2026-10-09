@@ -1,0 +1,414 @@
+/* components/skeleton/skeleton.wxss — 骨架屏
+   卡片尺寸刻意与 app.wxss 的 .card 对齐（圆角 20rpx / 内边距 32rpx / 左右外边距 32rpx），
+   这样骨架屏换成真实内容时不会出现跳动。 */
+
+.sk-page {
+  padding-bottom: 24rpx;
+}
+
+.sk-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 32rpx;
+  margin: 24rpx 32rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+/* 身体记录页的卡片是「页面内边距 + 只有下边距」，跟随时保持一致 */
+.sk-page.sk-body .sk-card {
+  margin: 0 0 24rpx;
+}
+
+/* 不带白卡外框的区块（深色 hero / 横向胶囊），尺寸与页面里的真实区块一致 */
+.sk-bare {
+  display: block;
+}
+
+/* ---------- 基础灰块 + 微光动画 ---------- */
+.sk {
+  background: #e8eaee;
+  border-radius: 10rpx;
+}
+
+.sh {
+  background-image: linear-gradient(90deg, #e8eaee 25%, #f2f3f6 37%, #e8eaee 63%);
+  background-size: 400% 100%;
+  animation: sk-shine 1.4s ease-in-out infinite;
+}
+
+/* 深色底上的微光（hero 内部），用半透明白叠加而不是灰 */
+.sh-dark {
+  background-color: rgba(255, 255, 255, 0.2);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.14) 25%,
+    rgba(255, 255, 255, 0.32) 37%,
+    rgba(255, 255, 255, 0.14) 63%
+  );
+  background-size: 400% 100%;
+  animation: sk-shine 1.4s ease-in-out infinite;
+}
+
+@keyframes sk-shine {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* ---------- 深色头部（训练计划 / 跟练打卡） ---------- */
+.sk-hero {
+  background: linear-gradient(135deg, #111827 0%, #059669 140%);
+  border-radius: var(--radius-lg);
+  padding: 40rpx 32rpx;
+}
+
+.sk-hero-line {
+  height: 26rpx;
+  border-radius: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.sk-hero-line:last-child {
+  margin-bottom: 0;
+}
+
+.sk-hero-track {
+  height: 16rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.2);
+  margin-top: 26rpx;
+  overflow: hidden;
+}
+
+.sk-hero-track-inner {
+  width: 38%;
+  height: 100%;
+  border-radius: 8rpx;
+}
+
+/* ---------- 卡片标题 ---------- */
+.sk-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26rpx;
+}
+
+.sk-t {
+  height: 28rpx;
+  border-radius: 8rpx;
+}
+
+/* ---------- 文本行 ---------- */
+.sk-lines {
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-line {
+  height: 24rpx;
+  border-radius: 8rpx;
+  margin-bottom: 18rpx;
+}
+
+.sk-lines .sk-line:last-child,
+.sk-row-main .sk-line:last-child {
+  margin-bottom: 0;
+}
+
+.sk-line-sm {
+  width: 76rpx;
+  height: 20rpx;
+  margin-bottom: 0;
+}
+
+/* 浅绿底区块（训练首页「今日安排」的实际底色是 rgba(16,185,129,.1) 渐变） */
+.sk-tint {
+  background: rgba(16, 185, 129, 0.09);
+  border: 1rpx solid rgba(16, 185, 129, 0.22);
+  border-radius: var(--radius-base);
+  padding: 24rpx 28rpx;
+  margin-bottom: 20rpx;
+}
+
+/* ---------- 进度环（本周目标） ---------- */
+.sk-ring-wrap {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0 24rpx;
+}
+
+.sk-ring {
+  width: 132rpx;
+  height: 132rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sk-ring-lines {
+  flex: 1;
+  min-width: 0;
+  margin-left: 28rpx;
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-ring-lines .sk-line:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 四格数据 ---------- */
+.sk-grid {
+  display: flex;
+}
+
+.sk-grid-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sk-num {
+  width: 76rpx;
+  height: 44rpx;
+  border-radius: 10rpx;
+  margin-bottom: 16rpx;
+}
+
+/* ---------- 徽章栅格（成就徽章页）
+   尺寸对齐真实版式：2 列、列间距 16rpx、方块内边距 20rpx、图标 64rpx */
+.sk-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -8rpx;
+}
+
+.sk-tile {
+  width: calc(50% - 16rpx);
+  margin: 8rpx;
+  padding: 20rpx;
+  background: #f7f8fa;
+  border-radius: var(--radius-base);
+  box-sizing: border-box;
+}
+
+.sk-tile-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  margin-bottom: 18rpx;
+}
+
+.sk-tile .sk-line {
+  margin-bottom: 12rpx;
+}
+
+.sk-tile .sk-line:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 柱状图 ---------- */
+.sk-chart {
+  display: flex;
+  align-items: flex-end;
+  height: 240rpx;
+}
+
+.sk-bar-col {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.sk-bar {
+  width: 26rpx;
+  min-height: 16rpx;
+  border-radius: 8rpx 8rpx 0 0;
+}
+
+/* ---------- 热力图 ---------- */
+.sk-heat {
+  display: flex;
+}
+
+.sk-heat-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-cell {
+  height: 22rpx;
+  margin: 2rpx;
+  border-radius: 4rpx;
+}
+
+/* ---------- 日历 ---------- */
+.sk-cal {
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-cal-row {
+  display: flex;
+}
+
+.sk-cal-cell {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx 0;
+}
+
+.sk-sq {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 10rpx;
+}
+
+/* ---------- 列表行 ---------- */
+.sk-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.sk-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0;
+}
+
+.sk-row + .sk-row,
+.sk-kv-row + .sk-kv-row {
+  border-top: 2rpx solid #f1f2f4;
+}
+
+.sk-thumb {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--radius-base);
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.sk-lead {
+  flex-shrink: 0;
+  margin: 0 20rpx 0 0;
+}
+
+.sk-row-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sk-row-main .sk-line {
+  margin-bottom: 16rpx;
+}
+
+/* ---------- 键值行 ---------- */
+.sk-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 0;
+}
+
+.sk-kv-row .sk-line {
+  margin-bottom: 0;
+}
+
+/* ---------- 周打卡圆点 ---------- */
+.sk-dots {
+  display: flex;
+  padding: 4rpx 0 20rpx;
+}
+
+.sk-dot-item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.sk-dot {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+}
+
+/* ---------- 工具入口 ---------- */
+.sk-tools {
+  display: flex;
+}
+
+.sk-tool {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sk-icon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  margin-bottom: 16rpx;
+}
+
+/* ---------- 横向标签条 ---------- */
+.sk-tabs {
+  display: flex;
+}
+
+/* 计划页的周切换：横向胶囊，间距跟随 .week-tabs 的 margin-top: 32rpx */
+.sk-bare .sk-tabs {
+  margin-top: 32rpx;
+}
+
+.sk-pill {
+  width: 140rpx;
+  height: 96rpx;
+  border-radius: var(--radius-base);
+  margin-right: 16rpx;
+}
+
+/* ---------- 组数输入块 ---------- */
+.sk-sets {
+  display: flex;
+  margin-top: 8rpx;
+}
+
+.sk-chip {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: var(--radius-base);
+  margin-right: 16rpx;
+}
+
+/* ---------- 按钮 / 进度条 ---------- */
+.sk-btn {
+  height: 76rpx;
+  border-radius: 48rpx;
+  flex: 1;
+}
+
+.sk-btns {
+  display: flex;
+  margin-top: 26rpx;
+}
+
+.sk-btns .sk-btn + .sk-btn {
+  margin-left: 20rpx;
+}
+
+.sk-btn-full {
+  margin-top: 26rpx;
+}
+
+.sk-progress {
+  height: 16rpx;
+  border-radius: 8rpx;
+  margin-bottom: 22rpx;
+}

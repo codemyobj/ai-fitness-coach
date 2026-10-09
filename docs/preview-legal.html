@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>用户协议与隐私政策 · 视觉预览</title>
+<style>
+  /* 本文件由 tools/gen-legal-preview.js 生成，请勿手改 —— 改 content/legal.js 后重跑脚本 */
+  :root {
+    --color-primary: #10b981;
+    --color-primary-dark: #059669;
+    --color-accent: #f59e0b;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-card: #ffffff;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text); }
+  h1.pagetitle { text-align: center; font-size: 18px; margin: 0 0 6px; }
+  .pagesub { text-align: center; font-size: 12px; color: #6b7280; margin-bottom: 26px; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; align-items: flex-start; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 22px; overflow: hidden;
+    box-shadow: 0 10px 32px rgba(0,0,0,.14); position: relative; flex: 0 0 auto; }
+  .statusbar { height: 20px; background: #111827; }
+  .navbar { height: 40px; background: #111827; color: #fff; display: flex; align-items: center;
+    justify-content: center; font-size: 15px; font-weight: 600; }
+  .screen { height: 640px; overflow: hidden; position: relative; }
+  .screen.scroll { overflow-y: auto; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; max-width: 375px; }
+
+  /* ---------- 协议页 ---------- */
+  .page { min-height: 100%; padding: 12px 0 40px; }
+  .doc-head { padding: 4px 16px 12px; }
+  .doc-title { font-size: 20px; font-weight: 700; line-height: 1.3; }
+  .doc-meta { margin-top: 6px; font-size: 12px; color: var(--color-text-light); }
+  .doc-summary { margin-top: 10px; font-size: 12px; color: var(--color-text-secondary); line-height: 1.7; }
+  .doc-tabs { display: flex; margin: 0 16px 12px; background: #e9ebef;
+    border-radius: var(--radius-base); padding: 3px; }
+  .doc-tab { flex: 1; text-align: center; font-size: 14px; color: var(--color-text-secondary);
+    padding: 7px 0; border-radius: 4px; }
+  .doc-tab.active { background: var(--color-card); color: var(--color-primary-dark); font-weight: 600;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .sec-card { background: #fff; border-radius: var(--radius-lg); margin: 0 16px 12px;
+    padding: 14px 16px; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .sec-h { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .sec-p { font-size: 12px; color: var(--color-text-secondary); line-height: 1.8; margin-bottom: 6px; }
+  .sec-p:last-child { margin-bottom: 0; }
+  .tbl { margin-top: 10px; border-top: 1px solid var(--color-border); }
+  .tbl-row { padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+  .tbl-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .tbl-top { display: flex; align-items: center; margin-bottom: 5px; }
+  .tbl-name { flex: 1; font-size: 14px; font-weight: 600; }
+  .tbl-tag { font-size: 10px; padding: 1px 6px; border-radius: 999px; margin-left: 6px; }
+  .tbl-tag.req { color: #b91c1c; background: #fee2e2; }
+  .tbl-tag.opt { color: var(--color-text-secondary); background: #f3f4f6; }
+  .tbl-line { display: flex; font-size: 12px; line-height: 1.7; margin-top: 3px; }
+  .tbl-k { width: 38px; flex-shrink: 0; color: var(--color-text-light); }
+  .tbl-v { flex: 1; color: var(--color-text-secondary); }
+  .doc-foot { padding: 8px 16px 0; text-align: center; }
+  .foot-line { font-size: 12px; color: var(--color-text-light); line-height: 20px; }
+  .agree-bar { position: absolute; left: 0; right: 0; bottom: 0; padding: 10px 16px;
+    background: #fff; border-top: 1px solid var(--color-border); box-shadow: 0 -1px 8px rgba(0,0,0,.05); }
+  .agree-tip { text-align: center; font-size: 12px; color: var(--color-primary-dark); margin-bottom: 6px; }
+  .btn-primary { background: var(--color-primary); color: #fff; text-align: center; font-size: 15px;
+    font-weight: 600; padding: 12px 0; border-radius: var(--radius-base); }
+
+  /* ---------- 建档页底部同意条 ---------- */
+  .onboard-body { padding: 20px 16px 0; }
+  .step-title { font-size: 18px; font-weight: 700; }
+  .step-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 5px; }
+  .day-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+  .day-option { width: 70px; height: 48px; border-radius: var(--radius-base);
+    border: 1px solid var(--color-border); background: #fff; display: flex; align-items: center;
+    justify-content: center; font-size: 15px; font-weight: 600; }
+  .day-option.selected { border-color: var(--color-primary); background: #ecfdf5; color: var(--color-primary-dark); }
+  .day-unit { font-size: 11px; margin-left: 2px; font-weight: 400; }
+  .btn-area { position: absolute; left: 0; right: 0; bottom: 0; padding: 20px 16px;
+    background: #fff; border-top: 1px solid var(--color-border); }
+  .agree-row { display: flex; align-items: flex-start; margin-bottom: 16px; }
+  .agree-row.shake { animation: agree-shake .45s ease-in-out; }
+  @keyframes agree-shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+  .agree-box { width: 18px; height: 18px; flex-shrink: 0; margin: 1px 8px 0 0;
+    border: 1px solid var(--color-border); border-radius: 4px; background: #fff;
+    display: flex; align-items: center; justify-content: center; }
+  .agree-box.checked { background: var(--color-primary); border-color: var(--color-primary); }
+  .agree-tick { color: #fff; font-size: 12px; font-weight: 700; line-height: 1; }
+  .agree-text { flex: 1; font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; }
+  .agree-link { color: var(--color-primary-dark); }
+  .btn-row { display: flex; gap: 12px; }
+  .btn-ghost { border: 1px solid var(--color-border); color: var(--color-text-secondary); text-align: center;
+    font-size: 15px; padding: 12px 0; border-radius: var(--radius-base); background: #fff; }
+  .btn-ghost.back { width: 100px; }
+  .btn-primary.next { flex: 1; }
+  .toast { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.78); color: #fff; font-size: 13px; padding: 12px 18px; border-radius: 8px;
+    max-width: 260px; text-align: center; line-height: 1.5; }
+  .state-tag { position: absolute; top: 8px; right: 10px; background: rgba(0,0,0,.6); color: #fff;
+    font-size: 11px; padding: 3px 9px; border-radius: 999px; }
+  .stat { display: flex; justify-content: center; gap: 18px; font-size: 12px; color: #6b7280;
+    margin-bottom: 22px; flex-wrap: wrap; }
+  .stat b { color: #10b981; }
+</style>
+</head>
+<body>
+  <h1 class="pagetitle">用户协议与隐私政策 · 视觉预览</h1>
+  <div class="pagesub">由 tools/gen-legal-preview.js 从 content/legal.js 真实正文生成 · v1.1 · 生效 2026-10-08</div>
+  <div class="stat">
+    <span>用户协议 <b>10</b> 节</span>
+    <span>隐私政策 <b>10</b> 节</span>
+    <span>收集清单 <b>7</b> 项（必需 3）</span>
+  </div>
+
+  <div class="wrap">
+    <div>
+      <div class="phone">
+        <div class="statusbar"></div>
+        <div class="navbar">用户协议</div>
+        <div class="screen scroll"><div class="page">
+    <div class="doc-head">
+      <div class="doc-title">用户协议</div>
+      <div class="doc-meta">版本 v1.1 · 生效日期 2026-10-08 · 更新于 2026-10-08</div>
+      <div class="doc-summary">本协议是你与轻练打卡健身之间就使用本小程序服务达成的约定。开始使用前请完整阅读，尤其是加粗的健康与安全提示。</div>
+    </div>
+    <div class="doc-tabs">
+      <div class="doc-tab active">用户协议</div><div class="doc-tab ">隐私政策</div>
+    </div>
+    <div class="sec-card"><div class="sec-h">一、服务说明与协议接受</div><div class="sec-p">1.1 轻练打卡健身（以下简称「本小程序」）是一款由个人开发者独立开发并运营的健身训练记录与指导工具，为你提供运动档案建立、训练计划生成、动作示范、训练打卡与数据统计等功能。</div><div class="sec-p">1.2 你开始使用本小程序，或在建档流程中勾选同意本协议，即表示你已阅读、理解并同意本协议全部内容。若你不同意，请停止使用。</div><div class="sec-p">1.3 若你未满 18 周岁，请在监护人陪同下阅读本协议，并在取得监护人同意后使用。</div></div><div class="sec-card"><div class="sec-h">二、账号与登录</div><div class="sec-p">2.1 本小程序通过微信授权静默登录，无需单独注册账号，也不会获取你的手机号。</div><div class="sec-p">2.2 你的训练进度、训练计划等数据与微信账号绑定。删除或更换微信账号将无法继续访问原数据。</div><div class="sec-p">2.3 请勿将账号交由他人使用。因账号被他人使用产生的后果由你自行承担。</div></div><div class="sec-card"><div class="sec-h">三、你的行为规范</div><div class="sec-p">3.1 你承诺不利用本小程序从事任何违反法律法规、公序良俗的行为。</div><div class="sec-p">3.2 你不得使用自动化脚本、批量工具等方式异常访问或抓取本小程序的数据与内容，不得对服务进行反向工程、攻击或干扰。</div><div class="sec-p">3.3 你填写或记录的内容由你负责，不得包含违法违规、侵权或他人的隐私信息。</div></div><div class="sec-card"><div class="sec-h">四、健康与安全提示（请务必阅读）</div><div class="sec-p">4.1 本小程序提供的训练计划、动作示范与数据统计均属一般健身参考信息，不构成医疗建议、诊断或治疗方案。</div><div class="sec-p">4.2 开始任何训练计划前，建议你先咨询医生或专业教练，尤其是存在心血管疾病、关节损伤、孕期或其他病史的情况。</div><div class="sec-p">4.3 训练过程中请根据自身感受调整强度。若出现疼痛、眩晕、胸闷、呼吸急促等不适，请立即停止训练并及时就医。</div><div class="sec-p">4.4 你应在安全的环境中使用合适的器械进行训练。因未按动作要点训练、未评估自身健康状况或擅自增加强度而造成的身体损伤，责任由你自行承担。</div></div><div class="sec-card"><div class="sec-h">五、训练计划的性质与使用建议</div><div class="sec-p">5.1 训练计划由本小程序依据你填写的档案，通过开发者预设的确定性规则自动编排生成（动作池按可用器械筛选、按训练目标安排分化、按周推进容量与强度），不涉及人工智能生成合成技术；计划内容仍可能存在不适合你个人情况的部分。</div><div class="sec-p">5.2 你应结合自身实际情况判断计划是否合适，并可在训练过程中自行调整组数、次数与重量。</div><div class="sec-p">5.3 训练计划与训练建议仅供参考，不代表开发者对训练效果作出任何承诺或保证。</div></div><div class="sec-card"><div class="sec-h">六、知识产权与第三方素材</div><div class="sec-p">6.1 本小程序的界面设计、程序代码、文案内容的知识产权归开发者所有。</div><div class="sec-p">6.2 动作数据与示范图片来源于第三方素材提供方 RepDB（repdb.co），按其免费档许可证使用，并在「我的」页保留了必要署名。相关权利归原权利人所有。</div><div class="sec-p">6.3 未经书面许可，你不得复制、传播、出售本小程序的任何内容或将其用于商业用途。</div></div><div class="sec-card"><div class="sec-h">七、服务变更、中断与终止</div><div class="sec-p">7.1 开发者可能因版本迭代、系统维护、微信平台规则调整或不可抗力等原因，变更、暂停或终止部分或全部服务。</div><div class="sec-p">7.2 本小程序目前为免费服务，开发者保留在未来调整功能范围或引入付费内容的权利。若涉及收费，将提前以显著方式告知。</div><div class="sec-p">7.3 若你严重违反本协议，开发者有权限制或终止向你提供服务。</div></div><div class="sec-card"><div class="sec-h">八、免责声明与责任限制</div><div class="sec-p">8.1 本小程序按「现状」提供。开发者将尽合理努力保障服务可用与数据准确，但不保证服务不会中断、不出错，也不保证数据不会因不可抗力、平台故障或你的误操作而丢失。</div><div class="sec-p">8.2 在法律允许的最大范围内，开发者不对因使用或无法使用本小程序而产生的间接损失、数据丢失或身体损伤承担责任。</div><div class="sec-p">8.3 你理解并同意，运动本身存在固有风险，你需对自身的训练决策与身体状况负责。</div></div><div class="sec-card"><div class="sec-h">九、协议的更新</div><div class="sec-p">9.1 本协议可能随功能迭代而更新。更新后本小程序会重新提示你阅读并确认，你可在本页随时查看最新版本与生效日期。</div><div class="sec-p">9.2 若你在协议更新后继续使用本小程序，视为你接受更新后的协议。</div></div><div class="sec-card"><div class="sec-h">十、联系我们</div><div class="sec-p">10.1 如你对本协议有任何疑问、意见或投诉，可通过以下方式联系开发者：GitHub：github.com/codemyobj。</div><div class="sec-p">10.2 我们会在收到你的反馈后尽快处理。</div></div>
+    <div class="doc-foot">
+      <div class="foot-line">用户协议 v1.1</div>
+      <div class="foot-line">生效日期 2026-10-08 · 更新于 2026-10-08</div>
+    </div></div></div>
+      </div>
+      <div class="cap">① 用户协议：标题 + 版本/生效日期 + 两份文档切换标签 + 分节正文（可滚动查看全部 10 节）</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="statusbar"></div>
+        <div class="navbar">隐私政策</div>
+        <div class="screen scroll"><div class="page">
+    <div class="doc-head">
+      <div class="doc-title">隐私政策</div>
+      <div class="doc-meta">版本 v1.1 · 生效日期 2026-10-08 · 更新于 2026-10-08</div>
+      <div class="doc-summary">本政策说明轻练打卡健身会收集哪些信息、为什么收集、如何存储与保护，以及你对自己的信息拥有哪些权利。</div>
+    </div>
+    <div class="doc-tabs">
+      <div class="doc-tab ">用户协议</div><div class="doc-tab active">隐私政策</div>
+    </div>
+    <div class="sec-card"><div class="sec-h">一、引言与适用范围</div><div class="sec-p">1.1 本政策适用于轻练打卡健身小程序。我们深知个人信息对你的重要性，并会按照《中华人民共和国个人信息保护法》《中华人民共和国网络安全法》等法律法规的要求处理你的个人信息。</div><div class="sec-p">1.2 本政策仅适用于本小程序。若你通过本小程序跳转到第三方服务，请另行阅读该第三方的隐私政策。</div><div class="sec-p">1.3 你开始使用本小程序，即表示你已同意我们按照本政策处理你的个人信息。你可以在「我的 → 清空训练数据」中删除已产生的数据，或通过关闭订阅提醒、不再授权等方式撤回同意。</div></div><div class="sec-card"><div class="sec-h">二、我们收集哪些信息</div><div class="sec-p">我们遵循「最小必要」原则，只收集实现功能所必需的信息。下表列出了全部收集项，其中标注为「必需」的信息是提供核心功能所必需的，拒绝提供将无法使用对应功能；标注为「可选」的信息仅在你主动提供时才会收集，你可以随时不提供或撤回。</div><div class="sec-p">除下表列出的信息外，本小程序不会收集你的手机号、通讯录、位置、相册、麦克风、剪贴板或设备标识等任何其他个人信息。</div><div class="tbl">
+        <div class="tbl-row">
+          <div class="tbl-top">
+            <span class="tbl-name">微信标识（OpenID）</span>
+            <span class="tbl-tag req">必需</span>
+          </div>
+          <div class="tbl-line"><span class="tbl-k">内容</span><span class="tbl-v">微信登录返回的用户唯一标识，不含昵称、头像、手机号</span></div>
+          <div class="tbl-line"><span class="tbl-k">用途</span><span class="tbl-v">识别你的账号，把你的训练数据与账号关联</span></div>
+        </div>
+        <div class="tbl-row">
+          <div class="tbl-top">
+            <span class="tbl-name">身体档案</span>
+            <span class="tbl-tag req">必需</span>
+          </div>
+          <div class="tbl-line"><span class="tbl-k">内容</span><span class="tbl-v">性别、年龄、身高、体重、训练目标、训练经验、可用器械、每周训练天数</span></div>
+          <div class="tbl-line"><span class="tbl-k">用途</span><span class="tbl-v">计算训练强度、生成个性化训练计划</span></div>
+        </div>
+        <div class="tbl-row">
+          <div class="tbl-top">
+            <span class="tbl-name">训练记录</span>
+            <span class="tbl-tag req">必需</span>
+          </div>
+          <div class="tbl-line"><span class="tbl-k">内容</span><span class="tbl-v">打卡日期、训练时长、完成动作、组数、次数、重量，以及由此估算的消耗</span></div>
+          <div class="tbl-line"><span class="tbl-k">用途</span><span class="tbl-v">生成数据看板、连续打卡统计与周目标进度</span></div>
+        </div>
+        <div class="tbl-row">
+          <div class="tbl-top">
+            <span class="tbl-name">身体记录</span>
+            <span class="tbl-tag opt">可选</span>
+          </div>
+          <div class="tbl-line"><span class="tbl-k">内容</span><span class="tbl-v">记录日期、体重、体脂率、备注</span></div>
+          <div class="tbl-line"><span class="tbl-k">用途</span><span class="tbl-v">记录并展示你的身体变化趋势</span></div>
+        </div>
+        <div class="tbl-row">
+          <div class="tbl-top">
+            <span class="tbl-name">头像与昵称</span>
+            <span class="tbl-tag opt">可选</span>
+          </div>
+          <div class="tbl-line"><span class="tbl-k">内容</span><span class="tbl-v">你主动选择的微信头像、填写的昵称</span></div>
+          <div class="tbl-line"><span class="tbl-k">用途</span><span class="tbl-v">仅在「我的」页展示，仅你本人可见</span></div>
+        </div>
+        <div class="tbl-row">
+          <div class="tbl-top">
+            <span class="tbl-name">订阅消息授权</span>
+            <span class="tbl-tag opt">可选</span>
+          </div>
+          <div class="tbl-line"><span class="tbl-k">内容</span><span class="tbl-v">你授权的订阅消息额度（每次授权对应一条提醒）</span></div>
+          <div class="tbl-line"><span class="tbl-k">用途</span><span class="tbl-v">在你设定的时间发送训练提醒</span></div>
+        </div>
+        <div class="tbl-row">
+          <div class="tbl-top">
+            <span class="tbl-name">本地设置数据</span>
+            <span class="tbl-tag opt">可选</span>
+          </div>
+          <div class="tbl-line"><span class="tbl-k">内容</span><span class="tbl-v">重量单位、组间休息时长、动作收藏、协议同意记录</span></div>
+          <div class="tbl-line"><span class="tbl-k">用途</span><span class="tbl-v">记住你的使用偏好</span></div>
+        </div></div></div><div class="sec-card"><div class="sec-h">三、我们如何使用这些信息</div><div class="sec-p">3.1 用于向你提供核心功能：按你的档案编排训练计划、展示动作示范、记录训练打卡、统计训练数据与身体变化趋势。</div><div class="sec-p">3.2 用于改善使用体验：记住你的单位偏好、组间休息时长与动作收藏。</div><div class="sec-p">3.3 用于向你发送训练提醒：仅在你主动授权订阅消息后，按你设定的时间发送。</div><div class="sec-p">3.4 我们不会将你的个人信息用于广告推送、用户画像或与上述目的无关的任何用途。</div></div><div class="sec-card"><div class="sec-h">四、信息的存储与安全</div><div class="sec-p">4.1 存储位置：你的档案、训练记录与身体记录保存在微信云开发（腾讯云）为开发者提供的云数据库中，服务器位于中国境内。你的偏好设置与协议同意记录保存在你自己的手机本地。</div><div class="sec-p">4.2 传输安全：数据通过微信提供的加密通道传输。</div><div class="sec-p">4.3 访问控制：云数据库按用户维度隔离，你只能读写自己的数据，其他用户无法访问。</div><div class="sec-p">4.4 保存期限：在你使用本小程序期间持续保存。你可以随时通过「我的 → 清空训练数据」删除训练打卡、身体记录与训练计划；清除后不可恢复。</div><div class="sec-p">4.5 需要说明的是，运动档案与身体记录属于个人健康相关信息，属于敏感个人信息范畴。请你确认在知情的前提下自愿提供。</div></div><div class="sec-card"><div class="sec-h">五、信息的共享、转让与公开披露</div><div class="sec-p">5.1 我们不会出售你的个人信息，也不会与任何第三方共享，但以下情形除外：</div><div class="sec-p">（1）已取得你的明确同意；</div><div class="sec-p">（2）根据法律法规、司法或行政机关的强制性要求必须提供；</div><div class="sec-p">（3）为维护公共利益或你本人的人身、财产安全所必需。</div><div class="sec-p">5.2 本小程序不会将你的个人信息用于任何用户间的展示、排行或社交功能，你的数据仅你本人可见。</div></div><div class="sec-card"><div class="sec-h">六、第三方服务</div><div class="sec-p">6.1 微信云开发：用于数据存储，由腾讯公司提供，遵循微信相关的隐私保护规则。</div><div class="sec-p">6.2 微信订阅消息：用于发送训练提醒，仅在你主动授权后生效。</div><div class="sec-p">6.3 动作数据与示范图片：来自素材提供方 RepDB（repdb.co），该素材不含任何用户个人信息。</div><div class="sec-p">6.4 本小程序未接入任何第三方广告、统计或数据分析 SDK。</div></div><div class="sec-card"><div class="sec-h">七、你的权利</div><div class="sec-p">7.1 查询与更正：你可在「我的 → 编辑身体档案」中查看并修改全部档案信息。</div><div class="sec-p">7.2 删除：你可在「我的 → 清空训练数据」中一次性删除云端的训练打卡、身体记录与训练计划。</div><div class="sec-p">7.3 撤回同意：你可随时在「我的 → 训练提醒」中关闭提醒，或在头像昵称编辑弹层中恢复默认头像，以撤回对应授权。</div><div class="sec-p">7.4 注销：如你希望删除全部数据并停止使用，可先清空训练数据，再移除本小程序，并通过本政策「十、联系我们」中的方式告知我们。</div><div class="sec-p">7.5 投诉与举报：若你认为我们处理个人信息的行为侵害了你的合法权益，可通过本政策「十、联系我们」中的方式反馈，我们会在收到后尽快处理。</div></div><div class="sec-card"><div class="sec-h">八、未成年人保护</div><div class="sec-p">8.1 本小程序主要面向成年人。若你未满 18 周岁，请在监护人指导下使用，并由监护人代为阅读并同意本政策。</div><div class="sec-p">8.2 若我们发现在未事先取得监护人同意的情况下收集了未成年人的个人信息，会尽快予以删除。</div></div><div class="sec-card"><div class="sec-h">九、政策的更新</div><div class="sec-p">9.1 当收集范围、使用目的或存储方式发生实质变化时，我们会更新本政策并提升版本号，同时在本小程序内重新提示你阅读确认。</div><div class="sec-p">9.2 本政策的版本号与生效日期展示在本页顶部，你可以随时查阅。</div></div><div class="sec-card"><div class="sec-h">十、联系我们</div><div class="sec-p">10.1 如你对本政策或你的个人信息有任何疑问、意见或投诉，可通过以下方式联系开发者：GitHub：github.com/codemyobj。</div><div class="sec-p">10.2 一般情况下，我们会在收到你的反馈后尽快答复处理。</div></div>
+    <div class="doc-foot">
+      <div class="foot-line">隐私政策 v1.1</div>
+      <div class="foot-line">生效日期 2026-10-08 · 更新于 2026-10-08</div>
+    </div></div></div>
+      </div>
+      <div class="cap">② 隐私政策：第二节内嵌「我们收集哪些信息」清单表格，必需项红标 / 可选项灰标</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="statusbar"></div>
+        <div class="navbar">个人档案</div>
+        <div class="screen">
+          <span class="state-tag">未勾选</span>
+          <div class="onboard-body">
+            <div class="step-title">每周打算练几天？</div>
+            <div class="step-sub">决定计划分化与恢复安排</div>
+            <div class="day-grid">
+              <div class="day-option">1<span class="day-unit">天</span></div>
+              <div class="day-option">2<span class="day-unit">天</span></div>
+              <div class="day-option selected">3<span class="day-unit">天</span></div>
+              <div class="day-option">4<span class="day-unit">天</span></div>
+              <div class="day-option">5<span class="day-unit">天</span></div>
+              <div class="day-option">6<span class="day-unit">天</span></div>
+            </div>
+          </div>
+          <div class="toast">请先阅读并同意《用户协议》和《隐私政策》</div>
+          
+    <div class="btn-area">
+      <div class="agree-row shake">
+        <div class="agree-box "></div>
+        <div class="agree-text">我已阅读并同意
+          <span class="agree-link">《用户协议》</span>和<span class="agree-link">《隐私政策》</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <div class="btn-ghost back">上一步</div>
+        <div class="btn-primary next">完成建档</div>
+      </div>
+    </div>
+        </div>
+      </div>
+      <div class="cap">③ 建档最后一步：未勾选时点「完成建档」被拦下 —— 勾选框抖动 + toast 说明原因</div>
+    </div>
+
+    <div>
+      <div class="phone">
+        <div class="statusbar"></div>
+        <div class="navbar">个人档案</div>
+        <div class="screen">
+          <span class="state-tag">已勾选</span>
+          <div class="onboard-body">
+            <div class="step-title">每周打算练几天？</div>
+            <div class="step-sub">决定计划分化与恢复安排</div>
+            <div class="day-grid">
+              <div class="day-option">1<span class="day-unit">天</span></div>
+              <div class="day-option">2<span class="day-unit">天</span></div>
+              <div class="day-option selected">3<span class="day-unit">天</span></div>
+              <div class="day-option">4<span class="day-unit">天</span></div>
+              <div class="day-option">5<span class="day-unit">天</span></div>
+              <div class="day-option">6<span class="day-unit">天</span></div>
+            </div>
+          </div>
+          
+    <div class="btn-area">
+      <div class="agree-row ">
+        <div class="agree-box checked"><span class="agree-tick">✓</span></div>
+        <div class="agree-text">我已阅读并同意
+          <span class="agree-link">《用户协议》</span>和<span class="agree-link">《隐私政策》</span>
+        </div>
+      </div>
+      <div class="btn-row">
+        <div class="btn-ghost back">上一步</div>
+        <div class="btn-primary next">完成建档</div>
+      </div>
+    </div>
+        </div>
+      </div>
+      <div class="cap">④ 勾选后放行建档；写库前还有一次服务端校验兜底。取消勾选即撤回同意记录</div>
+    </div>
+  </div>
+</body>
+</html>

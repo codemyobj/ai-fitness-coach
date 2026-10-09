@@ -1,0 +1,283 @@
+/* packageA/badges/badges.wxss — 成就徽章 */
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: 0 0 60rpx;
+  box-sizing: border-box;
+}
+
+/* ---------- 顶部进度概览 ---------- */
+.hero {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 135%);
+  padding: 40rpx 32rpx 44rpx;
+  color: #ffffff;
+}
+.hero-row {
+  display: flex;
+  align-items: center;
+}
+.hero-main {
+  flex: 1;
+}
+.hero-num {
+  font-size: 64rpx;
+  font-weight: 700;
+  line-height: 1.1;
+}
+.hero-total {
+  font-size: 28rpx;
+  font-weight: 400;
+  opacity: 0.65;
+  margin-left: 8rpx;
+}
+.hero-label {
+  font-size: var(--font-size-sm);
+  opacity: 0.75;
+  margin-top: 8rpx;
+}
+.hero-badge {
+  font-size: 64rpx;
+  opacity: 0.9;
+}
+.hero-track {
+  height: 12rpx;
+  border-radius: 8rpx;
+  background: rgba(255, 255, 255, 0.2);
+  margin-top: 28rpx;
+  overflow: hidden;
+}
+.hero-fill {
+  height: 100%;
+  border-radius: 8rpx;
+  background: linear-gradient(90deg, #34d399, #10b981);
+  transition: width 0.3s;
+}
+
+/* ---------- 新解锁提示 ---------- */
+.new-card {
+  display: flex;
+  align-items: center;
+  margin: 24rpx 32rpx 0;
+  padding: 20rpx 24rpx;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1rpx solid #fcd34d;
+  border-radius: var(--radius-base);
+}
+.new-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+.new-text {
+  flex: 1;
+  font-size: var(--font-size-sm);
+  color: #92400e;
+  line-height: 1.5;
+}
+
+/* ---------- 下一个目标 ---------- */
+.next-card {
+  margin: 24rpx 32rpx;
+  padding: 28rpx 32rpx;
+}
+.next-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.next-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+.next-remain {
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+.next-body {
+  display: flex;
+  align-items: center;
+}
+.next-icon {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  flex-shrink: 0;
+  margin-right: 24rpx;
+}
+.next-main {
+  flex: 1;
+  min-width: 0;
+}
+.next-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+.next-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 6rpx;
+}
+.next-bar {
+  height: 12rpx;
+  border-radius: 8rpx;
+  background: var(--color-border);
+  margin-top: 16rpx;
+  overflow: hidden;
+}
+.next-fill {
+  height: 100%;
+  border-radius: 8rpx;
+  background: var(--color-primary);
+  transition: width 0.3s;
+}
+
+.all-done-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40rpx 32rpx;
+}
+.all-done-icon {
+  font-size: 40rpx;
+  margin-right: 16rpx;
+}
+.all-done-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ---------- 分组卡片 ---------- */
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 28rpx 32rpx 32rpx;
+  margin: 24rpx 32rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+.card-title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+.card-stat {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+/* ---------- 徽章网格（2 列） ---------- */
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -8rpx;
+}
+.tile {
+  width: calc(50% - 16rpx);
+  margin: 8rpx;
+  padding: 20rpx;
+  background: #f7f8fa;
+  border: 1rpx solid transparent;
+  border-radius: var(--radius-base);
+  box-sizing: border-box;
+}
+/* 已解锁：白底 + 绿边，图标彩色 */
+.tile.on {
+  background: #ffffff;
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 2rpx 10rpx rgba(16, 185, 129, 0.08);
+}
+/* 本次新解锁：把边框和底色再加一档，让用户一眼看到是哪几枚 */
+.tile.is-new {
+  border-color: var(--color-primary);
+  background: #ecfdf5;
+}
+.tile-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #e9ebef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 34rpx;
+  margin-bottom: 16rpx;
+  /* 未解锁：灰度处理，和已解锁形成明确对比 */
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.tile.on .tile-icon {
+  background: #ecfdf5;
+  filter: none;
+  opacity: 1;
+}
+.tile-name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text-light);
+}
+.tile.on .tile-name {
+  color: var(--color-text);
+}
+.tile-desc {
+  font-size: 22rpx;
+  color: var(--color-text-light);
+  line-height: 1.5;
+  margin-top: 6rpx;
+  min-height: 66rpx;
+}
+.tile-bar {
+  height: 8rpx;
+  border-radius: 6rpx;
+  background: #e2e4e8;
+  margin-top: 12rpx;
+  overflow: hidden;
+}
+.tile-fill {
+  height: 100%;
+  border-radius: 6rpx;
+  background: var(--color-primary);
+  transition: width 0.3s;
+}
+.tile-foot {
+  font-size: 20rpx;
+  color: var(--color-text-light);
+  margin-top: 12rpx;
+}
+.tile-unlocked {
+  color: var(--color-primary-dark);
+}
+
+/* ---------- 状态卡 / 脚注 ---------- */
+.state-card {
+  text-align: center;
+  padding: 60rpx 32rpx;
+}
+.state-text {
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+.state-btn {
+  display: inline-block;
+  margin-top: 28rpx;
+  padding: 0 48rpx;
+}
+.footnote {
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--color-text-light);
+  margin-top: 32rpx;
+  padding: 0 48rpx;
+  line-height: 1.6;
+}

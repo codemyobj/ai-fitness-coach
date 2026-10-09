@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "skeleton": "../../components/skeleton/skeleton"
+  },
+  "navigationBarTitleText": "身体记录",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

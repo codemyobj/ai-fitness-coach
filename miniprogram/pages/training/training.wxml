@@ -1,0 +1,144 @@
+<!--pages/training/training.wxml — 训练首页：今日安排 + 本周进度 + 打卡条 -->
+<view class="page">
+
+  <!-- 顶部问候区（padding-top = 状态栏高度 + 14px 呼吸空间） -->
+  <view class="hero" style="padding-top: {{statusBarHeight + 14}}px;">
+    <view class="hero-date">{{todayText}}</view>
+    <view class="hero-title">
+      <text>{{greeting}}，{{nickname || '健身搭子'}}</text>
+    </view>
+    <view class="hero-sub">今天也要元气满满地动起来 💪</view>
+  </view>
+
+  <!-- 首屏骨架屏：延迟 180ms 才出现，有 TTL 缓存的加载不会闪一下 -->
+  <skeleton wx:if="{{skVisible}}" variant="training" />
+
+  <!-- 登录失败：原因 + 重试 -->
+  <view wx:elif="{{loginError}}" class="card state-card">
+    <view class="state-icon">⚠️</view>
+    <view class="onboarding-title">登录失败</view>
+    <view class="onboarding-desc">{{loginError}}</view>
+    <view class="btn-primary" bindtap="retryLogin">重试</view>
+  </view>
+
+  <!-- 未建档：引导去建档 -->
+  <view wx:elif="{{!hasProfile}}" class="card onboarding-card">
+    <view class="onboarding-icon">📝</view>
+    <view class="onboarding-title">先让我认识你</view>
+    <view class="onboarding-desc">花 1 分钟填写身体数据和目标，为你编排专属训练计划</view>
+    <view class="btn-primary" bindtap="goOnboarding">开始建档</view>
+  </view>
+
+  <!-- 已建档：计划与打卡都落定后才渲染（否则会先闪一个"无计划"占位再跳成计划） -->
+  <block wx:elif="{{planReady}}">
+
+    <!-- 今日训练卡片 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">今日训练</text>
+        <text class="card-tag">{{goalText}}</text>
+      </view>
+
+      <!-- 有计划：今日安排 + 计划入口 -->
+      <block wx:if="{{plan}}">
+        <view class="today-box {{todayChecked ? 'is-done' : ''}}">
+          <view class="today-head">
+            <text class="today-status">{{todayChecked ? '今日已完成' : (today.weekDone ? '本周已达标' : '今天练')}}</text>
+            <text wx:if="{{todayChecked}}" class="today-check">✓ 已打卡</text>
+          </view>
+          <block wx:if="{{today.ready}}">
+            <view class="today-focus">{{today.focus}}</view>
+            <view class="today-meta">
+              第 {{today.weekNumber}}/{{today.totalWeeks}} 周 · 第 {{today.dayNumber}}/{{today.daysPerWeek}} 节 · {{today.exerciseCount}} 个动作
+            </view>
+          </block>
+          <view wx:else class="today-focus today-focus-empty">{{today.reason}}</view>
+        </view>
+
+        <view class="plan-line" bindtap="goPlanDetail">
+          <text class="plan-line-name">{{plan.planName}}</text>
+          <text class="plan-line-arrow">查看全计划 ›</text>
+        </view>
+
+        <view class="plan-actions">
+          <view class="btn-primary plan-actions-item {{today.ready ? '' : 'disabled'}}" bindtap="goWorkout">
+            {{todayChecked ? '再练一次' : '开始跟练'}}
+          </view>
+          <view class="btn-ghost plan-actions-item {{planLoading ? 'disabled' : ''}}" bindtap="generatePlan">
+            {{planLoading ? '编排中…' : '换一份计划'}}
+          </view>
+        </view>
+      </block>
+
+      <!-- 无计划：生成入口 -->
+      <block wx:else>
+        <view class="plan-placeholder">
+          <view class="empty-tip">按你的目标编排一份专属计划</view>
+          <view class="empty-sub">基于你的档案 · 4 周渐进式安排</view>
+        </view>
+        <view class="btn-primary {{planLoading ? 'disabled' : ''}}" bindtap="generatePlan">
+          {{planLoading ? '生成中…' : '生成训练计划'}}
+        </view>
+      </block>
+    </view>
+
+    <!-- 本周打卡概览：进度环 + 连续天数 + 周一到周日打卡条 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">本周打卡</text>
+        <text class="card-stat">{{weekProgress.text}}</text>
+      </view>
+
+      <view class="week-overview">
+        <view class="ring" style="background: {{ringBg}}">
+          <view class="ring-hole">
+            <text class="ring-num">{{weekProgress.percent}}%</text>
+          </view>
+        </view>
+        <view class="week-info">
+          <view class="week-info-main">
+            本周已练 <text class="hl">{{weekProgress.done}}</text> 天 · 目标 <text class="hl">{{weekProgress.target}}</text> 天
+          </view>
+          <view class="week-info-sub">
+            连续打卡 <text class="hl">{{streak}}</text> 天<text wx:if="{{weekMinText}}"> · {{weekMinText}}</text>
+          </view>
+          <view wx:if="{{weekProgress.reached}}" class="week-info-tip">目标达成 🎉 想加练也可以继续</view>
+        </view>
+      </view>
+
+      <view class="week-bar">
+        <view wx:for="{{weekDays}}" wx:key="key" class="week-item {{item.future ? 'is-future' : ''}}">
+          <view class="week-dot {{item.checked ? 'checked' : ''}} {{item.isToday ? 'today' : ''}}"></view>
+          <text class="week-label {{item.isToday ? 'is-today' : ''}}">{{item.label}}</text>
+        </view>
+      </view>
+
+      <view class="card-link" bindtap="goStats">查看数据看板 ›</view>
+    </view>
+
+    <!-- 更多工具 -->
+    <view class="card">
+      <view class="card-header">
+        <text class="card-title">更多</text>
+      </view>
+      <view class="tool-row">
+        <view class="tool-item" bindtap="goLibrary">
+          <text class="tool-icon">🏃</text>
+          <text class="tool-text">动作库</text>
+        </view>
+        <view class="tool-item" bindtap="goBody">
+          <text class="tool-icon">⚖️</text>
+          <text class="tool-text">身体记录</text>
+        </view>
+        <view class="tool-item" bindtap="goBadges">
+          <text class="tool-icon">🏅</text>
+          <text class="tool-text">成就徽章</text>
+          <text class="tool-badge">{{badgeUnlocked}}/{{badgeTotal}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 健康免责声明（审核合规必备） -->
+  <view class="disclaimer">训练建议仅供参考，不构成医疗建议</view>
+</view>

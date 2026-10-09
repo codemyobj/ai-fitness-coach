@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>打卡热力图 · 视觉预览（数据看板）</title>
+<style>
+  /* 本预览把 wxss 的 rpx 按 1rpx = 0.5px 换算，375px 宽模拟 iPhone */
+  :root {
+    --color-primary: #10b981;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #eceef1;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text);
+    padding: 28px 16px 60px;
+  }
+  .wrap { display: flex; flex-wrap: wrap; gap: 28px; justify-content: center; align-items: flex-start; }
+  .phone {
+    width: 375px;
+    background: var(--color-bg);
+    border-radius: 22px;
+    box-shadow: 0 10px 32px rgba(0,0,0,.14);
+    overflow: hidden;
+    flex: 0 0 auto;
+  }
+  .nav {
+    background: #fff;
+    height: 44px;
+    line-height: 44px;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .page { padding: 12px 12px 24px; font-size: 14px; }
+
+  .card {
+    background: #fff;
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin: 12px 16px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.04);
+  }
+  .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .card-title { font-size: 16px; font-weight: 600; }
+  .card-stat { font-size: 12px; color: var(--color-text-light); }
+
+  /* ---- 累计概览（占位，保持页面比例）---- */
+  .ov-grid { display: flex; }
+  .ov-item { flex: 1; text-align: center; padding: 10px 0; }
+  .ov-value { font-size: 22px; font-weight: 700; line-height: 1.2; }
+  .ov-item.highlight .ov-value { color: var(--color-primary); }
+  .ov-label { font-size: 12px; color: var(--color-text-light); margin-top: 4px; }
+  .ov-sub { font-size: 12px; color: var(--color-text-secondary); background: var(--color-bg); border-radius: var(--radius-base); padding: 8px 10px; margin-top: 6px; }
+
+  /* ---- 图表（占位）---- */
+  .chart { display: flex; align-items: flex-end; height: 120px; margin-top: 12px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .bar-wrap { width: 14px; flex: 1; display: flex; align-items: flex-end; justify-content: center; }
+  .bar { width: 100%; background: linear-gradient(180deg,#34d399,#10b981); border-radius: 4px 4px 0 0; }
+  .bar-zero { background: #e5e7eb; height: 3px; }
+  .bar-count { font-size: 10px; color: var(--color-text-secondary); margin-top: 4px; }
+  .bar-label { font-size: 9px; color: var(--color-text-light); }
+
+  /* ---- 热力图（与 stats.wxss 一一对应）---- */
+  .hm { display: flex; margin-top: 4px; }
+  .hm-side { width: 14px; padding-top: 13px; }
+  .hm-side-cell { height: 13px; margin-bottom: 3px; font-size: 9px; line-height: 13px; color: var(--color-text-light); }
+  .hm-main { flex: 1; margin-left: 4px; overflow: hidden; }
+  .hm-months { display: flex; height: 13px; }
+  .hm-month { flex: 1; font-size: 9px; line-height: 13px; color: var(--color-text-light); white-space: nowrap; }
+  .hm-cols { display: flex; }
+  .hm-col { flex: 1; padding-right: 3px; }
+  .hm-col:last-child { padding-right: 0; }
+  .hm-cell { width: 100%; height: 13px; margin-bottom: 3px; border-radius: 3px; background: #eef0f3; cursor: pointer; }
+  .hm-col .hm-cell:last-child { margin-bottom: 0; }
+  .hm-l0 { background: #eef0f3; }
+  .hm-l1 { background: #d1fae5; }
+  .hm-l2 { background: #6ee7b7; }
+  .hm-l3 { background: #10b981; }
+  .hm-l4 { background: #047857; }
+  .hm-future { background: transparent; cursor: default; }
+  .hm-today { border: 1px solid var(--color-primary); }
+  .hm-sel { box-shadow: 0 0 0 1px #065f46; }
+
+  .hm-foot {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--color-border);
+  }
+  .hm-tip { flex: 1; font-size: 11px; color: var(--color-text-secondary); line-height: 1.5; }
+  .hm-legend { display: flex; align-items: center; flex-shrink: 0; margin-left: 6px; }
+  .hm-legend .hm-cell { width: 11px; height: 11px; margin: 0 0 0 3px; border-radius: 2px; }
+  .hm-legend-text { font-size: 10px; color: var(--color-text-light); margin-left: 4px; }
+  .hm-hint { font-size: 10px; color: var(--color-text-light); margin-top: 5px; }
+
+  /* ---- 说明面板 ---- */
+  .notes { width: 320px; font-size: 13px; line-height: 1.8; color: #374151; }
+  .notes h2 { font-size: 15px; margin: 0 0 8px; }
+  .notes code { background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1px 4px; font-size: 12px; }
+  .notes ul { padding-left: 18px; margin: 6px 0 14px; }
+  .legend-row { display: flex; gap: 8px; align-items: center; font-size: 12px; margin: 4px 0 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone">
+    <div class="nav">数据看板</div>
+    <div class="page">
+      <div class="card">
+        <div class="card-header"><span class="card-title">累计数据</span></div>
+        <div class="ov-grid">
+          <div class="ov-item"><div class="ov-value">46</div><div class="ov-label">累计打卡</div></div>
+          <div class="ov-item highlight"><div class="ov-value">5</div><div class="ov-label">连续天数</div></div>
+          <div class="ov-item"><div class="ov-value">12</div><div class="ov-label">本月次数</div></div>
+          <div class="ov-item"><div class="ov-value">1380</div><div class="ov-label">累计分钟</div></div>
+        </div>
+        <div class="ov-sub">完成 132 组 · 总容量 8420 kg · 平均每次 30 分钟</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><span class="card-title">近 8 周打卡</span><span class="card-stat">最高 5 次/周</span></div>
+        <div class="chart" id="chart"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">打卡热力图</span>
+          <span class="card-stat" id="heatStat">近 17 周 0 天</span>
+        </div>
+        <div class="hm">
+          <div class="hm-side">
+            <div class="hm-side-cell">一</div><div class="hm-side-cell"></div>
+            <div class="hm-side-cell">三</div><div class="hm-side-cell"></div>
+            <div class="hm-side-cell">五</div><div class="hm-side-cell"></div>
+            <div class="hm-side-cell">日</div>
+          </div>
+          <div class="hm-main">
+            <div class="hm-months" id="hmMonths"></div>
+            <div class="hm-cols" id="hmCols"></div>
+          </div>
+        </div>
+        <div class="hm-foot">
+          <div class="hm-tip" id="hmTip"></div>
+          <div class="hm-legend">
+            <span class="hm-legend-text">少</span>
+            <div class="hm-cell hm-l0"></div><div class="hm-cell hm-l1"></div>
+            <div class="hm-cell hm-l2"></div><div class="hm-cell hm-l3"></div>
+            <div class="hm-cell hm-l4"></div>
+            <span class="hm-legend-text">多</span>
+          </div>
+        </div>
+        <div class="hm-hint" id="hmHint">轻点色块查看当天训练明细</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes">
+    <h2>说明</h2>
+    <ul>
+      <li>左侧标 <b>一 / 三 / 五 / 日</b>，一列 = 一周，共 <b>17 列（近 4 个月）</b></li>
+      <li>顶部为月份标签，只在换月的那一列显示</li>
+      <li>颜色深浅 = 当天训练分钟数
+        <div class="legend-row">
+          <span class="hm-cell hm-l0" style="width:11px;height:11px;border-radius:2px;display:inline-block"></span> 0 分钟
+          <span class="hm-cell hm-l1" style="width:11px;height:11px;border-radius:2px;display:inline-block"></span> &lt;20
+          <span class="hm-cell hm-l2" style="width:11px;height:11px;border-radius:2px;display:inline-block"></span> &lt;40
+          <span class="hm-cell hm-l3" style="width:11px;height:11px;border-radius:2px;display:inline-block"></span> &lt;60
+          <span class="hm-cell hm-l4" style="width:11px;height:11px;border-radius:2px;display:inline-block"></span> ≥60
+        </div>
+      </li>
+      <li>绿框 = 今天；半透明格 = 本周尚未到来的日子（不可点）</li>
+      <li>点任意色块 → 底部灰字变成当天明细：<br />
+        <code>10月5日 · 35 分钟 · 1 次记录 · 5 组 · 200 kg</code></li>
+    </ul>
+    <h2>数据来源</h2>
+    <ul>
+      <li><code>services/stats.js → getHeatmap(17)</code>，数据取 <code>workout_logs</code></li>
+      <li>同一天多条记录按天聚合（分钟/次数/组数/容量相加）</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+// 造一批接近真实使用的演示数据（约每周 4 练）
+const TODAY = new Date(2026, 9, 7); // 2026-10-07 周三
+function fmt(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function addDays(d, n) { const x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
+function startOfWeek(d) { const x = new Date(d.getTime()); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; }
+
+// 固定种子伪随机，保证预览稳定
+let seed = 20261007;
+function rnd() { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; }
+
+const HEAT_WEEKS = 17;
+const gridStart = addDays(startOfWeek(TODAY), -7 * (HEAT_WEEKS - 1));
+const agg = new Map();
+for (let i = 0; i < HEAT_WEEKS * 7; i++) {
+  const d = addDays(gridStart, i);
+  if (d > TODAY) continue;
+  const weekday = (d.getDay() + 6) % 7;
+  // 周一/三/五/六 更容易练；偶尔连续几周偷懒
+  const base = [0.75, 0.25, 0.7, 0.2, 0.8, 0.6, 0.25][weekday];
+  const slump = (i > 70 && i < 84) || (i > 110 && i < 116); // 两段低潮，热力图更真实
+  if (rnd() < (slump ? base * 0.25 : base)) {
+    agg.set(fmt(d), { minutes: [15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 75][Math.floor(rnd() * 12)] });
+  }
+}
+
+function level(m) { return m <= 0 ? 0 : m < 20 ? 1 : m < 40 ? 2 : m < 60 ? 3 : 4; }
+
+const cols = document.getElementById('hmCols');
+const months = document.getElementById('hmMonths');
+let lastMonth = -1, activeDays = 0, totalMin = 0;
+
+for (let w = 0; w < HEAT_WEEKS; w++) {
+  const col = document.createElement('div');
+  col.className = 'hm-col';
+  for (let d = 0; d < 7; d++) {
+    const date = addDays(gridStart, w * 7 + d);
+    const key = fmt(date);
+    const hit = agg.get(key);
+    const cell = document.createElement('div');
+    const lv = hit ? level(hit.minutes) : 0;
+    let cls = `hm-cell hm-l${lv}`;
+    if (date > TODAY) cls += ' hm-future';
+    if (key === fmt(TODAY)) cls += ' hm-today';
+    cell.className = cls;
+    cell.dataset.date = key;
+    if (hit) { activeDays++; totalMin += hit.minutes; }
+    if (hit) {
+      cell.addEventListener('click', () => {
+        document.querySelectorAll('.hm-sel').forEach((el) => el.classList.remove('hm-sel'));
+        cell.classList.add('hm-sel');
+        const label = Number(key.slice(5, 7)) + '月' + Number(key.slice(8, 10)) + '日';
+        document.getElementById('hmTip').textContent = `${label} · ${hit.minutes} 分钟 · 1 次记录 · ${Math.round(hit.minutes / 6)} 组`;
+        document.getElementById('hmHint').textContent =
+          `${gridStart.getMonth() + 1}月${gridStart.getDate()}日 ~ ${TODAY.getMonth() + 1}月${TODAY.getDate()}日`;
+      });
+    }
+    col.appendChild(cell);
+  }
+  const mEl = document.createElement('div');
+  mEl.className = 'hm-month';
+  const colFirst = addDays(gridStart, w * 7).getMonth() + 1;
+  if (colFirst !== lastMonth) { mEl.textContent = colFirst + '月'; lastMonth = colFirst; }
+  months.appendChild(mEl);
+  cols.appendChild(col);
+}
+
+document.getElementById('heatStat').textContent = `近 17 周 ${activeDays} 天`;
+document.getElementById('hmTip').textContent = `近 17 周训练 ${activeDays} 天 · 累计 ${totalMin} 分钟`;
+
+// 趋势柱状图（占位数据）
+const chart = document.getElementById('chart');
+const barLabels = ['8/24', '8/31', '9/7', '9/14', '9/21', '9/28', '10/5', '本周'];
+[3, 4, 2, 5, 4, 1, 4, 5].forEach((c, i) => {
+  const col = document.createElement('div'); col.className = 'bar-col';
+  col.innerHTML = `<div class="bar-wrap"><div class="bar${c ? '' : ' bar-zero'}" style="height:${c / 5 * 100}%"></div></div>
+    <div class="bar-count">${c}</div><div class="bar-label">${barLabels[i]}</div>`;
+  chart.appendChild(col);
+});
+</script>
+</body>
+</html>

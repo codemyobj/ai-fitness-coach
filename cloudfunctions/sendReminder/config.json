@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "openapi": [
+      "subscribeMessage.send"
+    ]
+  },
+  "triggers": [
+    {
+      "name": "hourlyReminder",
+      "type": "timer",
+      "config": "0 0 * * * * *"
+    }
+  ],
+  "timeout": 60
+}

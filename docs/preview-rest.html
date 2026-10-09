@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>组间休息倒计时 · 视觉预览（可点击，真倒计时）</title>
+<style>
+  /* rpx → px 按 1rpx = 0.5px 换算，375px 宽模拟 iPhone，与小程序真机一致 */
+  :root {
+    --color-primary: #10b981;
+    --color-primary-dark: #059669;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text); }
+  .head { max-width: 1180px; margin: 0 auto 22px; }
+  .head h1 { font-size: 20px; margin: 0 0 8px; }
+  .head p { font-size: 13px; color: #4b5563; line-height: 21px; margin: 0; }
+  .wrap { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; align-items: flex-start; }
+  .col { flex: 0 0 auto; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 22px; overflow: hidden;
+           box-shadow: 0 10px 32px rgba(0,0,0,.14); position: relative; height: 620px; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; width: 375px; }
+  .navbar { height: 44px; display: flex; align-items: center; justify-content: center;
+    background: #fff; font-size: 16px; font-weight: 600; border-bottom: 1px solid #f0f1f3; }
+  .screen { padding: 12px 12px 0; height: calc(100% - 44px); overflow: hidden; position: relative; }
+
+  /* 跟练页 */
+  .wk-hero { background: linear-gradient(135deg, #111827 0%, #059669 140%); color: #fff;
+    border-radius: var(--radius-lg); padding: 18px 16px 16px; }
+  .wk-hero-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .wk-title { font-size: 20px; font-weight: 700; }
+  .wk-sub { font-size: 12px; opacity: .85; margin-top: 4px; }
+  .wk-timer { font-size: 16px; font-weight: 700; background: rgba(255,255,255,.16);
+    border-radius: 999px; padding: 5px 14px; font-variant-numeric: tabular-nums; }
+  .wk-progress { height: 6px; border-radius: 999px; background: rgba(255,255,255,.2); margin-top: 14px; overflow: hidden; }
+  .wk-progress-inner { height: 100%; border-radius: 999px; background: #34d399; width: 33%; transition: width .3s; }
+
+  .ex-card { background: #fff; border-radius: var(--radius-lg); padding: 14px; margin-top: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .ex-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .ex-name { font-size: 16px; font-weight: 600; }
+  .ex-target { font-size: 12px; color: var(--color-text-secondary); margin-top: 3px; }
+  .ex-tips-btn { font-size: 12px; color: var(--color-primary); border: 1px solid var(--color-primary);
+    border-radius: 999px; padding: 4px 12px; }
+  .set-row { display: flex; align-items: center; padding: 9px 0; border-top: 1px solid #f3f4f6; }
+  .set-row:first-child { border-top: none; }
+  .set-check { width: 22px; height: 22px; border-radius: 50%; border: 1px solid #d1d5db; color: #9ca3af;
+    font-size: 11px; display: flex; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0; }
+  .set-check.done { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  .set-text { font-size: 14px; flex: 1; }
+  .set-weight { font-size: 13px; color: var(--color-text-light); border: 1px solid var(--color-border);
+    border-radius: 6px; padding: 5px 10px; width: 84px; text-align: center; background: #fff; }
+  .si-unit { font-size: 12px; color: var(--color-text-secondary); margin-left: 5px; }
+
+  /* 悬浮休息条（与小程序 WXSS 一一对应） */
+  .rest-fixed { position: absolute; left: 12px; right: 12px; bottom: 0; z-index: 20; }
+  .rest-card { background: #111827; border-radius: var(--radius-lg); padding: 10px 12px 8px;
+    margin-bottom: 10px; box-shadow: 0 4px 12px rgba(17,24,39,.28); }
+  .rest-card.is-paused { background: #374151; }
+  .rest-card.is-done { background: var(--color-primary-dark); }
+  .rest-row { display: flex; align-items: center; }
+  .rest-tap { display: flex; align-items: center; flex-shrink: 0; cursor: pointer; user-select: none; }
+  .rest-tap:active { opacity: .7; }
+  .rest-icon { font-size: 13px; margin-right: 4px; }
+  .rest-num { font-size: 22px; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
+  .rest-mid { flex: 1; min-width: 0; margin: 0 8px; }
+  .rest-title { font-size: 12px; color: rgba(255,255,255,.92); }
+  .rest-next { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 2px;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .rest-mini, .rest-skip { flex-shrink: 0; font-size: 11px; color: #fff; background: rgba(255,255,255,.16);
+    border-radius: 999px; padding: 4px 8px; margin-left: 4px; cursor: pointer; user-select: none; }
+  .rest-skip { background: rgba(255,255,255,.3); }
+  .rest-mini:active, .rest-skip:active { opacity: .7; }
+  .rest-bar { height: 4px; border-radius: 999px; background: rgba(255,255,255,.18); margin-top: 8px; overflow: hidden; }
+  .rest-bar-inner { height: 100%; border-radius: 999px; background: #34d399; transition: width .3s linear; }
+  .rest-card.is-done .rest-bar-inner { background: #fff; }
+
+  .footer-btn { margin: 0 12px 10px; background: #e5e7eb; color: #9ca3af; text-align: center;
+    font-size: 15px; font-weight: 600; padding: 12px; border-radius: 999px; }
+  .rest-revive { margin: 0 0 10px; background: #fff; border: 1px dashed #cbd5e1; color: #64748b;
+    text-align: center; font-size: 12px; padding: 9px; border-radius: var(--radius-lg); cursor: pointer; }
+  .toast { position: absolute; left: 50%; top: 46%; transform: translate(-50%,-50%);
+    background: rgba(0,0,0,.78); color: #fff; font-size: 13px; padding: 9px 16px; border-radius: 8px;
+    opacity: 0; transition: opacity .25s; pointer-events: none; z-index: 40; }
+  .toast.show { opacity: 1; }
+
+  /* 我的页 */
+  .user-card { background: linear-gradient(135deg, #111827 0%, #059669 140%); color: #fff;
+    border-radius: var(--radius-lg); padding: 16px; display: flex; align-items: center; gap: 14px; }
+  .user-avatar { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,255,255,.15);
+    display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+  .user-name { font-size: 18px; font-weight: 600; }
+  .user-desc { font-size: 12px; opacity: .82; margin-top: 3px; }
+  .user-edit { margin-left: auto; font-size: 12px; border: 1px solid rgba(255,255,255,.45);
+    border-radius: 999px; padding: 4px 12px; }
+  .stats-row { display: flex; background: #fff; border-radius: var(--radius-lg); margin-top: 12px; padding: 14px 0; }
+  .stat-item { flex: 1; text-align: center; }
+  .stat-value { font-size: 18px; font-weight: 700; }
+  .stat-label { font-size: 11px; color: var(--color-text-light); margin-top: 3px; }
+  .menu-group { background: #fff; border-radius: var(--radius-lg); margin-top: 12px; overflow: hidden; }
+  .menu-item { display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+    border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-icon { font-size: 16px; width: 20px; text-align: center; }
+  .menu-text { font-size: 15px; flex: 1; }
+  .menu-sub { font-size: 13px; color: var(--color-text-light); }
+  .menu-arrow { color: var(--color-text-light); font-size: 18px; }
+  .seg { display: flex; border: 1px solid var(--color-border); border-radius: 24px; overflow: hidden; }
+  .seg-item { padding: 4px 14px; font-size: 12px; color: var(--color-text-secondary); background: #fff; }
+  .seg-item.active { color: #fff; background: var(--color-primary); font-weight: 600; }
+
+  /* ActionSheet */
+  .as-mask { position: absolute; inset: 0; background: rgba(0,0,0,.5); z-index: 30;
+    display: flex; align-items: flex-end; }
+  .as-wrap { width: 100%; }
+  .as-panel { background: #fff; border-radius: 10px 10px 0 0; overflow: hidden; }
+  .as-title { font-size: 12px; color: var(--color-text-light); text-align: center; padding: 12px;
+    border-bottom: 1px solid #f0f1f3; }
+  .as-item { font-size: 16px; text-align: center; padding: 14px; border-bottom: 1px solid #f3f4f6; cursor: pointer; }
+  .as-item:last-child { border-bottom: none; }
+  .as-item.cur { color: var(--color-primary); font-weight: 600; }
+
+  /* 说明卡 */
+  .note { max-width: 375px; background: #fff; border-radius: var(--radius-lg); padding: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.07); font-size: 12.5px; line-height: 20px; color: #374151; }
+  .note h3 { font-size: 14px; margin: 0 0 8px; }
+  .note code { background: #f3f4f6; border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+  .note ul { margin: 6px 0; padding-left: 18px; }
+  .note li { margin-bottom: 5px; }
+  .k { color: #047857; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <h1>组间休息倒计时 · 视觉预览</h1>
+  <p>按 1rpx = 0.5px 换算，与小程序真机一致。<strong>倒计时是真的在走</strong>——点数字暂停/继续，点 −15s / +15s 微调，点「跳过」收起。归零时会变成绿色「休息结束」态，真机上同时双震提示。</p>
+</div>
+
+<div class="wrap">
+
+  <!-- ① 跟练页 · 休息中（可交互） -->
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">跟练打卡</div>
+      <div class="screen">
+        <div class="wk-hero">
+          <div class="wk-hero-top">
+            <div>
+              <div class="wk-title">Day 1 · 全身激活</div>
+              <div class="wk-sub">1/4 个动作已完成</div>
+            </div>
+            <div class="wk-timer">⏱ 06:12</div>
+          </div>
+          <div class="wk-progress"><div class="wk-progress-inner"></div></div>
+        </div>
+
+        <div class="ex-card">
+          <div class="ex-head">
+            <div>
+              <div class="ex-name">徒手深蹲</div>
+              <div class="ex-target">3 组 × 15 次</div>
+            </div>
+            <div class="ex-tips-btn">要点</div>
+          </div>
+          <div class="set-row">
+            <div class="set-check done">✓</div><div class="set-text">第 1 组</div>
+            <input class="set-weight" value="0" /><span class="si-unit">kg</span>
+          </div>
+          <div class="set-row">
+            <div class="set-check">2</div><div class="set-text">第 2 组</div>
+            <input class="set-weight" placeholder="重量" /><span class="si-unit">kg</span>
+          </div>
+          <div class="set-row">
+            <div class="set-check">3</div><div class="set-text">第 3 组</div>
+            <input class="set-weight" placeholder="重量" /><span class="si-unit">kg</span>
+          </div>
+        </div>
+
+        <div class="ex-card" style="opacity:.55">
+          <div class="ex-head">
+            <div>
+              <div class="ex-name">平板支撑</div>
+              <div class="ex-target">3 组 × 30 秒</div>
+            </div>
+            <div class="ex-tips-btn">要点</div>
+          </div>
+        </div>
+
+        <div style="height:100px"></div>
+
+        <div class="rest-fixed">
+          <div class="rest-revive" id="restRevive" style="display:none">↻ 重新演示休息倒计时</div>
+          <div class="rest-card" id="restCard">
+            <div class="rest-row">
+              <div class="rest-tap" id="restTap">
+                <span class="rest-icon" id="restIcon">⏸</span>
+                <span class="rest-num" id="restNum">01:00</span>
+              </div>
+              <div class="rest-mid">
+                <div class="rest-title" id="restTitle">组间休息</div>
+                <div class="rest-next" id="restNext">深蹲 · 第 2/3 组</div>
+              </div>
+              <div class="rest-mini" data-delta="-15" id="btnMinus">−15s</div>
+              <div class="rest-mini" data-delta="15" id="btnPlus">+15s</div>
+              <div class="rest-skip" id="btnSkip">跳过</div>
+            </div>
+            <div class="rest-bar"><div class="rest-bar-inner" id="restBar"></div></div>
+          </div>
+        </div>
+        <div class="footer-btn">完成所有动作后可打卡</div>
+        <div class="toast" id="toast">已震动提示</div>
+      </div>
+    </div>
+    <div class="cap">① 跟练页 · 勾选一组后自动出现（可点着玩）</div>
+  </div>
+
+  <!-- ② 我的 · 组间休息设置 -->
+  <div class="col">
+    <div class="phone">
+      <div class="navbar">我的</div>
+      <div class="screen">
+        <div class="user-card">
+          <div class="user-avatar">🏋️</div>
+          <div>
+            <div class="user-name">雷磊</div>
+            <div class="user-desc">减脂塑形 · 入门 · 每周 3 练</div>
+          </div>
+          <div class="user-edit">编辑</div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-item"><div class="stat-value">175</div><div class="stat-label">身高 cm</div></div>
+          <div class="stat-item"><div class="stat-value">68.4</div><div class="stat-label">体重 kg</div></div>
+          <div class="stat-item"><div class="stat-value">28</div><div class="stat-label">年龄</div></div>
+        </div>
+        <div class="menu-group">
+          <div class="menu-item"><span class="menu-icon">📝</span><span class="menu-text">编辑身体档案</span><span class="menu-arrow">›</span></div>
+          <div class="menu-item"><span class="menu-icon">🔔</span><span class="menu-text">训练提醒</span><span class="menu-sub">已开启 · 剩 1 次</span><span class="menu-arrow">›</span></div>
+        </div>
+        <div class="menu-group">
+          <div class="menu-item" id="restSettingRow">
+            <span class="menu-icon">⚙️</span><span class="menu-text">重量单位</span>
+            <span class="seg"><span class="seg-item active">kg</span><span class="seg-item">lb</span></span>
+          </div>
+          <div class="menu-item" id="openSheet">
+            <span class="menu-icon">⏱</span><span class="menu-text">组间休息</span>
+            <span class="menu-sub" id="restSettingValue">60 秒</span><span class="menu-arrow">›</span>
+          </div>
+          <div class="menu-item"><span class="menu-icon">🗑</span><span class="menu-text" style="color:#ef4444">清空训练数据</span><span class="menu-arrow">›</span></div>
+        </div>
+      </div>
+
+      <div class="as-mask" id="asMask" style="display:none">
+        <div class="as-wrap">
+          <div class="as-panel">
+            <div class="as-title">组间休息时长</div>
+            <div class="as-item" data-sec="0">已关闭</div>
+            <div class="as-item" data-sec="30">30 秒</div>
+            <div class="as-item" data-sec="45">45 秒</div>
+            <div class="as-item cur" data-sec="60">60 秒</div>
+            <div class="as-item" data-sec="90">90 秒</div>
+            <div class="as-item" data-sec="120">120 秒</div>
+          </div>
+          <div style="background:#fff;margin-top:8px;padding:14px;text-align:center;font-size:16px;border-radius:10px 10px 0 0">取消</div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">② 我的 → 组间休息（原生 ActionSheet，选中的时长会同步到左边演示）</div>
+  </div>
+
+  <!-- ③ 说明 -->
+  <div class="col">
+    <div class="note">
+      <h3>这一步做了什么</h3>
+      <ul>
+        <li><span class="k">勾选一组就自动开始倒计时</span>，不用手动点「开始休息」</li>
+        <li><span class="k">按时间戳倒计时</span>：切后台、锁屏、掉帧回来剩余秒数依然准（不是每秒累减）</li>
+        <li>归零 → <span class="k">双震</span>提示 + 绿色「休息结束」态，6 秒后自动收起</li>
+        <li>点数字 = 暂停/继续；<code>−15s / +15s</code> 只改本次；「跳过」立即收起</li>
+        <li>进度条下面一行告诉你<code>接下来练什么</code>（下一组 / 下一个动作）</li>
+        <li><span class="k">今天的最后一个动作做完不再休息</span>；取消勾选也不会误触发</li>
+        <li>跟练页会短暂<code>保持屏幕常亮</code>，离开页面自动失效</li>
+      </ul>
+      <h3>默认时长在哪改</h3>
+      <p style="margin:4px 0">我的 → 组间休息 → 30 / 45 / 60 / 90 / 120 秒，或<strong>关闭自动休息</strong>。存本地 storage，不占云数据库、不用重新部署。</p>
+      <h3>没做的</h3>
+      <p style="margin:4px 0">没做「休息结束音效」——加音频文件会增加包体积（分包已 1.21MB / 2MB），用震动 + 视觉代替。</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ---------- ① 跟练页：真实倒计时（逻辑与小程序一致：基于结束时间戳） ---------- */
+const TOTAL_MIN = 5;
+let TOTAL = 60;
+let endTs = Date.now() + TOTAL * 1000;
+let pausedMs = 0;
+let paused = false;
+let done = false;
+let hideTimer = null;
+
+const el = (id) => document.getElementById(id);
+const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+const pct = (l, t) => Math.max(0, Math.min(100, Math.round((l / t) * 100)));
+
+function render() {
+  const left = done ? 0 : Math.max(0, Math.ceil(((paused ? pausedMs : endTs - Date.now())) / 1000));
+  el('restNum').textContent = fmt(left);
+  el('restBar').style.width = (done ? 0 : pct(left, TOTAL)) + '%';
+  el('restCard').className = 'rest-card' + (done ? ' is-done' : '') + (paused && !done ? ' is-paused' : '');
+  el('restIcon').textContent = done ? '✅' : (paused ? '▶' : '⏸');
+  el('restTitle').textContent = done ? '休息结束，继续下一组' : (paused ? '已暂停' : '组间休息');
+  return left;
+}
+
+function finish() {
+  done = true;
+  render();
+  toast('🔔 双震提示（真机）');
+  hideTimer = setTimeout(collapse, 6000);
+}
+
+function tick() {
+  if (done) return;
+  if (!paused && Date.now() >= endTs) { finish(); return; }
+  render();
+}
+
+function collapse() {
+  clearTimeout(hideTimer);
+  el('restCard').style.display = 'none';
+  el('restRevive').style.display = '';
+}
+
+function restart() {
+  clearTimeout(hideTimer);
+  done = false; paused = false; pausedMs = 0;
+  endTs = Date.now() + TOTAL * 1000;
+  el('restCard').style.display = '';
+  el('restRevive').style.display = 'none';
+  render();
+}
+
+function toast(msg) {
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1100);
+}
+
+el('restTap').addEventListener('click', () => {
+  if (done) { collapse(); return; }
+  if (paused) { endTs = Date.now() + pausedMs; pausedMs = 0; paused = false; }
+  else { pausedMs = Math.max(0, endTs - Date.now()); paused = true; }
+  render();
+});
+
+document.querySelectorAll('.rest-mini').forEach((b) => {
+  b.addEventListener('click', () => {
+    if (done) return;
+    clearTimeout(hideTimer);
+    const delta = Number(b.dataset.delta);
+    const cur = paused ? Math.ceil(pausedMs / 1000) : Math.max(0, Math.ceil((endTs - Date.now()) / 1000));
+    const next = Math.max(5, Math.min(600, cur + delta));
+    if (paused) pausedMs = next * 1000; else endTs = Date.now() + next * 1000;
+    render();
+  });
+});
+
+el('btnSkip').addEventListener('click', collapse);
+el('restRevive').addEventListener('click', restart);
+setInterval(tick, 250);
+render();
+
+/* ---------- ② 我的：ActionSheet ---------- */
+el('openSheet').addEventListener('click', () => { el('asMask').style.display = 'flex'; });
+el('asMask').addEventListener('click', (e) => {
+  if (e.target.classList.contains('as-mask') || e.target.textContent === '取消') {
+    el('asMask').style.display = 'none';
+  }
+});
+document.querySelectorAll('.as-item').forEach((it) => {
+  it.addEventListener('click', () => {
+    const sec = Number(it.dataset.sec);
+    el('restSettingValue').textContent = sec === 0 ? '已关闭' : sec + ' 秒';
+    document.querySelectorAll('.as-item').forEach((x) => x.classList.remove('cur'));
+    it.classList.add('cur');
+    el('asMask').style.display = 'none';
+    if (sec === 0) {
+      el('restCard').style.display = 'none';
+      el('restRevive').style.display = 'none';
+      toast('已关闭自动休息：勾选组数不再弹倒计时');
+    } else {
+      TOTAL = Math.max(TOTAL_MIN, sec); // 左边演示跟着你选的时长走
+      restart();
+      toast('组间休息 ' + sec + ' 秒');
+    }
+  });
+});
+</script>
+</body>
+</html>

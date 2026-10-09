@@ -1,0 +1,48 @@
+<!--components/set-input/set-input.wxml — 组数/次数/重量输入器 -->
+<view class="set-input">
+
+  <!-- 头部：组数控制 + 目标次数 -->
+  <view class="si-header">
+    <view class="si-sets">
+      <text class="si-label">组数</text>
+      <view class="stepper">
+        <view class="step-btn" data-delta="-1" bindtap="onSetsStep">−</view>
+        <text class="step-num">{{setList.length}}</text>
+        <view class="step-btn" data-delta="1" bindtap="onSetsStep">+</view>
+      </view>
+    </view>
+    <view wx:if="{{reps}}" class="si-target">目标 {{reps}} 次/组</view>
+  </view>
+
+  <!-- 每组一行 -->
+  <view class="si-rows">
+    <view
+      wx:for="{{setList}}"
+      wx:for-item="s"
+      wx:key="index"
+      class="si-row {{s.done ? 'done' : ''}}"
+    >
+      <view
+        class="si-check"
+        data-index="{{index}}"
+        bindtap="onToggleSet"
+      >{{s.done ? '✓' : index + 1}}</view>
+
+      <text class="si-row-text">第 {{index + 1}} 组</text>
+
+      <block wx:if="{{allowWeight}}">
+        <input
+          class="si-weight"
+          type="digit"
+          value="{{s.weightKg}}"
+          placeholder="重量"
+          placeholder-class="si-ph"
+          data-index="{{index}}"
+          bindinput="onWeightInput"
+        />
+        <text class="si-unit">{{weightUnit}}</text>
+      </block>
+      <text wx:else class="si-bodyweight">自重</text>
+    </view>
+  </view>
+</view>

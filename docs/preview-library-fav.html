@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动作收藏 · 视觉预览（动作库）</title>
+<style>
+  /* rpx → px 按 1rpx = 0.5px 换算，375px 宽模拟 iPhone */
+  :root {
+    --color-primary: #10b981;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text);
+  }
+  .wrap { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; align-items: flex-start; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 22px; overflow: hidden;
+           box-shadow: 0 10px 32px rgba(0,0,0,.14); position: relative; flex: 0 0 auto; }
+  .nav { background: #fff; height: 44px; line-height: 44px; text-align: center; font-size: 17px;
+         font-weight: 600; border-bottom: 1px solid var(--color-border); }
+  .page { padding: 12px 12px 24px; font-size: 14px; min-height: 560px; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; }
+
+  /* 搜索 */
+  .search-bar { position: relative; display: flex; align-items: center; background: #fff;
+    border-radius: 24px; padding: 0 72rpx 0 14px; padding-right: 36px; height: 38px; }
+  .search-input { flex: 1; font-size: 14px; color: var(--color-text-light); }
+  .search-ph::after { content: '搜索动作 / 部位 / 器械'; }
+
+  /* 收藏入口 */
+  .fav-bar { display: flex; align-items: center; margin-top: 9px; }
+  .fav-chip { display: flex; align-items: center; padding: 5px 12px; border-radius: 24px; background: #fff;
+    border: 1px solid var(--color-border); font-size: 12px; color: var(--color-text-secondary); flex-shrink: 0; }
+  .fav-chip-on { color: #b91c1c; background: #fef2f2; border-color: #fca5a5; font-weight: 600; }
+  .fav-ico { font-size: 14px; margin-right: 4px; color: #ef4444; }
+  .fav-num { margin-left: 4px; font-size: 11px; color: #b91c1c; }
+  .fav-hint { flex: 1; margin-left: 8px; font-size: 11px; color: var(--color-text-light); }
+
+  /* 分类 tabs / 器械 chips */
+  .tab-row { display: flex; gap: 6px; margin-top: 10px; overflow-x: auto; padding-bottom: 2px; }
+  .tab { padding: 6px 14px; font-size: 14px; color: var(--color-text-secondary); background: #fff;
+         border-radius: 24px; border: 1px solid transparent; white-space: nowrap; }
+  .tab-active { color: #065f46; background: rgba(16,185,129,.12); border-color: var(--color-primary); font-weight: 600; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { padding: 4px 10px; font-size: 12px; color: var(--color-text-secondary); background: #fff;
+          border-radius: 6px; border: 1px solid var(--color-border); }
+  .chip-active { color: var(--color-primary); border-color: var(--color-primary); background: rgba(16,185,129,.08); }
+  .result-tip { font-size: 12px; color: var(--color-text-light); margin: 2px 2px 8px; }
+
+  /* 列表卡片 */
+  .ex-card { display: flex; align-items: center; background: #fff; border-radius: 10px;
+             padding: 10px 12px; margin-bottom: 8px; box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .ex-thumb { width: 64px; height: 64px; flex-shrink: 0; background: #f9fafb; border-radius: 6px;
+              margin-right: 10px; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-head { display: flex; align-items: center; justify-content: space-between; }
+  .ex-name { font-size: 16px; font-weight: 600; }
+  .ex-stars { font-size: 12px; color: #f59e0b; letter-spacing: 1px; }
+  .ex-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+  .tag { font-size: 11px; color: #065f46; background: rgba(16,185,129,.12); border-radius: 4px; padding: 3px 7px; }
+  .tag-plain { color: var(--color-text-secondary); background: var(--color-bg); }
+  .ex-fav { width: 32px; height: 32px; line-height: 32px; text-align: center; font-size: 20px;
+            color: #d1d5db; flex-shrink: 0; margin-left: 4px; cursor: pointer; }
+  .ex-fav-on { color: #ef4444; }
+
+  /* 详情弹层 */
+  .mask { position: absolute; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end; z-index: 10; }
+  .sheet { width: 100%; background: #fff; border-radius: 10px 10px 0 0; padding: 16px 16px 24px; max-height: 88%; overflow-y: auto; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; }
+  .sheet-title { font-size: 18px; font-weight: 700; }
+  .sheet-acts { display: flex; align-items: center; }
+  .sheet-fav { font-size: 12px; color: var(--color-text-secondary); background: var(--color-bg);
+               border-radius: 24px; padding: 5px 12px; margin-right: 8px; }
+  .sheet-fav-on { color: #b91c1c; background: #fef2f2; font-weight: 600; }
+  .sheet-close { width: 26px; height: 26px; line-height: 24px; text-align: center; font-size: 18px;
+                 color: var(--color-text-light); background: var(--color-bg); border-radius: 50%; }
+  .sheet-gif { width: 180px; height: 180px; display: flex; align-items: center; justify-content: center;
+               font-size: 64px; margin: 10px auto 0; background: #f9fafb; border-radius: 6px; }
+  .sec { margin-top: 14px; }
+  .sec-title { font-size: 14px; font-weight: 600; margin-bottom: 5px; }
+  .sec-body { font-size: 14px; color: var(--color-text-secondary); line-height: 1.7; background: var(--color-bg);
+              border-radius: 6px; padding: 10px 12px; }
+  .sec-body.warn { color: #92400e; background: #fffbeb; }
+  .alt-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .alt { font-size: 12px; color: var(--color-text-secondary); background: var(--color-bg); border-radius: 4px; padding: 5px 9px; }
+  .sheet-tip { font-size: 11px; color: var(--color-text-light); text-align: center; margin-top: 12px; }
+
+  /* 空态 */
+  .empty-box { text-align: center; padding: 40px 0 20px; }
+  .empty-tip { font-size: 14px; color: var(--color-text-secondary); }
+  .empty-sub { font-size: 12px; color: var(--color-text-light); margin-top: 4px; }
+  .empty-btn { display: inline-block; margin-top: 14px; padding: 8px 24px; border: 1px solid var(--color-primary);
+               color: var(--color-primary); border-radius: 24px; font-size: 14px; }
+
+  .notes { width: 330px; font-size: 13px; line-height: 1.85; color: #374151; }
+  .notes h2 { font-size: 15px; margin: 0 0 8px; }
+  .notes ul { padding-left: 18px; margin: 6px 0 14px; }
+  .notes code { background: #fff; border: 1px solid #e5e7eb; border-radius: 4px; padding: 1px 4px; font-size: 12px; }
+  .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ① 列表：卡片右侧 ♡/♥ + 顶部收藏入口 -->
+  <div>
+    <div class="phone">
+      <div class="nav">动作库</div>
+      <div class="page">
+        <div class="search-bar"><div class="search-input search-ph"></div></div>
+
+        <div class="fav-bar">
+          <div class="fav-chip"><span class="fav-ico">♡</span><span>我的收藏</span><span class="fav-num">2</span></div>
+          <div class="fav-hint">点卡片上的 ♡ 可取消收藏</div>
+        </div>
+
+        <div class="tab-row">
+          <div class="tab tab-active">全部</div><div class="tab">胸</div><div class="tab">背</div>
+          <div class="tab">腿</div><div class="tab">肩</div><div class="tab">核心</div><div class="tab">有氧</div>
+        </div>
+        <div class="chip-row">
+          <div class="chip chip-active">全部</div><div class="chip">徒手</div>
+          <div class="chip">哑铃</div><div class="chip">健身房</div>
+        </div>
+        <div class="result-tip">共 12 个动作</div>
+
+        <div class="ex-card">
+          <div class="ex-thumb">🤸</div>
+          <div class="ex-info">
+            <div class="ex-head"><span class="ex-name">标准俯卧撑</span><span class="ex-stars">★☆☆</span></div>
+            <div class="ex-tags"><span class="tag">胸</span><span class="tag tag-plain">徒手</span><span class="tag tag-plain">初级</span></div>
+          </div>
+          <div class="ex-fav ex-fav-on">♥</div>
+        </div>
+
+        <div class="ex-card">
+          <div class="ex-thumb">🏋️</div>
+          <div class="ex-info">
+            <div class="ex-head"><span class="ex-name">哑铃单臂划船</span><span class="ex-stars">★★☆</span></div>
+            <div class="ex-tags"><span class="tag">背</span><span class="tag tag-plain">哑铃</span><span class="tag tag-plain">中级</span></div>
+          </div>
+          <div class="ex-fav ex-fav-on">♥</div>
+        </div>
+
+        <div class="ex-card">
+          <div class="ex-thumb">🦵</div>
+          <div class="ex-info">
+            <div class="ex-head"><span class="ex-name">徒手深蹲</span><span class="ex-stars">★☆☆</span></div>
+            <div class="ex-tags"><span class="tag">腿</span><span class="tag tag-plain">徒手</span><span class="tag tag-plain">初级</span></div>
+          </div>
+          <div class="ex-fav">♡</div>
+        </div>
+
+        <div class="ex-card">
+          <div class="ex-thumb">💪</div>
+          <div class="ex-info">
+            <div class="ex-head"><span class="ex-name">引体向上</span><span class="ex-stars">★★★</span></div>
+            <div class="ex-tags"><span class="tag">背</span><span class="tag tag-plain">健身房</span><span class="tag tag-plain">高级</span></div>
+          </div>
+          <div class="ex-fav">♡</div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">① 列表：卡片右侧 ♡ / ♥，顶部「我的收藏」入口</div>
+  </div>
+
+  <!-- ② 收藏筛选 + 空态 -->
+  <div>
+    <div class="phone">
+      <div class="nav">动作库</div>
+      <div class="page">
+        <div class="search-bar"><div class="search-input search-ph"></div></div>
+        <div class="fav-bar">
+          <div class="fav-chip fav-chip-on"><span class="fav-ico">♥</span><span>我的收藏</span><span class="fav-num">2</span></div>
+          <div class="fav-hint">点卡片上的 ♡ 可取消收藏</div>
+        </div>
+        <div class="tab-row">
+          <div class="tab tab-active">全部</div><div class="tab">胸</div><div class="tab">背</div>
+          <div class="tab">腿</div><div class="tab">肩</div><div class="tab">核心</div><div class="tab">有氧</div>
+        </div>
+        <div class="result-tip">收藏 2 个动作</div>
+
+        <div class="ex-card">
+          <div class="ex-thumb">🏋️</div>
+          <div class="ex-info">
+            <div class="ex-head"><span class="ex-name">哑铃单臂划船</span><span class="ex-stars">★★☆</span></div>
+            <div class="ex-tags"><span class="tag">背</span><span class="tag tag-plain">哑铃</span><span class="tag tag-plain">中级</span></div>
+          </div>
+          <div class="ex-fav ex-fav-on">♥</div>
+        </div>
+        <div class="ex-card">
+          <div class="ex-thumb">🤸</div>
+          <div class="ex-info">
+            <div class="ex-head"><span class="ex-name">标准俯卧撑</span><span class="ex-stars">★☆☆</span></div>
+            <div class="ex-tags"><span class="tag">胸</span><span class="tag tag-plain">徒手</span><span class="tag tag-plain">初级</span></div>
+          </div>
+          <div class="ex-fav ex-fav-on">♥</div>
+        </div>
+
+        <div class="ex-card" style="opacity:.55">
+          <div class="ex-thumb" style="background:#f3f4f6">—</div>
+          <div class="ex-info">
+            <div class="ex-head"><span class="ex-name" style="color:#9ca3af">在收藏页取消 ♥ → 卡片立即消失</span></div>
+            <div class="ex-tags"><span class="tag tag-plain">最近收藏的排在最前</span></div>
+          </div>
+        </div>
+
+        <div class="empty-box">
+          <div class="empty-tip">还没有收藏的动作</div>
+          <div class="empty-sub">动作卡片右侧点 ♡，常用动作就会出现在这里</div>
+          <div class="empty-btn">看全部动作</div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">② 收藏筛选（最近收藏在前）+ 无收藏时的空态</div>
+  </div>
+
+  <!-- ③ 详情弹层里的收藏按钮 -->
+  <div>
+    <div class="phone">
+      <div class="nav">动作库</div>
+      <div class="page" style="min-height:600px">
+        <div class="search-bar"><div class="search-input search-ph"></div></div>
+        <div class="fav-bar">
+          <div class="fav-chip"><span class="fav-ico">♡</span><span>我的收藏</span><span class="fav-num">2</span></div>
+        </div>
+        <div class="result-tip">共 12 个动作</div>
+        <div class="ex-card"><div class="ex-thumb">🤸</div><div class="ex-info">
+          <div class="ex-head"><span class="ex-name">标准俯卧撑</span><span class="ex-stars">★☆☆</span></div></div>
+          <div class="ex-fav ex-fav-on">♥</div></div>
+        <div class="ex-card"><div class="ex-thumb">🦵</div><div class="ex-info">
+          <div class="ex-head"><span class="ex-name">徒手深蹲</span><span class="ex-stars">★☆☆</span></div></div>
+          <div class="ex-fav">♡</div></div>
+
+        <div class="mask">
+          <div class="sheet">
+            <div class="sheet-head">
+              <div class="sheet-title">标准俯卧撑</div>
+              <div class="sheet-acts">
+                <div class="sheet-fav sheet-fav-on">♥ 已收藏</div>
+                <div class="sheet-close">×</div>
+              </div>
+            </div>
+            <div class="ex-tags" style="display:flex;gap:5px;margin-top:10px">
+              <span class="tag">胸</span><span class="tag tag-plain">徒手</span><span class="tag tag-plain">初级</span>
+            </div>
+            <div class="sheet-gif">🤸</div>
+            <div class="sec"><div class="sec-title">动作要点</div>
+              <div class="sec-body">核心收紧，身体成一条直线，下落至胸口离地一拳</div></div>
+            <div class="sec"><div class="sec-title">常见错误</div>
+              <div class="sec-body warn">塌腰、耸肩、幅度不足</div></div>
+            <div class="sec"><div class="sec-title">替代 / 进阶</div>
+              <div class="alt-row"><span class="alt">跪姿俯卧撑</span><span class="alt">上斜俯卧撑</span></div></div>
+            <div class="sheet-tip">量力而行，出现疼痛请立即停止</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">③ 详情弹层右上角「♥ 已收藏 / ♡ 收藏」，点完不关闭弹层</div>
+  </div>
+
+  <div class="notes">
+    <h2>交互说明</h2>
+    <ul>
+      <li><b>收藏入口</b>：搜索框下方「♡ 我的收藏 + 数量」，点一下只看收藏，再点回到全部</li>
+      <li><b>卡片右侧 ♡ / ♥</b>：用 <code>catchtap</code> 阻止冒泡，点收藏不会打开详情</li>
+      <li><b>收藏顺序</b>：最近收藏的排最前；在收藏页取消 ♥，卡片立即消失</li>
+      <li><b>入口打通</b>：「我的 → ♥ 我的收藏（带数量）」直接跳 <code>library?fav=1</code></li>
+      <li><b>空态</b>：没有收藏时给引导 + 「看全部动作」按钮</li>
+    </ul>
+    <h2>实现要点</h2>
+    <ul>
+      <li>新服务 <code>services/favorites.js</code>：存在 <code>wx.storage</code>（key <code>fav_exercises_v1</code>），不碰云数据库</li>
+      <li>脏数据容错：非数组 / 非字符串 / 空串 / 重复 → 过滤；上限 200 条</li>
+      <li>存储读写包了 try/catch：写满或权限异常不会让页面崩</li>
+      <li>收藏 id 在动作库里查不到时（比如素材换源）自动过滤，不出现空白卡片</li>
+      <li>单测 <code>test-library.js</code> 45 → <b>66</b> 项，覆盖 toggle / 顺序 / 去重 / 上限 / 脏数据 / 与动作库联动</li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

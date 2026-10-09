@@ -1,0 +1,144 @@
+<!--components/skeleton/skeleton.wxml — 骨架屏（版式由 utils/skeleton.js 的 buildSpec 描述）-->
+<view class="sk-page sk-{{v}}">
+  <view wx:for="{{cards}}" wx:for-item="card" wx:key="k" class="{{card.bare ? 'sk-bare' : 'sk-card'}}">
+    <block wx:for="{{card.blocks}}" wx:for-item="b" wx:key="k">
+
+      <!-- 深色头部（计划 / 跟练页，页面里本来就是整块深色，不套白卡） -->
+      <view wx:if="{{b.type === 'hero'}}" class="sk-hero">
+        <view
+          wx:for="{{b.widths}}"
+          wx:for-item="w"
+          wx:key="*this"
+          class="sh-dark sk-hero-line"
+          style="width:{{w}}"
+        ></view>
+        <view wx:if="{{b.progress}}" class="sk-hero-track">
+          <view class="sh-dark sk-hero-track-inner"></view>
+        </view>
+      </view>
+
+      <!-- 卡片标题（右侧可选一条短块） -->
+      <view wx:elif="{{b.type === 'head'}}" class="sk-head">
+        <view class="sk sh sk-t" style="width:{{b.w}}rpx"></view>
+        <view wx:if="{{b.right}}" class="sk sh sk-t" style="width:{{b.right}}rpx"></view>
+      </view>
+
+      <!-- 文本行（tint = 浅绿底区块，如训练首页的「今日安排」） -->
+      <view wx:elif="{{b.type === 'lines'}}" class="sk-lines {{b.tint ? 'sk-tint' : ''}}">
+        <view
+          wx:for="{{b.widths}}"
+          wx:for-item="w"
+          wx:key="*this"
+          class="sk sh sk-line"
+          style="width:{{w}}"
+        ></view>
+      </view>
+
+      <!-- 进度环 + 两行概览（本周目标） -->
+      <view wx:elif="{{b.type === 'ring'}}" class="sk-ring-wrap">
+        <view class="sk sh sk-ring"></view>
+        <view class="sk-ring-lines">
+          <view class="sk sh sk-line" style="width:{{b.w1}}"></view>
+          <view class="sk sh sk-line" style="width:{{b.w2}}"></view>
+        </view>
+      </view>
+
+      <!-- 四格数据（概览类） -->
+      <view wx:elif="{{b.type === 'grid'}}" class="sk-grid">
+        <view wx:for="{{b.cells}}" wx:for-item="c" wx:key="*this" class="sk-grid-item">
+          <view class="sk sh sk-num"></view>
+          <view class="sk sh sk-line sk-line-sm"></view>
+        </view>
+      </view>
+
+      <!-- 徽章栅格（2 列：圆形图标 + 两行说明） -->
+      <view wx:elif="{{b.type === 'tiles'}}" class="sk-tiles">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk-tile">
+          <view class="sk sh sk-tile-icon"></view>
+          <view class="sk sh sk-line" style="width:74%"></view>
+          <view class="sk sh sk-line sk-line-sm" style="width:46%"></view>
+        </view>
+      </view>
+
+      <!-- 柱状图 -->
+      <view wx:elif="{{b.type === 'chart'}}" class="sk-chart">
+        <view wx:for="{{b.bars}}" wx:for-item="h" wx:key="*this" class="sk-bar-col">
+          <view class="sk sh sk-bar" style="height:{{h}}%"></view>
+        </view>
+      </view>
+
+      <!-- 热力图（列 × 7 天） -->
+      <view wx:elif="{{b.type === 'heat'}}" class="sk-heat">
+        <view wx:for="{{b.cols}}" wx:for-item="col" wx:key="*this" class="sk-heat-col">
+          <view wx:for="{{b.days}}" wx:for-item="d" wx:key="*this" class="sk sh sk-cell"></view>
+        </view>
+      </view>
+
+      <!-- 日历（行 × 7 天） -->
+      <view wx:elif="{{b.type === 'cal'}}" class="sk-cal">
+        <view wx:for="{{b.rows}}" wx:for-item="r" wx:key="*this" class="sk-cal-row">
+          <view wx:for="{{b.days}}" wx:for-item="d" wx:key="*this" class="sk-cal-cell">
+            <view class="sk sh sk-sq"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 列表行（可选缩略图 / 可选左侧日期条） -->
+      <view wx:elif="{{b.type === 'rows'}}" class="sk-rows">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk-row">
+          <view wx:if="{{b.avatar}}" class="sk sh sk-thumb"></view>
+          <view wx:if="{{b.lead}}" class="sk sh sk-line sk-lead" style="width:{{b.lead}}"></view>
+          <view class="sk-row-main">
+            <view class="sk sh sk-line" style="width:{{b.w1}}"></view>
+            <view class="sk sh sk-line" style="width:{{b.w2}}"></view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 键值行（左标签 / 右数值） -->
+      <view wx:elif="{{b.type === 'kv'}}" class="sk-rows">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk-kv-row">
+          <view class="sk sh sk-line" style="width:{{b.w1}}"></view>
+          <view class="sk sh sk-line" style="width:{{b.w2}}"></view>
+        </view>
+      </view>
+
+      <!-- 周打卡圆点 -->
+      <view wx:elif="{{b.type === 'dots'}}" class="sk-dots">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk-dot-item">
+          <view class="sk sh sk-dot"></view>
+        </view>
+      </view>
+
+      <!-- 工具入口 -->
+      <view wx:elif="{{b.type === 'tools'}}" class="sk-tools">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk-tool">
+          <view class="sk sh sk-icon"></view>
+          <view class="sk sh sk-line sk-line-sm"></view>
+        </view>
+      </view>
+
+      <!-- 横向标签条（周切换 / 分类） -->
+      <view wx:elif="{{b.type === 'tabs'}}" class="sk-tabs">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk sh sk-pill"></view>
+      </view>
+
+      <!-- 组数输入块 -->
+      <view wx:elif="{{b.type === 'sets'}}" class="sk-sets">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk sh sk-chip"></view>
+      </view>
+
+      <!-- 按钮行 -->
+      <view wx:elif="{{b.type === 'buttons'}}" class="sk-btns">
+        <view wx:for="{{b.items}}" wx:for-item="it" wx:key="*this" class="sk sh sk-btn"></view>
+      </view>
+
+      <!-- 单个通栏按钮 -->
+      <view wx:elif="{{b.type === 'button'}}" class="sk sh sk-btn sk-btn-full"></view>
+
+      <!-- 进度条 -->
+      <view wx:elif="{{b.type === 'bar'}}" class="sk sh sk-progress"></view>
+
+    </block>
+  </view>
+</view>

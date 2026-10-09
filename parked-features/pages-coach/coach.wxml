@@ -1,0 +1,87 @@
+<!--pages/coach/coach.wxml — AI 教练对话页（沉浸式改版） -->
+<view class="chat-page">
+
+  <!-- 沉浸式头部：深色渐变，与训练页 hero 同风格 -->
+  <view class="hero" style="padding-top: {{statusBarHeight}}px;">
+    <view class="hero-row">
+      <view class="hero-avatar">💪</view>
+      <view class="hero-info">
+        <view class="hero-name">AI 教练</view>
+        <view class="hero-status">
+          <view class="status-dot"></view>
+          <text>{{hasProfile ? '在线 · 已了解你的身体档案' : '在线 · 建议先去「训练」页建档'}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 消息列表 -->
+  <scroll-view
+    class="msg-list"
+    scroll-y
+    scroll-into-view="{{scrollIntoView}}"
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <!-- 欢迎消息 -->
+    <view class="msg-row assistant">
+      <view class="avatar">AI</view>
+      <view class="bubble">
+        <view class="msg-text">你好，我是你的专属 AI 健身教练 💪</view>
+        <view class="msg-text">{{hasProfile ? '已读取你的身体档案，训练、饮食、恢复都可以直接问。' : '训练安排、动作要领、饮食建议都可以问我。建议先完成建档，我能答得更准。'}}</view>
+      </view>
+    </view>
+
+    <!-- 快捷提问（无历史时展示） -->
+    <view wx:if="{{!messages.length && !sending}}" class="suggestions">
+      <view class="sug-title">试试这样问我</view>
+      <view class="sug-grid">
+        <view
+          wx:for="{{suggestions}}"
+          wx:key="text"
+          class="sug-item"
+          data-text="{{item.text}}"
+          hover-class="sug-hover"
+          bindtap="onSuggestionTap"
+        >
+          <text class="sug-icon">{{item.icon}}</text>
+          <text class="sug-text">{{item.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 历史与实时消息 -->
+    <view wx:for="{{messages}}" wx:key="id" class="msg-row {{item.role}} {{item.temp ? 'temp' : ''}}">
+      <view wx:if="{{item.role === 'assistant'}}" class="avatar">AI</view>
+      <view class="bubble">
+        <!-- 打字中：三点跳动动画 -->
+        <view wx:if="{{item.temp}}" class="typing">
+          <view class="dot d1"></view>
+          <view class="dot d2"></view>
+          <view class="dot d3"></view>
+        </view>
+        <!-- AI 回复：Markdown 渲染 -->
+        <rich-text wx:elif="{{item.nodes}}" class="msg-text msg-rich" nodes="{{item.nodes}}"></rich-text>
+        <view wx:else class="msg-text">{{item.content}}</view>
+      </view>
+      <view wx:if="{{item.role === 'user'}}" class="avatar user">😊</view>
+    </view>
+
+    <view id="msg-bottom" style="height: 24rpx;"></view>
+  </scroll-view>
+
+  <!-- 输入区：浮起式 -->
+  <view class="input-bar safe-area-bottom">
+    <input
+      class="chat-input"
+      value="{{inputValue}}"
+      placeholder="问我任何训练 / 饮食问题…"
+      placeholder-class="input-placeholder"
+      confirm-type="send"
+      bindinput="onInput"
+      bindconfirm="onSend"
+      disabled="{{sending}}"
+    />
+    <view class="send-btn {{inputValue ? 'active' : ''}}" bindtap="onSend">↑</view>
+  </view>
+</view>

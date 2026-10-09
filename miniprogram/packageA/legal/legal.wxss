@@ -1,0 +1,164 @@
+/* packageA/legal/legal.wxss — 用户协议 / 隐私政策 */
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding: 24rpx 0 80rpx;
+  box-sizing: border-box;
+}
+
+/* 底部有同意条时多留一段，避免正文被按钮盖住 */
+.page.has-bar {
+  padding-bottom: 220rpx;
+}
+
+/* ---------- 文档头 ---------- */
+.doc-head {
+  padding: 8rpx 32rpx 24rpx;
+}
+.doc-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+.doc-meta {
+  margin-top: 12rpx;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+.doc-summary {
+  margin-top: 20rpx;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.7;
+}
+
+/* ---------- 文档切换 ---------- */
+.doc-tabs {
+  display: flex;
+  margin: 0 32rpx 24rpx;
+  background: #e9ebef;
+  border-radius: var(--radius-base);
+  padding: 6rpx;
+}
+.doc-tab {
+  flex: 1;
+  text-align: center;
+  font-size: var(--font-size-base);
+  color: var(--color-text-secondary);
+  padding: 14rpx 0;
+  border-radius: 8rpx;
+  transition: all 0.15s;
+}
+.doc-tab.active {
+  background: var(--color-card);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+/* ---------- 正文 ---------- */
+.sec-card {
+  margin: 0 32rpx 24rpx;
+  padding: 28rpx 32rpx;
+}
+.sec-h {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 16rpx;
+}
+.sec-p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  margin-bottom: 12rpx;
+}
+.sec-p:last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- 收集清单表格 ---------- */
+.tbl {
+  margin-top: 20rpx;
+  border-top: 1rpx solid var(--color-border);
+}
+.tbl-row {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid var(--color-border);
+}
+.tbl-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+.tbl-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+.tbl-name {
+  flex: 1;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+}
+.tbl-tag {
+  font-size: 20rpx;
+  padding: 2rpx 12rpx;
+  border-radius: 999rpx;
+  margin-left: 12rpx;
+  flex-shrink: 0;
+}
+/* 必需 = 红字浅红底（提示不可省略）；可选 = 灰字浅灰底 */
+.tbl-tag.req {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+.tbl-tag.opt {
+  color: var(--color-text-secondary);
+  background: #f3f4f6;
+}
+.tbl-line {
+  display: flex;
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  margin-top: 6rpx;
+}
+.tbl-k {
+  width: 76rpx;
+  flex-shrink: 0;
+  color: var(--color-text-light);
+}
+.tbl-v {
+  flex: 1;
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 页脚 ---------- */
+.doc-foot {
+  padding: 16rpx 32rpx 0;
+  text-align: center;
+}
+.foot-line {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  line-height: 40rpx;
+}
+
+/* ---------- 从建档流程进入时的同意条 ---------- */
+.agree-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 20rpx 32rpx;
+  background: var(--color-card);
+  border-top: 1rpx solid var(--color-border);
+  box-shadow: 0 -2rpx 16rpx rgba(0, 0, 0, 0.05);
+}
+.agree-tip {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: var(--color-primary-dark);
+  margin-bottom: 12rpx;
+}

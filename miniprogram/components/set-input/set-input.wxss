@@ -1,0 +1,135 @@
+/* components/set-input/set-input.wxss */
+.set-input {
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 24rpx;
+}
+
+/* 头部 */
+.si-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20rpx;
+}
+
+.si-sets {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.si-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.step-btn {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--color-primary);
+  font-size: 32rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.step-btn:active {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.step-num {
+  min-width: 48rpx;
+  text-align: center;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.si-target {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+/* 每组行 */
+.si-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.si-row {
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: var(--radius-base);
+  padding: 16rpx 24rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+
+.si-row.done {
+  border-color: var(--color-primary);
+  background: rgba(16, 185, 129, 0.06);
+}
+
+.si-check {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: var(--color-bg);
+  border: 2rpx solid var(--color-border);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.si-row.done .si-check {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+.si-row-text {
+  flex: 1;
+  font-size: var(--font-size-base);
+  margin-left: 20rpx;
+}
+
+.si-weight {
+  width: 160rpx;
+  text-align: right;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+}
+
+.si-ph {
+  color: var(--color-text-light);
+  font-weight: 400;
+  font-size: var(--font-size-sm);
+}
+
+.si-unit {
+  width: 56rpx;
+  text-align: right;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.si-bodyweight {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}

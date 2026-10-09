@@ -1,0 +1,89 @@
+<!--packageA/badges/badges.wxml — 成就徽章 -->
+<view class="page">
+
+  <!-- 顶部进度概览 -->
+  <view class="hero">
+    <view class="hero-row">
+      <view class="hero-main">
+        <view class="hero-num">{{unlockedCount}}<text class="hero-total">/ {{total}}</text></view>
+        <view class="hero-label">已解锁徽章</view>
+      </view>
+      <view class="hero-badge">🏅</view>
+    </view>
+    <view class="hero-track">
+      <view class="hero-fill" style="width:{{percent}}%"></view>
+    </view>
+  </view>
+
+  <!-- 首屏骨架屏：延迟 180ms 才出现，缓存命中时不闪 -->
+  <skeleton wx:if="{{skVisible}}" variant="badge" />
+
+  <!-- 读取失败：错误卡只在失败时出现 -->
+  <view wx:elif="{{loadError}}" class="card state-card">
+    <view class="state-text">{{loadError}}</view>
+    <view class="btn-ghost state-btn" bindtap="retry">重试</view>
+  </view>
+
+  <block wx:else>
+
+    <!-- 本次新解锁 -->
+    <view wx:if="{{newly.length}}" class="new-card">
+      <text class="new-icon">🎉</text>
+      <text class="new-text">新解锁 {{newly.length}} 枚：{{newlyText}}</text>
+    </view>
+
+    <!-- 下一个目标 -->
+    <view wx:if="{{next}}" class="card next-card">
+      <view class="next-head">
+        <text class="next-label">下一个目标</text>
+        <text class="next-remain">{{next.remainText}}</text>
+      </view>
+      <view class="next-body">
+        <view class="next-icon">{{next.icon}}</view>
+        <view class="next-main">
+          <view class="next-name">{{next.name}}</view>
+          <view class="next-desc">{{next.desc}}</view>
+          <view class="next-bar">
+            <view class="next-fill" style="width:{{next.percent}}%"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="card next-card all-done-card">
+      <text class="all-done-icon">🏆</text>
+      <text class="all-done-text">全部 {{total}} 枚徽章已解锁，坚持就是你的实力</text>
+    </view>
+
+    <!-- 分组徽章网格 -->
+    <view class="card" wx:for="{{groups}}" wx:key="key" wx:for-item="grp">
+      <view class="card-header">
+        <text class="card-title">{{grp.title}}</text>
+        <text class="card-stat">{{grp.items.length}} 枚</text>
+      </view>
+
+      <view class="tiles">
+        <view
+          wx:for="{{grp.items}}"
+          wx:key="id"
+          wx:for-item="bg"
+          class="tile {{bg.unlocked ? 'on' : ''}} {{bg.isNew ? 'is-new' : ''}}"
+        >
+          <view class="tile-icon">{{bg.icon}}</view>
+          <view class="tile-name">{{bg.name}}</view>
+          <view class="tile-desc">{{bg.desc}}</view>
+          <view wx:if="{{bg.unlocked}}" class="tile-foot tile-unlocked">✓ {{bg.unlockedText}}</view>
+          <block wx:else>
+            <view class="tile-bar">
+              <view class="tile-fill" style="width:{{bg.percent}}%"></view>
+            </view>
+            <view class="tile-foot">{{bg.remainText}}</view>
+          </block>
+        </view>
+      </view>
+    </view>
+
+    <!-- 口径说明：避免用户以为「累计」是全历史 -->
+    <view class="footnote">徽章依据最近 365 天的训练记录判定，已解锁的徽章永久保留</view>
+  </block>
+</view>

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>训练提醒 · 视觉预览（设置页 / 未配置 / 打卡后引导 / 收到的消息）</title>
+<style>
+  /* rpx → px 按 1rpx = 0.5px 换算，375px 宽模拟 iPhone */
+  :root {
+    --color-primary: #10b981;
+    --color-text: #1f2937;
+    --color-text-secondary: #6b7280;
+    --color-text-light: #9ca3af;
+    --color-bg: #f5f6f8;
+    --color-border: #e5e7eb;
+    --radius-base: 6px;
+    --radius-lg: 10px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #eceef1; padding: 28px 16px 60px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', sans-serif;
+    color: var(--color-text); }
+  .wrap { display: flex; flex-wrap: wrap; gap: 26px; justify-content: center; align-items: flex-start; }
+  .phone { width: 375px; background: var(--color-bg); border-radius: 22px; overflow: hidden;
+           box-shadow: 0 10px 32px rgba(0,0,0,.14); position: relative; flex: 0 0 auto; }
+  .cap { text-align: center; font-size: 12px; color: #6b7280; margin-top: 10px; max-width: 375px; }
+  .navbar { height: 44px; display: flex; align-items: center; justify-content: center;
+    background: #fff; font-size: 16px; font-weight: 600; border-bottom: 1px solid #f0f1f3; }
+  .screen { padding: 12px 12px 30px; min-height: 560px; }
+
+  .note-card { background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: var(--radius-lg);
+    padding: 12px; margin-bottom: 12px; }
+  .note-title { font-size: 14px; font-weight: 600; color: #047857; margin-bottom: 6px; }
+  .note-line { font-size: 12px; color: #065f46; line-height: 20px; }
+
+  .card { background: #fff; border-radius: var(--radius-lg); padding: 16px; margin-bottom: 12px;
+    box-shadow: 0 1px 6px rgba(0,0,0,.04); }
+  .warn-card { background: #fffbeb; border: 1px solid #fde68a; }
+  .warn-title { font-size: 14px; font-weight: 600; color: #b45309; margin-bottom: 6px; }
+  .warn-line { font-size: 12px; color: #92400e; line-height: 19px; margin-bottom: 4px; }
+  .warn-code { font-size: 11px; color: #78350f; background: #fef3c7; border-radius: var(--radius-base);
+    padding: 5px 8px; margin: 4px 0; word-break: break-all; }
+
+  .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .card-title { font-size: 16px; font-weight: 600; }
+  .status-tag { font-size: 12px; color: var(--color-text-light); background: var(--color-bg);
+    border-radius: 999px; padding: 2px 9px; }
+  .status-tag.tag-on { color: #059669; background: #ecfdf5; }
+  .status-tag.tag-warn { color: #b45309; background: #fffbeb; }
+
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0;
+    border-bottom: 1px solid var(--color-border); }
+  .row:last-of-type { border-bottom: none; }
+  .row-label { font-size: 14px; color: var(--color-text-secondary); }
+  .row-value { font-size: 14px; display: flex; align-items: center; }
+  .row-arrow { color: var(--color-text-light); margin-left: 4px; }
+
+  .tip-text { font-size: 12px; color: var(--color-text-secondary); line-height: 19px; margin: 8px 0 4px; }
+  .btn-primary { margin-top: 12px; background: var(--color-primary); color: #fff; text-align: center;
+    font-size: 15px; font-weight: 600; padding: 11px; border-radius: 999px; }
+  .btn-ghost { margin-top: 10px; border: 1px solid var(--color-border); color: var(--color-text-secondary);
+    text-align: center; font-size: 14px; padding: 10px; border-radius: 999px; background: #fff; }
+  .disclaimer { text-align: center; font-size: 11px; color: var(--color-text-light); margin-top: 20px;
+    line-height: 17px; }
+
+  /* 打卡后引导弹层 */
+  .mask { position: absolute; inset: 0; background: rgba(0,0,0,.5); display: flex; align-items: flex-end; }
+  .sheet { width: 100%; background: #fff; border-radius: 10px 10px 0 0; padding: 16px 16px 24px; }
+  .remind-icon { font-size: 32px; text-align: center; line-height: 1.2; }
+  .remind-title { font-size: 18px; font-weight: 700; text-align: center; margin: 6px 0 5px; }
+  .remind-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 19px; text-align: center; }
+
+  /* 微信「服务通知」收到的消息 */
+  .wx-head { background: #ededed; padding: 10px 14px; font-size: 12px; color: #576b95; }
+  .msg-card { background: #fff; margin: 12px; border-radius: 8px; padding: 14px; }
+  .msg-app { font-size: 11px; color: var(--color-text-light); margin-bottom: 8px; }
+  .msg-row { display: flex; font-size: 13px; line-height: 24px; }
+  .msg-k { color: #7d7d7d; width: 76px; flex-shrink: 0; }
+  .msg-v { color: #303030; }
+  .msg-foot { font-size: 14px; font-weight: 600; color: #303030; margin-top: 12px;
+    padding-top: 10px; border-top: 1px solid #f0f1f3; }
+  .hint { font-size: 12px; color: #6b7280; line-height: 20px; padding: 0 16px 16px; }
+  .badge { display: inline-block; font-size: 11px; background: #ecfdf5; color: #047857;
+    border-radius: 4px; padding: 2px 6px; margin-left: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ① 提醒设置页 · 已开启 -->
+  <div>
+    <div class="phone">
+      <div class="navbar">训练提醒</div>
+      <div class="screen">
+        <div class="note-card">
+          <div class="note-title">训练提醒是怎么工作的</div>
+          <div class="note-line">· 微信对这类小程序只开放「一次性订阅」：授权 1 次 = 能收到 1 条提醒</div>
+          <div class="note-line">· 每次完成打卡后 App 会顺带问一句，顺手确认就够下一天用</div>
+          <div class="note-line">· 当天已经打过卡就不会再发，额度不会浪费</div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">提醒设置</span>
+            <span class="status-tag tag-on">已开启 · 19:00</span>
+          </div>
+          <div class="row">
+            <span class="row-label">提醒时间</span>
+            <span class="row-value">19:00<span class="row-arrow">›</span></span>
+          </div>
+          <div class="row">
+            <span class="row-label">剩余提醒次数</span>
+            <span class="row-value">剩余 2 次</span>
+          </div>
+          <div class="row">
+            <span class="row-label">最近一次提醒</span>
+            <span class="row-value">2026-10-06</span>
+          </div>
+          <div class="tip-text">订阅成功，额度 +1。微信限制一次授权只能发一条，完成训练后顺手续订即可。</div>
+          <div class="btn-primary">续订 1 次提醒</div>
+          <div class="btn-ghost">关闭提醒</div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><span class="card-title">自检</span></div>
+          <div class="tip-text">改完模板与云函数配置后，点下面按钮立刻给自己发一条，验证链路是否打通（会消耗 1 次订阅额度）。</div>
+          <div class="btn-ghost">发送测试提醒</div>
+        </div>
+
+        <div class="disclaimer">提醒通过微信订阅消息下发，实际到达时间受系统通知权限影响</div>
+      </div>
+    </div>
+    <div class="cap">① 提醒设置页（已开启）：时间是 picker，剩余次数是核心信息</div>
+  </div>
+
+  <!-- ② 未配置模板 -->
+  <div>
+    <div class="phone">
+      <div class="navbar">训练提醒</div>
+      <div class="screen">
+        <div class="note-card">
+          <div class="note-title">训练提醒是怎么工作的</div>
+          <div class="note-line">· 微信对这类小程序只开放「一次性订阅」：授权 1 次 = 能收到 1 条提醒</div>
+          <div class="note-line">· 每次完成打卡后 App 会顺带问一句，顺手确认就够下一天用</div>
+          <div class="note-line">· 当天已经打过卡就不会再发，额度不会浪费</div>
+        </div>
+
+        <div class="card warn-card">
+          <div class="warn-title">⚠️ 提醒模板未配置</div>
+          <div class="warn-line">请到「微信公众平台 → 功能 → 订阅消息」选用一个模板，然后把模板 ID 填到两处：</div>
+          <div class="warn-code">miniprogram/services/reminder.js → TEMPLATE_ID</div>
+          <div class="warn-code">云函数 sendReminder → 环境变量 REMINDER_TEMPLATE_ID</div>
+          <div class="warn-line">完整步骤见 docs/REMINDER-SETUP.md</div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">提醒设置</span>
+            <span class="status-tag tag-warn">待续订</span>
+          </div>
+          <div class="row">
+            <span class="row-label">提醒时间</span>
+            <span class="row-value">19:00<span class="row-arrow">›</span></span>
+          </div>
+          <div class="row">
+            <span class="row-label">剩余提醒次数</span>
+            <span class="row-value">剩余 0 次</span>
+          </div>
+          <div class="btn-primary">续订 1 次提醒</div>
+        </div>
+
+        <div class="disclaimer">提醒通过微信订阅消息下发，实际到达时间受系统通知权限影响</div>
+      </div>
+    </div>
+    <div class="cap">② 模板还没配时的样子：直接给配置指引，不会「点了没反应」</div>
+  </div>
+
+  <!-- ③ 打卡后的引导 -->
+  <div>
+    <div class="phone">
+      <div class="navbar">跟练</div>
+      <div class="screen" style="filter: blur(.4px);">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-size:15px;font-weight:700;">Day 1 · 胸 / 三头</div>
+              <div style="font-size:12px;color:#6b7280;margin-top:2px;">5/5 个动作已完成</div>
+            </div>
+            <div style="font-size:13px;color:#059669;">⏱ 32:10</div>
+          </div>
+          <div style="height:6px;background:#e5e7eb;border-radius:999px;margin-top:10px;">
+            <div style="height:6px;width:100%;background:#10b981;border-radius:999px;"></div>
+          </div>
+        </div>
+        <div class="card" style="opacity:.5;">
+          <div style="font-size:14px;font-weight:600;">俯卧撑</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:4px;">4 组 × 12 次</div>
+        </div>
+      </div>
+
+      <div class="mask">
+        <div class="sheet">
+          <div class="remind-icon">🔔</div>
+          <div class="remind-title">明天还要提醒你来训练吗？</div>
+          <div class="remind-desc">微信对健身类小程序只开放一次性订阅：授权 1 次可收到 1 条提醒。</div>
+          <div class="row" style="margin-top:8px;">
+            <span class="row-label">提醒时间</span>
+            <span class="row-value">19:00<span class="row-arrow">›</span></span>
+          </div>
+          <div class="btn-primary">订阅明日提醒</div>
+          <div class="btn-ghost">不用了</div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">③ 打卡成功后顺带引导（此时用户最有动力，弹授权最不反感）</div>
+  </div>
+
+  <!-- ④ 收到的消息 -->
+  <div>
+    <div class="phone">
+      <div class="wx-head">微信 · 服务通知</div>
+      <div class="screen" style="padding:0;">
+        <div class="msg-card" style="margin-top:0;border-radius:0;">
+          <div class="msg-app">轻练打卡健身 <span class="badge">订阅消息</span></div>
+          <div class="msg-row"><span class="msg-k">提醒事项</span><span class="msg-v">今日训练提醒</span></div>
+          <div class="msg-row"><span class="msg-k">提醒时间</span><span class="msg-v">2026年10月7日 19:00</span></div>
+          <div class="msg-row"><span class="msg-k">温馨提示</span><span class="msg-v">点开完成今天的计划吧</span></div>
+          <div class="msg-foot">点击查看 ›</div>
+        </div>
+        <div class="hint" style="margin-top:12px;">
+          字段名（thing1 / time2 / thing3）由你选用的模板决定，在<br>
+          <code>cloudfunctions/sendReminder/index.js</code> 的 <code>FIELD_MAP</code> 里改。<br>
+          三个字段的内容由 <code>lib.buildContent()</code> 生成，已按 20 字上限截断。
+        </div>
+      </div>
+    </div>
+    <div class="cap">④ 用户实际收到的样子（模板不同，字段名与排版会略有差别）</div>
+  </div>
+
+</div>
+</body>
+</html>

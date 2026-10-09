@@ -1,0 +1,9 @@
+{
+  "usingComponents": {
+    "set-input": "../../components/set-input/set-input",
+    "skeleton": "../../components/skeleton/skeleton"
+  },
+  "navigationBarTitleText": "跟练打卡",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

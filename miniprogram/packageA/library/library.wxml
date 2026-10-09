@@ -1,0 +1,138 @@
+<!--packageA/library/library.wxml — 动作库 -->
+<view class="page">
+
+  <!-- 搜索 -->
+  <view class="search-bar">
+    <input
+      class="search-input"
+      value="{{keyword}}"
+      placeholder="搜索动作 / 部位 / 器械"
+      placeholder-class="search-ph"
+      bindinput="onSearch"
+    />
+    <view wx:if="{{keyword}}" class="search-clear" bindtap="onClearKeyword">×</view>
+  </view>
+
+  <!-- 收藏入口 -->
+  <view class="fav-bar">
+    <view class="fav-chip {{favOnly ? 'fav-chip-on' : ''}}" bindtap="onToggleFavOnly">
+      <text class="fav-ico">{{favOnly ? '♥' : '♡'}}</text>
+      <text>我的收藏</text>
+      <text wx:if="{{favCount}}" class="fav-num">{{favCount}}</text>
+    </view>
+    <text class="fav-hint">{{favCount ? '点卡片上的 ♡ 可取消收藏' : '点动作卡片右侧的 ♡ 收藏常用动作'}}</text>
+  </view>
+
+  <!-- 分类 -->
+  <scroll-view scroll-x class="tab-scroll">
+    <view class="tab-row">
+      <view
+        wx:for="{{categories}}"
+        wx:key="*this"
+        class="tab {{item === activeCategory ? 'tab-active' : ''}}"
+        data-value="{{item}}"
+        bindtap="onCategoryTap"
+      >{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 器械 -->
+  <view class="chip-row">
+    <view
+      wx:for="{{equipments}}"
+      wx:key="*this"
+      class="chip {{item === activeEquipment ? 'chip-active' : ''}}"
+      data-value="{{item}}"
+      bindtap="onEquipmentTap"
+    >{{item}}</view>
+  </view>
+
+  <view class="result-tip">{{favOnly ? '收藏 ' : '共 '}}{{total}} 个动作</view>
+
+  <!-- 空态 -->
+  <view wx:if="{{empty}}" class="empty-box">
+    <block wx:if="{{favOnly && !favCount}}">
+      <view class="empty-tip">还没有收藏的动作</view>
+      <view class="empty-sub">动作卡片右侧点 ♡，常用动作就会出现在这里</view>
+      <view class="btn-ghost empty-btn" bindtap="onShowAll">看全部动作</view>
+    </block>
+    <block wx:else>
+      <view class="empty-tip">没有匹配的动作</view>
+      <view class="empty-sub">换个关键词或筛选条件试试</view>
+      <view class="btn-ghost empty-btn" bindtap="onShowAll">清空筛选</view>
+    </block>
+  </view>
+
+  <!-- 列表 -->
+  <view
+    wx:for="{{list}}"
+    wx:key="id"
+    class="ex-card"
+    data-id="{{item.id}}"
+    bindtap="onExerciseTap"
+  >
+    <image class="ex-thumb" src="{{item.thumb}}" mode="aspectFit" lazy-load />
+    <view class="ex-info">
+      <view class="ex-head">
+        <text class="ex-name">{{item.name}}</text>
+        <text class="ex-stars">{{item.difficultyStars}}</text>
+      </view>
+      <view class="ex-tags">
+        <text class="tag">{{item.category}}</text>
+        <text class="tag tag-plain">{{item.equipment}}</text>
+        <text class="tag tag-plain">{{item.difficultyLabel}}</text>
+      </view>
+    </view>
+    <view
+      class="ex-fav {{item.fav ? 'ex-fav-on' : ''}}"
+      data-id="{{item.id}}"
+      data-index="{{index}}"
+      catchtap="onToggleFav"
+    >{{item.fav ? '♥' : '♡'}}</view>
+  </view>
+
+  <!-- 详情弹层 -->
+  <view wx:if="{{showDetail}}" class="mask" bindtap="onCloseDetail">
+    <view class="sheet" catchtap="noop">
+      <view class="sheet-head">
+        <view class="sheet-title">{{detail.name}}</view>
+        <view class="sheet-acts">
+          <view
+            class="sheet-fav {{detail.fav ? 'sheet-fav-on' : ''}}"
+            data-id="{{detail.id}}"
+            catchtap="onToggleFav"
+          >{{detail.fav ? '♥ 已收藏' : '♡ 收藏'}}</view>
+          <view class="sheet-close" bindtap="onCloseDetail">×</view>
+        </view>
+      </view>
+
+      <view class="ex-tags">
+        <text class="tag">{{detail.category}}</text>
+        <text class="tag tag-plain">{{detail.equipment}}</text>
+        <text class="tag tag-plain">{{detail.difficultyLabel}}</text>
+      </view>
+
+      <image wx:if="{{detail.anim}}" class="sheet-gif" src="{{detail.anim}}" mode="aspectFit" />
+      <image wx:elif="{{detail.demo}}" class="sheet-gif" src="{{detail.demo}}" mode="aspectFit" />
+
+      <view class="sec">
+        <view class="sec-title">动作要点</view>
+        <view class="sec-body">{{detail.tips}}</view>
+      </view>
+
+      <view class="sec" wx:if="{{detail.mistakes}}">
+        <view class="sec-title">常见错误</view>
+        <view class="sec-body warn">{{detail.mistakes}}</view>
+      </view>
+
+      <view class="sec" wx:if="{{detail.alternatives.length}}">
+        <view class="sec-title">替代 / 进阶</view>
+        <view class="alt-row">
+          <text wx:for="{{detail.alternatives}}" wx:for-item="alt" wx:key="*this" class="alt">{{alt}}</text>
+        </view>
+      </view>
+
+      <view class="sheet-tip">量力而行，出现疼痛请立即停止</view>
+    </view>
+  </view>
+</view>
