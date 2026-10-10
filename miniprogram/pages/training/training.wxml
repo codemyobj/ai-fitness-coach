@@ -1,8 +1,8 @@
 <!--pages/training/training.wxml — 训练首页：今日安排 + 本周进度 + 打卡条 -->
 <view class="page">
 
-  <!-- 顶部问候区（padding-top = 状态栏高度 + 14px 呼吸空间） -->
-  <view class="hero" style="padding-top: {{statusBarHeight + 14}}px;">
+  <!-- 顶部问候区（padding-top = 状态栏高度 + 14px 呼吸空间；header-sticky 见 app.wxss） -->
+  <view class="hero header-sticky" style="padding-top: {{statusBarHeight + 14}}px;">
     <view class="hero-date">{{todayText}}</view>
     <view class="hero-title">
       <text>{{greeting}}，{{nickname || '健身搭子'}}</text>

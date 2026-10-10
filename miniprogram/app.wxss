@@ -22,6 +22,14 @@ view, text, image, button, input {
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
 }
 
+/* 顶部深色头部的吸顶行为：训练页 hero 与「我的」页 user-card 共用，保证两页滚动表现一致。
+   必须给 z-index —— 定位后与卡片同属定位元素，DOM 靠后的卡片会盖到头部上来。 */
+.header-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
 /* 主按钮 */
 .btn-primary {
   background: var(--color-primary);

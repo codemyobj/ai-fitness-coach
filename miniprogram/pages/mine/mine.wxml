@@ -1,8 +1,8 @@
 <!--pages/mine/mine.wxml — 我的 -->
 <view class="page">
 
-  <!-- 用户卡（padding-top = 状态栏高度 + 14px 呼吸空间） -->
-  <view class="user-card" style="padding-top: {{statusBarHeight + 14}}px;">
+  <!-- 用户卡（padding-top = 状态栏高度 + 14px 呼吸空间；header-sticky 见 app.wxss） -->
+  <view class="user-card header-sticky" style="padding-top: {{statusBarHeight + 14}}px;">
     <image wx:if="{{avatar}}" class="user-avatar-img" src="{{avatar}}" mode="aspectFill" />
     <view wx:else class="user-avatar">{{hasProfile ? '🏋️' : '😊'}}</view>
     <view class="user-info">

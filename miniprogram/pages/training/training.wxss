@@ -3,12 +3,8 @@
   padding-bottom: 48rpx;
 }
 
-/* 顶部 hero 区（吸顶：页面滚动时固定在顶部，内容从其下方穿过。
-   必须给 z-index —— hero 定位后与卡片同属定位元素，后绘制的卡片会盖上来） */
+/* 顶部 hero 区（吸顶行为由全局类 .header-sticky 提供，见 app.wxss） */
 .hero {
-  position: sticky;
-  top: 0;
-  z-index: 100;
   background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 130%);
   color: #ffffff;
   padding: 48rpx 32rpx 56rpx;
