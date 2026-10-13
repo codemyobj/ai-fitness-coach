@@ -57,8 +57,7 @@
       />
     </view>
 
-    <!-- 组间休息倒计时：固定在底部悬浮（spacer 撑出等高占位，避免压住打卡按钮） -->
-    <view wx:if="{{restActive}}" class="rest-spacer"></view>
+    <!-- 组间休息倒计时：固定在底部悬浮（spacer 放在页尾，见 wk-footer 之后） -->
     <view wx:if="{{restActive}}" class="rest-fixed">
       <view class="rest-card {{restDone ? 'is-done' : ''}} {{restPaused ? 'is-paused' : ''}}">
         <view class="rest-row">
@@ -90,6 +89,11 @@
         {{alreadyChecked ? '今日已打卡' : (allDone ? '完成打卡' : '完成所有动作后可打卡')}}
       </view>
     </view>
+
+    <!-- 组间休息悬浮条的等高占位：必须放在打卡按钮【之后】。
+         休息条是 fixed 钉在屏幕底部的，占位只有放在流式内容末尾，
+         才能把按钮多顶出一屏可滚动高度，滚到底时按钮恰好完整露出、不被遮住 -->
+    <view wx:if="{{restActive}}" class="rest-spacer"></view>
   </block>
 
   <!-- 没找到训练内容（含排查线索）/ 骨架屏就绪前的占位 -->

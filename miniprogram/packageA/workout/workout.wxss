@@ -110,9 +110,12 @@
 }
 
 /* ---------- 组间休息倒计时 ---------- */
-/* 悬浮条 + 等高 spacer：条本身脱离文档流，靠 spacer 保证不遮挡底部打卡按钮 */
+/* 悬浮条 + 等高 spacer：条本身脱离文档流，靠 spacer 保证不遮挡底部打卡按钮。
+   spacer 高度 = 卡片(约 165rpx) + 安全区；用 calc+env 精确补偿，无安全区机型回落到 240rpx */
 .rest-spacer {
-  height: 200rpx;
+  height: 240rpx;
+  height: calc(240rpx + constant(safe-area-inset-bottom));
+  height: calc(240rpx + env(safe-area-inset-bottom));
 }
 
 .rest-fixed {
