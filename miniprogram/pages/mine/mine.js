@@ -8,6 +8,7 @@ const reminder = require('../../services/reminder.js');
 const rest = require('../../services/rest.js');
 const legal = require('../../services/legal.js');
 const badges = require('../../services/badges.js');
+const share = require('../../utils/share.js');
 
 // 开发环境（开发者工具 / 体验版）拿不到版本号，用一个兜底值，避免「当前版本」空着
 const FALLBACK_VERSION = 'v1.1.0';
@@ -282,5 +283,24 @@ Page({
     wx.showToast({ title: '该功能后续版本上线', icon: 'none' });
   },
 
-  noop() {}
+  noop() {},
+
+  // ---------- 分享 ----------
+  // 「我的」是 tabBar 页：不定义 onShareAppMessage 的话右上角「转发」是灰的，
+  // 用户想分享会发现没入口。本页正好展示着徽章解锁进度，就拿它当文案。
+  onShareAppMessage() {
+    return share.buildBadgeCard({
+      unlocked: this.data.badgeCount,
+      total: this.data.badgeTotal
+    });
+  },
+
+  onShareTimeline() {
+    return share.buildTimeline({
+      title: this.data.badgeTotal
+        ? `我已解锁 ${this.data.badgeCount}/${this.data.badgeTotal} 枚成就徽章`
+        : '',
+      tag: 'mine'
+    });
+  }
 });

@@ -7,6 +7,7 @@ const session = require('../../services/session.js');
 const badges = require('../../services/badges.js');
 const favorites = require('../../services/favorites.js');
 const skeleton = require('../../utils/skeleton.js');
+const share = require('../../utils/share.js');
 
 const GOAL_TEXT = {
   fat_loss: '减脂塑形',
@@ -346,5 +347,29 @@ Page({
   // V1.1 成就徽章
   goBadges() {
     wx.navigateTo({ url: '/packageA/badges/badges' });
+  },
+
+  // ---------- 分享 ----------
+  // 卡片文案由 utils/share.js 统一生成（纯函数、可离线单测），文案都不带 imageUrl，
+  // 由微信自动截取页面顶部 —— 主包已经 174.7KB，能不加图片就不加。
+  onShareAppMessage() {
+    const t = this.data.today;
+    return share.buildHomeCard({
+      hasPlan: !!(t && t.ready),
+      focus: t && t.focus,
+      dayNumber: t && t.dayNumber,
+      streak: this.data.streak,
+      todayChecked: this.data.todayChecked
+    });
+  },
+
+  onShareTimeline() {
+    const t = this.data.today;
+    return share.buildTimeline({
+      title: (this.data.todayChecked && this.data.streak > 0)
+        ? `我已连续打卡 ${this.data.streak} 天，一起来练`
+        : (t && t.ready ? `今天练${t.focus}` : ''),
+      tag: 'home'
+    });
   }
 });

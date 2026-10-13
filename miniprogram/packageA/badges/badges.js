@@ -7,6 +7,7 @@ const badges = require('../../services/badges.js');
 const stats = require('../../services/stats.js');
 const favorites = require('../../services/favorites.js');
 const skeleton = require('../../utils/skeleton.js');
+const share = require('../../utils/share.js');
 
 function fmtDay(ts) {
   const n = Number(ts);
@@ -97,5 +98,23 @@ Page({
     this.load();
   },
 
-  noop() {}
+  noop() {},
+
+  // ---------- 分享 ----------
+  // 徽章墙对新用户是空的，所以落地页统一给首页（utils/share.js 里的约定），
+  // 分享文案只讲「我解锁了多少」——这是唯一别人看得懂、也愿意点进来的信息。
+  onShareAppMessage() {
+    return share.buildBadgeCard({
+      unlocked: this.data.unlockedCount,
+      total: this.data.total,
+      nextName: (this.data.next && this.data.next.name) || ''
+    });
+  },
+
+  onShareTimeline() {
+    return share.buildTimeline({
+      title: `我已解锁 ${this.data.unlockedCount}/${this.data.total} 枚成就徽章`,
+      tag: 'badges'
+    });
+  }
 });

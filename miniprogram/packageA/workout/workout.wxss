@@ -423,3 +423,117 @@
 .remind-skip {
   margin-top: 20rpx;
 }
+
+/* 打卡结算卡 */
+.sum-sheet {
+  text-align: center;
+  padding-bottom: 48rpx;
+}
+
+.sum-icon {
+  font-size: 72rpx;
+  line-height: 1.2;
+}
+
+.sum-title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-top: 6rpx;
+}
+
+.sum-sub {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 8rpx;
+}
+
+/* 用时是这张卡的主角，给足字号和主色 */
+.sum-hero {
+  margin: 28rpx 0 8rpx;
+}
+
+.sum-hero-value {
+  font-size: 80rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums; /* 数字等宽，换字时不左右跳 */
+}
+
+.sum-hero-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  margin-top: 4rpx;
+}
+
+.sum-grid {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.sum-cell {
+  flex: 1;
+  background: var(--color-bg);
+  border-radius: var(--radius-base);
+  padding: 20rpx 8rpx;
+}
+
+.sum-cell-value {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.2;
+}
+
+/* 「1,240 kg」这类带单位的数字比纯数字长，降一档字号才不会被挤压换行 */
+.sum-cell-value-sm {
+  font-size: var(--font-size-lg);
+}
+
+.sum-cell-label {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+  margin-top: 6rpx;
+}
+
+.sum-badges {
+  margin-top: 24rpx;
+  font-size: var(--font-size-base);
+  color: #92400e;
+  background: #fffbeb;
+  border-radius: var(--radius-base);
+  padding: 18rpx 20rpx;
+  line-height: 38rpx;
+}
+
+.sum-share-hint {
+  margin-top: 20rpx;
+  font-size: 22rpx;
+  color: var(--color-text-light);
+  line-height: 34rpx;
+}
+
+/* open-type="share" 必须是 button 元素（微信要求），把默认外观抹平成 .btn-primary */
+.sum-share {
+  width: 100%;
+  margin: 28rpx 0 0;
+  line-height: 1.5;
+}
+
+.sum-share::after {
+  border: none;
+}
+
+.sum-ghost {
+  margin-top: 20rpx;
+}
+
+.sum-done {
+  margin-top: 24rpx;
+  padding: 12rpx 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+

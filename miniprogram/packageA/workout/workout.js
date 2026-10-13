@@ -3,9 +3,14 @@
 const app = getApp();
 const planService = require('../../services/plan.js');
 const workoutService = require('../../services/workout.js');
+const statsService = require('../../services/stats.js');
+const badges = require('../../services/badges.js');
+const favorites = require('../../services/favorites.js');
+const units = require('../../services/units.js');
 const reminder = require('../../services/reminder.js');
 const rest = require('../../services/rest.js');
 const skeleton = require('../../utils/skeleton.js');
+const share = require('../../utils/share.js');
 const EXERCISES = require('../../assets/data/exercises.js');
 
 // 小时 → picker 下标（不在候选列表里就回落到默认值）
@@ -47,6 +52,11 @@ Page({
     // 动作要点弹层
     showTips: false,
     tipEx: null,
+    // 打卡结算卡（用自定义弹层而不是 showModal：要把用时/组数/容量/新徽章摊开，
+    // 还要放一个 open-type="share" 的按钮 —— 这些 showModal 都做不到）
+    showSummary: false,
+    summary: null,
+    sharePreview: '',   // 结算卡里给用户看「好友会看到什么」，降低分享的心理门槛
     // 打卡后的「订阅明日提醒」引导（微信一次性订阅：授权 1 次只能发 1 条）
     showRemind: false,
     remindHour: 19,
@@ -428,30 +438,110 @@ Page({
       return;
     }
 
+    const durationMin = Math.max(1, Math.round(elapsedSec / 60));
     wx.showLoading({ title: '记录中…', mask: true });
     try {
-      const logId = await workoutService.saveLog({
+      await workoutService.saveLog({
         planId: plan._id,
         weekIndex: this.data.currentWeekIndex || 0,
         dayIndex: day.dayIndex,
         focus: day.focus,
         exercises,
-        durationMin: Math.max(1, Math.round(elapsedSec / 60))
+        durationMin
       });
       wx.hideLoading();
       this.stopTimer();
-      wx.showModal({
-        title: '🎉 打卡成功',
-        content: `本次训练 ${Math.max(1, Math.round(elapsedSec / 60))} 分钟，完成 ${this.data.finishedCount}/${this.data.totalCount} 个动作。坚持就是胜利！`,
-        showCancel: false,
-        confirmText: '太棒了',
-        success: () => this.afterCheckin()
+      // 打卡成功不再用 showModal 一句话打发：刚练完是用户全天动力最强的时刻，
+      // 把这次训练摊开给他看（用时/组数/容量/连续天数/新徽章），并就地给出分享落点。
+      const summary = await this.buildCheckinSummary({ exercises, durationMin });
+      this.setData({
+        alreadyChecked: true, // 关键：不置真的话「查看数据」回来还能再点一次打卡
+        showSummary: true,
+        summary,
+        sharePreview: share.buildCheckinCard(summary).title
       });
     } catch (err) {
       wx.hideLoading();
       console.error('打卡失败：', err);
       wx.showToast({ title: '打卡失败，请重试', icon: 'none' });
     }
+  },
+
+  // 结算卡数据（只读，不写库）
+  // 徽章在**这里**同步，而不是等回到首页：这是全流程唯一的高光时刻，
+  // 等切回首页再弹 Toast 情绪已经凉了。首页的 loadBadges 是幂等的
+  // （解锁记录已落盘、走高水位判定），所以不会重复提示。
+  async buildCheckinSummary({ exercises, durationMin }) {
+    // 组数/容量复用看板的聚合口径，避免同一个数字在两个页面对不上
+    const agg = statsService.sumSets({ exercises });
+    let streak = 0;
+    let newBadgeNames = [];
+    try {
+      // saveLog 已经失效过缓存，这里拿到的是含本次打卡的最新值
+      const sum = await statsService.getHomeSummary();
+      streak = Number(sum && sum.streak) || 0;
+    } catch (e) {
+      console.warn('连续天数读取失败（不影响打卡）：', e);
+    }
+    try {
+      // 与上面的 getHomeSummary 共用同一批 365 天记录缓存 → 0 次额外云查询
+      const totals = await statsService.getBadgeStats();
+      const res = badges.sync(badges.buildMetrics(totals, {
+        hasProfile: !!(app.globalData && app.globalData.profile),
+        favCount: favorites.count()
+      }));
+      newBadgeNames = res.list.filter((b) => b.isNew).map((b) => b.name);
+    } catch (e) {
+      console.warn('徽章同步失败（不影响打卡）：', e);
+    }
+    return {
+      durationMin,
+      durationText: this.data.elapsedText, // 计时器刚停，这就是最终值
+      setsText: String(agg.sets),
+      volumeText: agg.volume > 0 ? units.formatVolume(agg.volume, units.get()) : '',
+      streak,
+      newBadgeNames,
+      badgeText: newBadgeNames.join('、'),
+      focus: (this.data.day && this.data.day.focus) || '',
+      finishedCount: this.data.finishedCount,
+      totalCount: this.data.totalCount
+    };
+  },
+
+  // 结算卡「完成」→ 接回原有的「订阅明日提醒」引导。
+  // 注意别在这里直接 navigateBack：那样提醒引导永远弹不出来。
+  closeSummary() {
+    this.setData({ showSummary: false });
+    this.afterCheckin();
+  },
+
+  goStatsFromSummary() {
+    this.setData({ showSummary: false });
+    wx.navigateTo({ url: '/packageA/stats/stats' });
+  },
+
+  // ---------- 分享 ----------
+  // 从结算卡的「分享战绩」按钮进来时带 data-share="checkin"（微信会在 res.target.dataset 里回传），
+  // 出的是战绩卡；其余入口（右上角 ··· 转发）出「正在练 XX」卡。
+  onShareAppMessage(res) {
+    const from = (res && res.from === 'button' && res.target && res.target.dataset)
+      ? res.target.dataset.share
+      : '';
+    if (from === 'checkin' && this.data.summary) return share.buildCheckinCard(this.data.summary);
+    const day = this.data.day;
+    return share.buildWorkoutCard({
+      focus: day && day.focus,
+      dayNumber: day && day.dayIndex,
+      totalCount: this.data.totalCount
+    });
+  },
+
+  onShareTimeline() {
+    const day = this.data.day;
+    return share.buildTimeline({
+      title: day ? `今天练${day.focus}` : '',
+      tag: 'workout'
+    });
   },
 
   // ---------- 打卡后：顺带订阅明日提醒 ----------

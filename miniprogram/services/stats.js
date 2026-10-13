@@ -362,6 +362,9 @@ module.exports = {
   getHeatmap,
   getRecentLogs,
   invalidateCache,
+  // 单条记录的组数/容量聚合：看板汇总与「打卡结算卡」共用同一份口径，
+  // 否则同一个数字会在两个页面对不上（统计口径只能有一个真源）
+  sumSets,
   // 纯函数导出，方便单测
   _internal: { fmt, parse, todayStr, startOfWeek, addDays, sumSets, calcStreak, calcBestStreak, heatLevel, cnDate }
 };

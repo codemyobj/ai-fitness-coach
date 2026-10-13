@@ -4,6 +4,7 @@ const app = getApp();
 const stats = require('../../services/stats.js');
 const units = require('../../services/units.js');
 const skeleton = require('../../utils/skeleton.js');
+const share = require('../../utils/share.js');
 
 const WEEK_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
 const HEAT_WEEKS = 17; // 热力图展示周数（约 4 个月）
@@ -160,5 +161,24 @@ Page({
   // 空态引导：回训练页去生成计划 / 开始跟练
   goTrainingTab() {
     wx.switchTab({ url: '/pages/training/training' });
+  },
+
+  // ---------- 分享 ----------
+  // 看板对陌生用户是空的，所以落地页给首页；分享文案讲累计与最长连续，
+  // 「最长连续」比「当前连续」更适合传播——它只会越来越大，不会因为断卡而归零。
+  onShareAppMessage() {
+    const o = this.data.overview || {};
+    return share.buildStatsCard({
+      totalCheckins: o.totalCheckins,
+      bestStreak: o.bestStreak
+    });
+  },
+
+  onShareTimeline() {
+    const o = this.data.overview || {};
+    return share.buildTimeline({
+      title: o.totalCheckins ? `累计打卡 ${o.totalCheckins} 次，最长连续 ${o.bestStreak || 0} 天` : '',
+      tag: 'stats'
+    });
   }
 });

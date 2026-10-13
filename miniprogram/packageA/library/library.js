@@ -2,6 +2,7 @@
 // 分类筛选 + 器械筛选 + 关键词搜索 + 收藏筛选 + 动作详情弹层（要点/常见错误/替代动作）
 const library = require('../../services/library.js');
 const favorites = require('../../services/favorites.js');
+const share = require('../../utils/share.js');
 
 Page({
   data: {
@@ -28,6 +29,9 @@ Page({
       favOnly
     });
     this.applyFilter();
+    // 分享卡落地：?id=xxx 直接摊开这个动作的详情。
+    // 分享出去的就是那个动作，落地还要用户在 601 个动作里自己找就白分享了。
+    if (options && options.id) this.openDetail(options.id);
   },
 
   // 入口页（我的/训练）在跳转前 showLoading 兜底分包下载，页面就绪后关闭。
@@ -144,7 +148,11 @@ Page({
   },
 
   onExerciseTap(e) {
-    const id = e.currentTarget.dataset.id;
+    this.openDetail(e.currentTarget.dataset.id);
+  },
+
+  // 打开动作详情（列表点击与分享落地共用一份逻辑）
+  openDetail(id) {
     const ex = library.getExerciseById(id);
     if (!ex) {
       wx.showToast({ title: '未找到该动作', icon: 'none' });
@@ -159,5 +167,29 @@ Page({
   },
 
   // 阻止弹层内部点击冒泡到遮罩（否则点内容也会关闭）
-  noop() {}
+  noop() {},
+
+  // ---------- 分享 ----------
+  // 详情打开着就分享这个动作（唯一「有内容可看」的分享卡，落地页带 id 直开详情）；
+  // 否则分享动作库本身。
+  onShareAppMessage() {
+    const d = this.data.showDetail ? this.data.detail : null;
+    if (d && d.id) {
+      return share.buildExerciseCard({
+        id: d.id,
+        name: d.name,
+        category: d.category,
+        equipment: d.equipment
+      });
+    }
+    return share.buildLibraryCard({ total: this.data.total });
+  },
+
+  onShareTimeline() {
+    const d = this.data.showDetail ? this.data.detail : null;
+    return share.buildTimeline({
+      title: d && d.name ? `${d.name}｜动作要领` : `${this.data.total} 个动作的要点与示范`,
+      tag: 'library'
+    });
+  }
 });

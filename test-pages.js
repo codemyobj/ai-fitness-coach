@@ -679,6 +679,154 @@ function bootPage(file, query, label) {
     passed.push('成就徽章针对性用例（首页入口 / 徽章页渲染 / 新解锁幂等 / 失败降级）');
   }
 
+  // ---------------- 打卡结算卡 + 分享针对性用例 ----------------
+  // 回归点：①打卡成功以前只弹一句 showModal，成果信息拿不到、也没有分享落点；
+  //        ②结算卡的组数/容量必须和看板同一口径（都走 stats.sumSets）；
+  //        ③五个页面的分享卡文案/落地页由 utils/share.js 统一生成，页面漏接一个就会退回「转发是灰的」。
+  {
+    const workoutService = require(path.join(ROOT, 'services/workout.js'));
+    const statsService2 = require(path.join(ROOT, 'services/stats.js'));
+    const shareUtil = require(path.join(ROOT, 'utils/share.js'));
+
+    function eq2(name, actual, expected) {
+      if (actual === expected) passed.push(name);
+      else failed.push(`${name} → 期望 ${JSON.stringify(expected)}，实际 ${JSON.stringify(actual)}`);
+    }
+    function ok2(name, cond, detail) {
+      if (cond) passed.push(name);
+      else failed.push(`${name}${detail ? ' → ' + detail : ''}`);
+    }
+
+    // 存档再打桩，最后统一还原（前面的徽章用例已经还原过一次了）
+    const realSave = workoutService.saveLog;
+    const realHome = statsService2.getHomeSummary;
+    const realBadge = statsService2.getBadgeStats;
+
+    // 让存储可用（badges.sync / favorites 都要读本地记录）
+    const store = {};
+    const wxRealStorage = {
+      get: global.wx.getStorageSync,
+      set: global.wx.setStorageSync,
+      remove: global.wx.removeStorageSync
+    };
+    global.wx.getStorageSync = (k) => (k in store ? store[k] : '');
+    global.wx.setStorageSync = (k, v) => { store[k] = v; };
+    global.wx.removeStorageSync = (k) => { delete store[k]; };
+
+    const savedLogs = [];
+    workoutService.saveLog = async (payload) => { savedLogs.push(payload); return 'log-1'; };
+    statsService2.getHomeSummary = async () => ({ streak: 4, totalCheckins: 9, weekDates: [], weekCount: 3, weekMin: 60, todayChecked: true });
+    statsService2.getBadgeStats = async () => ({ totalCheckins: 9, bestStreak: 5, totalMin: 200, totalSets: 40, monthCount: 4 });
+
+    const workoutFile = path.join(ROOT, 'packageA/workout/workout.js');
+    // 不带 planId：走「当前生效计划」查询（mock 的 doc().get() 返回的是数组，
+    // 按 id 读那条路径在离线 mock 下拿不到 structure，不是本用例要测的点）
+    let w = bootPage(workoutFile, { week: '0', day: '1' }, 'packageA/workout/workout');
+    await w._life;
+
+    ok2('跟练页：按 query 载入指定训练日', !!(w.data.day && w.data.day.exercises.length === 3), JSON.stringify(w.data.day));
+
+    // 造进度：3 组俯卧撑（10 kg × 12 次 × 2 组）
+    w.data.progress.pushup = {
+      doneCount: 3,
+      total: 3,
+      sets: [
+        { done: true, weightKg: 10 },
+        { done: true, weightKg: 10 },
+        { done: false, weightKg: null }
+      ]
+    };
+    w.data.finishedCount = 1;
+    w.data.elapsedText = '12:30';
+    w.data.elapsedSec = 750;
+
+    await w.onFinish();
+
+    ok2('打卡：写入了一条训练记录', savedLogs.length === 1, JSON.stringify(savedLogs));
+    eq2('打卡：时长按秒换算成分钟', savedLogs[0] && savedLogs[0].durationMin, 13);
+    eq2('打卡：结算卡弹出', w.data.showSummary, true);
+    ok2('打卡：结算卡有内容', !!w.data.summary, JSON.stringify(w.data.summary));
+    eq2('打卡：用时直接取计时器最终值', w.data.summary.durationText, '12:30');
+    eq2('打卡：完成组数只算勾选的组', w.data.summary.setsText, '2');
+    eq2('打卡：连续天数取打卡后的最新值', w.data.summary.streak, 4);
+    ok2('打卡：训练容量=重量×次数（10×12×2=240 kg）', w.data.summary.volumeText.indexOf('240') === 0, w.data.summary.volumeText);
+    ok2('打卡：组数口径与看板一致（同一份 stats.sumSets）', w.data.summary.setsText === String(statsService2.sumSets({ exercises: savedLogs[0].exercises }).sets));
+    eq2('打卡：打卡后置为已打卡（防止再点一次）', w.data.alreadyChecked, true);
+    ok2('打卡：结算卡里预告了分享文案', !!w.data.sharePreview && w.data.sharePreview.indexOf('undefined') < 0, w.data.sharePreview);
+
+    // 分享：结算卡按钮带 data-share="checkin" → 出战绩卡；右上角转发 → 出跟练卡
+    const checkinCard = w.onShareAppMessage({ from: 'button', target: { dataset: { share: 'checkin' } } });
+    ok2('分享：结算卡按钮出战绩卡', checkinCard.path === '/pages/training/training?share=checkin', checkinCard.path);
+    ok2('分享：战绩卡文案与结算卡预告一致', checkinCard.title === w.data.sharePreview, `${checkinCard.title} vs ${w.data.sharePreview}`);
+    const plainCard = w.onShareAppMessage({ from: 'menu' });
+    ok2('分享：右上角转发出跟练卡', plainCard.path === '/pages/training/training?share=workout', plainCard.path);
+    ok2('分享：跟练卡带动作数', plainCard.title.indexOf('3 个动作') > 0, plainCard.title);
+    const wTl = w.onShareTimeline();
+    ok2('分享：跟练页朋友圈 query 正确', wTl.query === 'share=workout', JSON.stringify(wTl));
+
+    // 同一天再点打卡应被拦住
+    savedLogs.length = 0;
+    await w.onFinish();
+    eq2('打卡：已打卡后不再重复写库', savedLogs.length, 0);
+
+    // ---- 其余页面的分享接入口 ----
+    const homePage = path.join(ROOT, 'pages/training/training.js');
+    const homeShare = bootPage(homePage, {}, 'pages/training/training');
+    await homeShare._life;
+    const homeCard = homeShare.onShareAppMessage();
+    eq2('分享：首页卡落地首页', homeCard.path, '/pages/training/training?share=home');
+    ok2('分享：首页卡标题非空且干净', homeCard.title.length > 0 && !/undefined/.test(homeCard.title), homeCard.title);
+    eq2('分享：首页朋友圈 query', homeShare.onShareTimeline().query, 'share=home');
+
+    const badgesFile = path.join(ROOT, 'packageA/badges/badges.js');
+    const badgePage = bootPage(badgesFile, {}, 'packageA/badges/badges');
+    await badgePage._life;
+    const badgeCard = badgePage.onShareAppMessage();
+    ok2('分享：徽章卡带解锁进度', badgeCard.title.indexOf(`${badgePage.data.unlockedCount}/${badgePage.data.total}`) > 0, badgeCard.title);
+    eq2('分享：徽章卡落地首页', badgeCard.path, '/pages/training/training?share=badges');
+
+    const statsFile = path.join(ROOT, 'packageA/stats/stats.js');
+    const statsPage = bootPage(statsFile, {}, 'packageA/stats/stats');
+    await statsPage._life;
+    const statsCard = statsPage.onShareAppMessage();
+    eq2('分享：看板卡落地首页', statsCard.path, '/pages/training/training?share=stats');
+    ok2('分享：看板卡文案非空且干净', statsCard.title.length > 0 && !/undefined/.test(statsCard.title), statsCard.title);
+
+    const libFile = path.join(ROOT, 'packageA/library/library.js');
+    // 分享落地：?id=pushup 应直接把该动作详情摊开
+    const libShared = bootPage(libFile, { share: 'exercise', id: 'pushup' }, 'packageA/library/library');
+    eq2('分享落地：带 id 进来直接打开详情', libShared.data.showDetail, true);
+    eq2('分享落地：详情就是那个动作', libShared.data.detail && libShared.data.detail.id, 'pushup');
+    const exCard = libShared.onShareAppMessage();
+    ok2('分享：动作卡带上 id', exCard.path.indexOf('id=pushup') > 0, exCard.path);
+    // 未打开详情时退回分享动作库本身
+    const libPlain = bootPage(libFile, {}, 'packageA/library/library');
+    const libCard = libPlain.onShareAppMessage();
+    ok2('分享：未打开详情时分享动作库', libCard.path.indexOf('/packageA/library/library') === 0 && libCard.path.indexOf('id=') < 0, libCard.path);
+
+    const mineFile2 = path.join(ROOT, 'pages/mine/mine.js');
+    const mineShare = bootPage(mineFile2, {}, 'pages/mine/mine');
+    await mineShare._life;
+    ok2('分享：tabBar「我的」页也接了转发（否则右上角是灰的）',
+      typeof mineShare.onShareAppMessage === 'function' && mineShare.onShareAppMessage().title.length > 0,
+      mineShare.onShareAppMessage && mineShare.onShareAppMessage().title);
+
+    // 通用体检：接了分享的页面，标题必须过 utils/share.js 的长度上限
+    [homeCard, badgeCard, statsCard, libCard, plainCard, checkinCard].forEach((c, i) => {
+      ok2(`分享：第 ${i + 1} 张卡标题不超长（≤ ${shareUtil.MAX_TITLE}）`, c.title.length <= shareUtil.MAX_TITLE, `${c.title.length} → ${c.title}`);
+    });
+
+    // 还原
+    workoutService.saveLog = realSave;
+    statsService2.getHomeSummary = realHome;
+    statsService2.getBadgeStats = realBadge;
+    global.wx.getStorageSync = wxRealStorage.get;
+    global.wx.setStorageSync = wxRealStorage.set;
+    global.wx.removeStorageSync = wxRealStorage.remove;
+
+    passed.push('打卡结算卡 + 分享针对性用例（结算卡口径 / 战绩卡 / 五页分享接入 / 动作分享落地）');
+  }
+
   console.log('\n================ 页面冒烟测试 ================\n');
   passed.forEach((s) => console.log('   ✅ ' + s));
   if (failed.length) {

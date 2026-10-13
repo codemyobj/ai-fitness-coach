@@ -139,6 +139,47 @@
     </view>
   </view>
 
+  <!-- 打卡结算卡：把这次训练的成果摊开给用户看，并就地给出分享落点。
+       遮罩不绑定关闭 —— 这是全天唯一的高光时刻，误触一下关掉就没了；
+       三个出口（分享战绩 / 查看数据 / 完成）都写得出来，不会把人困住。 -->
+  <view wx:if="{{showSummary}}" class="tips-mask">
+    <view class="tips-sheet sum-sheet" catchtap="noop">
+      <view class="sum-icon">🎉</view>
+      <view class="sum-title">打卡成功</view>
+      <view class="sum-sub">{{summary.focus}} · 完成 {{summary.finishedCount}}/{{summary.totalCount}} 个动作</view>
+
+      <view class="sum-hero">
+        <view class="sum-hero-value">{{summary.durationText}}</view>
+        <view class="sum-hero-label">本次用时</view>
+      </view>
+
+      <view class="sum-grid">
+        <view class="sum-cell">
+          <view class="sum-cell-value">{{summary.setsText}}</view>
+          <view class="sum-cell-label">完成组数</view>
+        </view>
+        <view wx:if="{{summary.volumeText}}" class="sum-cell">
+          <view class="sum-cell-value sum-cell-value-sm">{{summary.volumeText}}</view>
+          <view class="sum-cell-label">训练容量</view>
+        </view>
+        <view class="sum-cell">
+          <view class="sum-cell-value">{{summary.streak}}</view>
+          <view class="sum-cell-label">连续打卡（天）</view>
+        </view>
+      </view>
+
+      <view wx:if="{{summary.badgeText}}" class="sum-badges">
+        🏅 新解锁成就：{{summary.badgeText}}
+      </view>
+
+      <view wx:if="{{sharePreview}}" class="sum-share-hint">好友将看到：「{{sharePreview}}」</view>
+
+      <button class="btn-primary sum-share" open-type="share" data-share="checkin">分享战绩</button>
+      <view class="btn-ghost sum-ghost" bindtap="goStatsFromSummary">查看数据看板</view>
+      <view class="sum-done" bindtap="closeSummary">完成</view>
+    </view>
+  </view>
+
   <!-- 打卡后的「订阅明日提醒」引导（不遮住返回路径，可直接跳过） -->
   <view wx:if="{{showRemind}}" class="tips-mask" bindtap="onRemindSkip">
     <view class="tips-sheet" catchtap="noop">
