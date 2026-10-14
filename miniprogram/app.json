@@ -12,6 +12,7 @@
         "plan/plan",
         "workout/workout",
         "stats/stats",
+        "record/record",
         "library/library",
         "body/body",
         "reminder/reminder",

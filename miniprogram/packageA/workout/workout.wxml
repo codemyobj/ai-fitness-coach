@@ -48,7 +48,22 @@
         <view class="ex-tips-btn" data-id="{{ex.exerciseId}}" bindtap="onShowTips">要点</view>
       </view>
 
+      <!-- 渐进超负荷建议：把历史数据变成「这次该用多少」。没有历史时整块不渲染 -->
+      <view wx:if="{{ex.suggest}}" class="sg-row sg-{{ex.suggest.status}}">
+        <view class="sg-main">
+          <view class="sg-title">{{ex.suggest.title}}</view>
+          <view class="sg-reason">{{ex.suggest.reason}} · {{ex.suggest.lastText}}</view>
+        </view>
+        <view
+          wx:if="{{ex.suggest.canApply}}"
+          class="sg-apply"
+          data-id="{{ex.exerciseId}}"
+          bindtap="applySuggest"
+        >套用</view>
+      </view>
+
       <set-input
+        id="set-{{ex.exerciseId}}"
         sets="{{ex.sets}}"
         reps="{{ex.reps}}"
         allowWeight="{{ex.allowWeight}}"

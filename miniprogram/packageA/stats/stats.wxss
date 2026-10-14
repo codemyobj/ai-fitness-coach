@@ -380,6 +380,18 @@
   margin-top: 6rpx;
 }
 
+/* 可点行的右侧箭头 + 按下反馈（否则用户不知道这行能点进去） */
+.log-arrow {
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  color: var(--color-text-light);
+  font-size: var(--font-size-lg);
+}
+
+.log-row:active {
+  background: rgba(16, 185, 129, 0.06);
+}
+
 .empty-box {
   text-align: center;
   padding: 40rpx 0 20rpx;

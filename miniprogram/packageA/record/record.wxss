@@ -1,0 +1,200 @@
+/* packageA/record/record.wxss — 单次训练记录详情 */
+
+.page {
+  min-height: 100vh;
+  background: var(--color-bg);
+  padding-bottom: 40rpx;
+}
+
+/* ---------- 状态页（加载 / 失败 / 找不到） ---------- */
+.rec-state {
+  padding: 160rpx 48rpx;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+}
+
+.rec-state-icon {
+  font-size: 72rpx;
+  margin-bottom: 24rpx;
+}
+
+.rec-state-sub {
+  margin-top: 12rpx;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+  line-height: 1.6;
+}
+
+.rec-state .btn-ghost {
+  margin-top: 32rpx;
+}
+
+/* ---------- 顶部 ---------- */
+.rec-hero {
+  background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #059669 130%);
+  color: #ffffff;
+  padding: 48rpx 32rpx 56rpx;
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+.rec-date {
+  font-size: var(--font-size-base);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.rec-focus {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  margin: 12rpx 0 8rpx;
+}
+
+.rec-duration {
+  font-size: var(--font-size-sm);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+/* ---------- 数据格 ---------- */
+.rec-grid {
+  display: flex;
+  margin: -32rpx 24rpx 0;
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 28rpx 0;
+  box-shadow: 0 4rpx 16rpx rgba(17, 24, 39, 0.06);
+}
+
+.rec-cell {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+
+/* 分格竖线用伪元素：比给每格加 border-right 少一层「最后一格怎么办」的判断 */
+.rec-cell + .rec-cell::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2rpx;
+  height: 48rpx;
+  background: var(--color-border);
+}
+
+.rec-cell-value {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.rec-cell-label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 6rpx;
+}
+
+/* ---------- 动作卡 ---------- */
+.rec-card {
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: 28rpx 32rpx;
+  margin: 24rpx 24rpx 0;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.04);
+}
+
+.rec-ex-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.rec-ex-name {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text);
+  flex: 1;
+  min-width: 0;
+}
+
+.rec-ex-target {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-light);
+}
+
+.rec-ex-meta {
+  display: flex;
+  align-items: center;
+  margin-top: 8rpx;
+}
+
+.rec-ex-sets {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* 与上次的对比：涨=绿（正向），降=橙（提醒），持平=灰 */
+.rec-cmp {
+  margin-left: 16rpx;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+}
+
+.rec-cmp-up {
+  color: var(--color-primary-dark);
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.rec-cmp-down {
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.14);
+}
+
+.rec-cmp-flat {
+  color: var(--color-text-secondary);
+  background: rgba(107, 114, 128, 0.1);
+}
+
+/* ---------- 每组明细 ---------- */
+.rec-sets {
+  margin-top: 20rpx;
+  border-top: 2rpx solid var(--color-border);
+  padding-top: 16rpx;
+}
+
+.rec-set {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  font-size: var(--font-size-base);
+  color: var(--color-text-light);
+}
+
+.rec-set.is-done {
+  color: var(--color-text);
+}
+
+.rec-set-no {
+  width: 160rpx;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.rec-set-weight {
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.rec-set-tick {
+  width: 40rpx;
+  text-align: right;
+  color: var(--color-primary);
+}
+
+.rec-set:not(.is-done) .rec-set-tick {
+  color: var(--color-text-light);
+}

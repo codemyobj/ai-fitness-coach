@@ -68,6 +68,24 @@ Component({
       this.buildSetList(next);
     },
 
+    // 一键套用建议重量（渐进超负荷建议用）。
+    // 只填「还没填」的组：用户已经手填过的重量不能被覆盖——他可能正在刻意降重量热身。
+    // @returns {Number} 实际填入的组数（0 表示没有可填的组）
+    fillWeight(value) {
+      const num = Number(value);
+      if (!isFinite(num) || num <= 0) return 0;
+      let filled = 0;
+      const setList = this.data.setList.map((s) => {
+        const empty = s.weightKg === '' || s.weightKg === null || s.weightKg === undefined;
+        if (!empty) return s;
+        filled += 1;
+        return { ...s, weightKg: num };
+      });
+      if (!filled) return 0;
+      this.setData({ setList }, () => this.emitChange());
+      return filled;
+    },
+
     // 通知父组件当前填写状态
     emitChange() {
       const setList = this.data.setList;

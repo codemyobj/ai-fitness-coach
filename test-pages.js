@@ -827,6 +827,204 @@ function bootPage(file, query, label) {
     passed.push('打卡结算卡 + 分享针对性用例（结算卡口径 / 战绩卡 / 五页分享接入 / 动作分享落地）');
   }
 
+  // ---------------- 渐进超负荷 + 记录详情针对性用例 ----------------
+  // 回归点：①跟练页必须把历史数据变成「这次该用多少」并挂到动作上（挂错地方就渲染不出）；
+  //        ②「套用」要把建议重量填进组输入器（填不进去这个功能就是假的）；
+  //        ③看板「最近训练」能点进单次详情，且详情能标出「比上次」。
+  {
+    const statsService3 = require(path.join(ROOT, 'services/stats.js'));
+    const progressionUtil = require(path.join(ROOT, 'services/progression.js'));
+    const unitsUtil = require(path.join(ROOT, 'services/units.js'));
+
+    function eq3(name, actual, expected) {
+      if (actual === expected) passed.push(name);
+      else failed.push(`${name} → 期望 ${JSON.stringify(expected)}，实际 ${JSON.stringify(actual)}`);
+    }
+    function ok3(name, cond, detail) {
+      if (cond) passed.push(name);
+      else failed.push(`${name}${detail ? ' → ' + detail : ''}`);
+    }
+
+    // 历史日志：dumbbell_row（哑铃动作，可记重量）连续两次 10kg 做满 3 组 → 应建议加重
+    // 注意 pushup / squat / plank 在动作库里都是「徒手」，走的是次数递进分支，
+    // 所以负重分支必须用一个真·负重动作（dumbbell_row），否则测的是另一条路径。
+    const mkLog = (date, exs) => ({ _id: 'log-' + date, date, focus: '胸 + 三头', durationMin: 30, exercises: exs });
+    const mkEx = (id, weights, done, opts) => Object.assign({
+      exerciseId: id,
+      name: id,
+      targetSets: weights.length,
+      reps: 12,
+      sets: weights.map((w, i) => ({ done: i < (done === undefined ? weights.length : done), weightKg: w }))
+    }, opts || {});
+
+    const historyLogs = [
+      mkLog('2026-10-01', [mkEx('dumbbell_row', [10, 10, 10]), mkEx('pushup', [null, null, null])]),
+      mkLog('2026-10-03', [mkEx('dumbbell_row', [10, 10, 10]), mkEx('pushup', [null, null, null])])
+    ];
+
+    // 计划里塞一个负重动作 + 一个徒手动作 + 一个从没练过的动作
+    const progPlan = {
+      _id: 'plan-1',
+      status: 'active',
+      structure: [1, 2, 3, 4].map((w) => ({
+        weekIndex: w,
+        days: [1, 2, 3].map((d) => ({
+          dayIndex: d,
+          focus: `第${d}天`,
+          exercises: [
+            { exerciseId: 'dumbbell_row', name: '哑铃划船', sets: 3, reps: 12, restSec: 60 },
+            { exerciseId: 'pushup', name: '标准俯卧撑', sets: 3, reps: 12, restSec: 60 },
+            { exerciseId: 'plank', name: '平板支撑', sets: 3, reps: 30, restSec: 60 }
+          ]
+        }))
+      }))
+    };
+    const realDatabase = global.wx.cloud.database;
+    global.wx.cloud.database = () => ({
+      collection: () => ({
+        where() { return this; }, orderBy() { return this; }, limit() { return this; },
+        skip() { return this; }, field() { return this; }, doc() { return this; },
+        async get() { return { data: [progPlan] }; },
+        async add() { return { _id: 'new-doc' }; },
+        async update() { return { stats: { updated: 1 } }; },
+        async remove() { return { stats: { removed: 1 } }; },
+        async count() { return { total: 0 }; }
+      }),
+      serverDate: () => ({ $date: Date.now() }),
+      command: { gte: (v) => ({ gte: v, and: () => ({}) }), lte: (v) => ({ lte: v }) }
+    });
+
+    const realListLogs = statsService3.listLogs;
+    const realGetLogById = statsService3.getLogById;
+    statsService3.listLogs = async () => historyLogs;
+    statsService3.getLogById = async (id) => historyLogs.find((l) => l._id === id) || null;
+
+    // ---- 跟练页：建议挂到动作上 ----
+    // 单位偏好存在本地 storage 里，而默认 mock 的 getStorageSync 恒返回 ''，
+    // 不放开读写就没法验证 lb 单位下的换算
+    const store3 = {};
+    const wxStore3 = {
+      get: global.wx.getStorageSync,
+      set: global.wx.setStorageSync,
+      remove: global.wx.removeStorageSync
+    };
+    global.wx.getStorageSync = (k) => (k in store3 ? store3[k] : '');
+    global.wx.setStorageSync = (k, v) => { store3[k] = v; };
+    global.wx.removeStorageSync = (k) => { delete store3[k]; };
+
+    // plan.js 对「当前生效计划」有 30s 缓存，前面的用例已经把 samplePlan 缓存进去了，
+    // 不清掉的话这里还是拿到老计划（新塞的负重动作根本不会出现）
+    require(path.join(ROOT, 'services/plan.js')).invalidatePlanCache();
+    const workoutFile2 = path.join(ROOT, 'packageA/workout/workout.js');
+    let wk = bootPage(workoutFile2, { week: '0', day: '1' }, 'packageA/workout/workout');
+    await wk._life;
+
+    const rowEx = wk.data.day.exercises.find((e) => e.exerciseId === 'dumbbell_row');
+    const pushEx = wk.data.day.exercises.find((e) => e.exerciseId === 'pushup');
+    const plankEx = wk.data.day.exercises.find((e) => e.exerciseId === 'plank');
+    ok3('跟练页：负重动作挂上了建议对象', !!(rowEx && rowEx.suggest), JSON.stringify(rowEx && rowEx.suggest));
+    eq3('跟练页：连续两次同重量做满 → 建议加重', rowEx.suggest.status, 'up');
+    eq3('跟练页：建议重量 12.5kg', rowEx.suggest.weightKg, 12.5);
+    ok3('跟练页：文案是给人看的一句话', rowEx.suggest.title.indexOf('12.5') > 0, rowEx.suggest.title);
+    ok3('跟练页：建议里带「上次」依据', rowEx.suggest.lastText.indexOf('上次') === 0, rowEx.suggest.lastText);
+    eq3('跟练页：徒手动作走次数递进分支', pushEx.suggest.status, 'reps-up');
+    eq3('跟练页：徒手建议每组 14 次（12+2）', pushEx.suggest.repsTarget, 14);
+    ok3('跟练页：没有历史的动作不出现建议（平板支撑无记录）', !plankEx.suggest, JSON.stringify(plankEx.suggest));
+
+    // ---- 「套用」：把建议重量填进组输入器 ----
+    const filledCalls = [];
+    wk.selectComponent = (sel) => ({
+      fillWeight(v) { filledCalls.push({ sel, v }); return 3; }
+    });
+    wk.applySuggest({ currentTarget: { dataset: { id: 'dumbbell_row' } } });
+    eq3('套用：找到了对应动作的输入器', filledCalls.length, 1);
+    ok3('套用：选择器按动作 id 定位', filledCalls[0].sel === '#set-dumbbell_row', filledCalls[0].sel);
+    eq3('套用：填入的是建议重量（kg 单位下原值）', filledCalls[0].v, 12.5);
+
+    // lb 单位下要换算后再填
+    unitsUtil.set('lb');
+    wk.applySuggest({ currentTarget: { dataset: { id: 'dumbbell_row' } } });
+    eq3('套用：lb 单位下按展示值填入（12.5kg ≈ 27.6lb）', filledCalls[1].v, 27.6);
+    unitsUtil.set('kg');
+
+    // 徒手动作（无重量建议）与无建议动作点「套用」应安静退出（不报错、不误填）
+    filledCalls.length = 0;
+    wk.applySuggest({ currentTarget: { dataset: { id: 'pushup' } } });
+    wk.applySuggest({ currentTarget: { dataset: { id: 'plank' } } });
+    eq3('套用：徒手/无建议的动作不做任何事', filledCalls.length, 0);
+    // 组件还没渲染出来（真机首帧）也不能炸
+    wk.selectComponent = () => null;
+    wk.applySuggest({ currentTarget: { dataset: { id: 'dumbbell_row' } } });
+
+    // ---- 看板：最近训练可点进详情 ----
+    const realNavigate2 = global.wx.navigateTo;
+    const urls2 = [];
+    global.wx.navigateTo = (opt) => { urls2.push(opt.url); };
+    const statsFile2 = path.join(ROOT, 'packageA/stats/stats.js');
+    const st = bootPage(statsFile2, {}, 'packageA/stats/stats');
+    await st._life;
+    st.goRecord({ currentTarget: { dataset: { id: 'log-2026-10-03' } } });
+    eq3('看板：最近训练点进记录详情', urls2[0], '/packageA/record/record?id=log-2026-10-03');
+    urls2.length = 0;
+    st.goRecord({ currentTarget: { dataset: {} } });
+    eq3('看板：缺少 id 时不跳转（避免进到空详情）', urls2.length, 0);
+    global.wx.navigateTo = realNavigate2;
+
+    // ---- 记录详情页 ----
+    const recordFile = path.join(ROOT, 'packageA/record/record.js');
+    let rec = bootPage(recordFile, { id: 'log-2026-10-03' }, 'packageA/record/record');
+    await rec._life;
+    eq3('详情：加载完成', rec.data.loading, false);
+    ok3('详情：渲染出顶栏信息', !!rec.data.meta, JSON.stringify(rec.data.meta));
+    ok3('详情：日期带星期', /月.+日 周/.test(rec.data.meta.dateText), rec.data.meta.dateText);
+    eq3('详情：用时文案', rec.data.meta.durationText, '30 分钟');
+    eq3('详情：完成组数（3+3）', rec.data.meta.setsText, '6');
+    eq3('详情：动作数', rec.data.meta.exerciseCount, '2');
+    ok3('详情：训练容量按重量×次数算（10kg×12 次×3 组 = 360）', rec.data.meta.volumeText.indexOf('360') === 0, rec.data.meta.volumeText);
+    eq3('详情：动作明细条数', rec.data.exercises.length, 2);
+    ok3('详情：每组有重量文案', rec.data.exercises[0].sets[0].weightText.indexOf('10') === 0, JSON.stringify(rec.data.exercises[0].sets[0]));
+    ok3('详情：勾选的组会被标记', rec.data.exercises[0].sets.every((s) => s.done), JSON.stringify(rec.data.exercises[0].sets));
+    ok3('详情：标出与上次的对比', !!rec.data.exercises[0].compare.text, JSON.stringify(rec.data.exercises[0].compare));
+    eq3('详情：同一重量连续两次 → 重量持平', rec.data.exercises[0].compare.tone, 'flat');
+    const recCard = rec.onShareAppMessage();
+    eq3('详情：分享卡落地首页', recCard.path, '/pages/training/training?share=record');
+    ok3('详情：分享卡文案干净', recCard.title.length > 0 && !/undefined/.test(recCard.title), recCard.title);
+    ok3('详情：朋友圈只带 query（微信限制）', typeof rec.onShareTimeline().query === 'string', JSON.stringify(rec.onShareTimeline()));
+
+    // 首次记录（没有更早的同动作历史）→ 文案应为「首次记录」
+    statsService3.listLogs = async () => [historyLogs[1]];
+    statsService3.getLogById = async () => historyLogs[1];
+    const recFirst = bootPage(recordFile, { id: 'log-2026-10-03' }, 'packageA/record/record');
+    await recFirst._life;
+    eq3('详情：无更早记录时标注「首次记录」', recFirst.data.exercises[0].compare.text, '首次记录');
+
+    // 找不到记录（超出一年的记录会被过滤）
+    statsService3.getLogById = async () => null;
+    const recMiss = bootPage(recordFile, { id: 'nope' }, 'packageA/record/record');
+    await recMiss._life;
+    eq3('详情：记录不存在时给出空态', recMiss.data.notFound, true);
+    eq3('详情：空态不再显示 loading', recMiss.data.loading, false);
+
+    // 读取失败 → 显示错误而不是白屏
+    statsService3.getLogById = async () => { throw new Error('cloud boom'); };
+    const recErr = bootPage(recordFile, { id: 'log-1' }, 'packageA/record/record');
+    await recErr._life;
+    ok3('详情：读取失败时显示错误原因', recErr.data.loadError.indexOf('cloud boom') >= 0, recErr.data.loadError);
+
+    // 还原
+    statsService3.listLogs = realListLogs;
+    statsService3.getLogById = realGetLogById;
+    global.wx.cloud.database = realDatabase;
+    global.wx.getStorageSync = wxStore3.get;
+    global.wx.setStorageSync = wxStore3.set;
+    global.wx.removeStorageSync = wxStore3.remove;
+
+    ok3('纯函数层与页面用的是同一套规则（页面不做二次加工）',
+      progressionUtil.MAX_WEIGHT_KG === 300, progressionUtil.MAX_WEIGHT_KG);
+
+    passed.push('渐进超负荷 + 记录详情针对性用例（建议分支 / 套用重量 / 详情渲染 / 对比与空态）');
+  }
+
   console.log('\n================ 页面冒烟测试 ================\n');
   passed.forEach((s) => console.log('   ✅ ' + s));
   if (failed.length) {

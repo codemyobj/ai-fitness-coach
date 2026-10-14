@@ -123,6 +123,22 @@ function buildBadgeCard(input) {
   return { title: clip(title), path: withShare(HOME_PATH, 'badges') };
 }
 
+// ---------- 单次训练记录详情 ----------
+// 讲「刚练完什么」而不是「我累计多少」：详情页的读者看到的是这一次训练，
+// 讲当下的事实最自然，也避免分享一件很久以前的记录时文案对不上时间。
+function buildRecordCard(input) {
+  const o = input || {};
+  const focus = String(o.focus || '').trim();
+  const durationMin = Number(o.durationMin) || 0;
+  const sets = Number(o.sets) || 0;
+  const bits = [];
+  if (focus) bits.push(`刚练完${focus}`);
+  if (durationMin > 0) bits.push(`${durationMin} 分钟`);
+  if (sets > 0) bits.push(`${sets} 组`);
+  const title = bits.length ? `${joinParts(bits, '，')} 💪` : `${APP_NAME}｜记录每一次坚持`;
+  return { title: clip(title), path: withShare(HOME_PATH, 'record') };
+}
+
 // ---------- 数据看板 ----------
 function buildStatsCard(input) {
   const o = input || {};
@@ -157,6 +173,7 @@ module.exports = {
   buildExerciseCard,
   buildLibraryCard,
   buildBadgeCard,
+  buildRecordCard,
   buildStatsCard,
   buildTimeline,
   _internal: { clip, joinParts, withShare }

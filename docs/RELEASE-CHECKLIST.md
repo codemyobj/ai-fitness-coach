@@ -2,7 +2,7 @@
 
 > 项目：`D:\学习\前端\小程序\ai-fitness-coach` ｜ AppID：`wxdd0c509fc6db9a2a`
 > 环境：`cloud1-d9gqfb50v89521c1a`
-> 更新：2026-10-08（V1.0.1 被驳回 → AI 功能已移除，见 [`docs/REVIEW-AI-REMOVAL.md`](./REVIEW-AI-REMOVAL.md)）
+> 更新：2026-10-14（V1.0.1 被驳回 → AI 功能已移除，见 [`docs/REVIEW-AI-REMOVAL.md`](./REVIEW-AI-REMOVAL.md)；此后陆续完成分享与结算卡、渐进超负荷建议与训练记录详情，当前代码版本对应 **V1.0.5**）
 
 ---
 
@@ -12,10 +12,12 @@
 |---|---|
 | `DEBUG_SHOW_ERROR` 改为 `false`（错误弹窗关闭） | ✅ |
 | 调试入口隐藏：身体记录页「一键初始化数据库」、计划页/跟练页「排查线索」框，均改为仅调试模式可见 | ✅ |
-| **十六套**测试全绿：verify 0 错误 · cloud 29 · pages **166** · stats 118 · library 66 · body 75 · settings 52 · reminder 108 · rest 74 · rest-page 53 · skeleton 130 · session 160 · legal 131 · badges 121 · **share 89** · **review 35** | ✅ |
-| 体积：主包 ~**183.1KB**、packageA ~**1275.9KB**（均 < 2048KB 上限）；AI 模块移出包后主包小了 18.8KB | ✅ |
-| 分享能力：训练首页 / 跟练 / 徽章 / 看板 / 动作库 / 我的 六页接入转发与朋友圈（「我的」是 tabBar 页，不接则转发按钮是灰的）；文案统一由 `utils/share.js` 生成，不设 imageUrl → 0 体积成本 | ✅ |
+| **十七套**测试全绿：verify 0 错误 · cloud 29 · pages **204** · stats **121** · library 66 · body 75 · settings 52 · reminder 108 · rest 74 · rest-page 53 · skeleton 130 · session 160 · legal 131 · badges 121 · share **96** · **progression 70** · **review 35** | ✅ |
+| 体积：主包 ~**198KB**、packageA ~**1293KB**（均 < 2048KB 上限）；AI 模块移出包后主包小了 18.8KB | ✅ |
+| 分享能力：训练首页 / 跟练 / 徽章 / 看板 / 动作库 / 我的 / **训练记录** 接入转发与朋友圈（「我的」是 tabBar 页，不接则转发按钮是灰的）；文案统一由 `utils/share.js` 生成，不设 imageUrl → 0 体积成本 | ✅ |
 | 打卡结算卡：用时 / 组数 / 容量 / 连续天数 / 新解锁徽章 + 「分享战绩」按钮（替代原来一句 `showModal`） | ✅ |
+| 渐进超负荷建议：跟练页每个动作给「建议加到 X kg / 保持 / 每组 +2 次」+ 一键套用重量（只填空白组）；纯本地规则、无 AI、无联网 | ✅ |
+| 训练记录详情：看板「最近训练」可点进单次记录（每组重量 + 比上次），空态/读取失败都有兜底 | ✅ |
 | 首屏骨架屏：7 个页面（训练/看板/身体/计划/跟练/提醒/徽章），延迟 180ms 显示，刷新不闪 | ✅ |
 | 成就徽章：13 枚 / 7 分组，本地判定 0 云成本，首页与我的页入口 + 新解锁提示 | ✅ |
 | 训练首页数据打通：今日安排（第几周第几节）、周目标进度环、连续打卡天数、自然周打卡条 | ✅ |

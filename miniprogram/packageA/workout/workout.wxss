@@ -280,6 +280,60 @@
   background: rgba(16, 185, 129, 0.1);
 }
 
+/* 渐进超负荷建议行（动作卡内，位于动作名与组输入器之间） */
+.sg-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+  padding: 16rpx 20rpx;
+  border-radius: var(--radius-base);
+  background: rgba(16, 185, 129, 0.08);
+  border-left: 6rpx solid var(--color-primary);
+}
+
+/* 加重 = 明确的正向信号，用主色；保持 = 中性提示，降饱和避免像警告 */
+.sg-row.sg-hold,
+.sg-row.sg-no-weight {
+  background: rgba(107, 114, 128, 0.08);
+  border-left-color: var(--color-text-light);
+}
+
+.sg-row.sg-reps-up {
+  background: rgba(245, 158, 11, 0.1);
+  border-left-color: var(--color-accent);
+}
+
+.sg-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.sg-title {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.sg-reason {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-top: 4rpx;
+}
+
+.sg-apply {
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: var(--font-size-sm);
+}
+
+.sg-apply:active {
+  background: var(--color-primary-dark);
+}
+
 /* 底部 */
 .wk-footer {
   padding: 40rpx 0 32rpx;

@@ -37,6 +37,7 @@ const CARD_BUILDERS = [
   ['动作卡', share.buildExerciseCard, { id: 'pushup', name: '标准俯卧撑', category: '胸', equipment: '徒手' }],
   ['动作库卡', share.buildLibraryCard, { total: 12 }],
   ['徽章卡', share.buildBadgeCard, { unlocked: 7, total: 13, nextName: '坚持一月' }],
+  ['记录卡', share.buildRecordCard, { focus: '胸 + 三头', durationMin: 42, sets: 15 }],
   ['看板卡', share.buildStatsCard, { totalCheckins: 30, bestStreak: 14 }]
 ];
 

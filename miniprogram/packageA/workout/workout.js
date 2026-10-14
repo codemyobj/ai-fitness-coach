@@ -9,6 +9,7 @@ const favorites = require('../../services/favorites.js');
 const units = require('../../services/units.js');
 const reminder = require('../../services/reminder.js');
 const rest = require('../../services/rest.js');
+const progression = require('../../services/progression.js');
 const skeleton = require('../../utils/skeleton.js');
 const share = require('../../utils/share.js');
 const EXERCISES = require('../../assets/data/exercises.js');
@@ -176,6 +177,10 @@ Page({
         console.warn('打卡记录查询失败（不阻断跟练）：', e);
       }
 
+      // 渐进超负荷：给每个动作挂上「这次该用多少」。
+      // 放在首屏 setData 之前一次渲染完；历史读不到不该让跟练白屏，最多是没有建议。
+      await this.attachSuggestions(day);
+
       this.setData({
         loading: false,
         plan,
@@ -185,6 +190,7 @@ Page({
         totalCount: day.exercises.length,
         alreadyChecked
       });
+
       this.startTimer();
     } catch (err) {
       console.error('跟练页加载失败：', err);
@@ -409,6 +415,62 @@ Page({
 
   // 阻止弹层内点击冒泡到遮罩
   noop() {},
+
+  // ---------- 渐进超负荷 ----------
+  // 给 day.exercises 里的每个动作挂 ex.suggest（可能为 null = 没有历史，不给建议）。
+  // 直接挂到动作对象上而不是另开一个 map：WXML 里就不用写 {{map[ex.id].title}} 这种
+  // 深层取值（数据缺失会白屏，verify.js 也会告警）。
+  async attachSuggestions(day) {
+    const unit = units.get();
+    let logs = [];
+    try {
+      // 与看板/结算卡共用同一份 30s 缓存记录，通常 0 次额外云查询
+      logs = await statsService.listLogs(365);
+    } catch (e) {
+      console.warn('历史记录读取失败（不给建议，不影响跟练）：', e);
+    }
+    const today = workoutService.todayStr();
+    (day.exercises || []).forEach((ex) => {
+      try {
+        const history = progression.historyOf(logs, ex.exerciseId, { excludeDate: today });
+        ex.suggest = progression.suggest({
+          history,
+          targetSets: ex.sets,
+          reps: ex.reps,
+          allowWeight: ex.allowWeight,
+          unit
+        });
+      } catch (e) {
+        console.warn('建议计算失败（该动作不出建议）：', e);
+        ex.suggest = null;
+      }
+    });
+  },
+
+  // 一键套用建议重量：填进该动作所有「还没填」的组
+  applySuggest(e) {
+    const id = e.currentTarget.dataset.id;
+    const ex = ((this.data.day && this.data.day.exercises) || []).find((x) => x.exerciseId === id);
+    const sg = ex && ex.suggest;
+    if (!sg || sg.weightKg === null || sg.weightKg === undefined) return;
+
+    let comp = null;
+    try {
+      comp = this.selectComponent ? this.selectComponent(`#set-${id}`) : null;
+    } catch (err) {
+      comp = null;
+    }
+    if (!comp || typeof comp.fillWeight !== 'function') {
+      wx.showToast({ title: '请手动填写重量', icon: 'none' });
+      return;
+    }
+    // 与 units 一致：库里存 kg，输入框按用户当前单位显示
+    const filled = comp.fillWeight(units.toDisplay(sg.weightKg, units.get()));
+    wx.showToast({
+      title: filled > 0 ? `已填入 ${filled} 组` : '各组都已填过重量',
+      icon: 'none'
+    });
+  },
 
   // ---------- 完成打卡 ----------
   async onFinish() {

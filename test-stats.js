@@ -32,13 +32,13 @@ const TODAY = today();
 
 const fakeLogs = [
   // 今天：俯卧撑 3 组全完成（20kg×10次，其中 2 组记了重量）
-  { date: TODAY, focus: '胸 / 三头', durationMin: 30, exercises: [{ exerciseId: 'pushup', name: '标准俯卧撑', reps: 10, sets: [{ done: true, weightKg: 20 }, { done: true, weightKg: 20 }, { done: true, weightKg: null }] }] },
+  { _id: 'log-today', date: TODAY, focus: '胸 / 三头', durationMin: 30, exercises: [{ exerciseId: 'pushup', name: '标准俯卧撑', reps: 10, sets: [{ done: true, weightKg: 20 }, { done: true, weightKg: 20 }, { done: true, weightKg: null }] }] },
   // 昨天：深蹲 2 组，1 组完成（自重）
-  { date: shift(TODAY, -1), focus: '腿 / 臀', durationMin: 25, exercises: [{ exerciseId: 'squat', name: '徒手深蹲', reps: 12, sets: [{ done: true, weightKg: null }, { done: false, weightKg: null }] }] },
+  { _id: 'log-d1', date: shift(TODAY, -1), focus: '腿 / 臀', durationMin: 25, exercises: [{ exerciseId: 'squat', name: '徒手深蹲', reps: 12, sets: [{ done: true, weightKg: null }, { done: false, weightKg: null }] }] },
   // 前天：未完成任何组
-  { date: shift(TODAY, -2), focus: '核心', durationMin: 15, exercises: [{ exerciseId: 'plank', name: '平板支撑', reps: 30, sets: [{ done: false, weightKg: null }] }] },
+  { _id: 'log-d2', date: shift(TODAY, -2), focus: '核心', durationMin: 15, exercises: [{ exerciseId: 'plank', name: '平板支撑', reps: 30, sets: [{ done: false, weightKg: null }] }] },
   // 4 天前（中间断了一天）
-  { date: shift(TODAY, -4), focus: '背', durationMin: 40, exercises: [{ exerciseId: 'dumbbell_row', name: '哑铃划船', reps: 12, sets: [{ done: true, weightKg: 15 }] }] }
+  { _id: 'log-d4', date: shift(TODAY, -4), focus: '背', durationMin: 40, exercises: [{ exerciseId: 'dumbbell_row', name: '哑铃划船', reps: 12, sets: [{ done: true, weightKg: 15 }] }] }
 ];
 
 // 覆写数据源，避免依赖真实的 wx.cloud（同时统计调用次数，验证缓存）
@@ -166,6 +166,13 @@ const { sumSets, calcStreak, calcBestStreak, addDays, startOfWeek, fmt, heatLeve
   eq('按日期倒序，第一条是今天', recent[0].date, TODAY);
   ok('包含动作数与组数', recent[0].exerciseCount === 1 && recent[0].doneSets === 3);
 
+  // 单条记录（记录详情页入口）：复用同一份缓存，不额外查库
+  const oneLog = await stats.getLogById(recent[0]._id);
+  ok('getLogById 能取到完整记录（含 exercises 明细）',
+    !!(oneLog && oneLog.date === TODAY && Array.isArray(oneLog.exercises)), oneLog && oneLog.date);
+  eq('getLogById 未知 id 返回 null', await stats.getLogById('nope'), null);
+  eq('getLogById 空 id 直接返回 null（不打无谓的查询）', await stats.getLogById(''), null);
+
   // ---------- 8. 热力图 ----------
   // 分级纯函数边界
   eq('heatLevel 0 分钟 → 0', heatLevel(0), 0);
@@ -276,7 +283,15 @@ const { sumSets, calcStreak, calcBestStreak, addDays, startOfWeek, fmt, heatLeve
       home.weekMin, inWeek.reduce((a, l) => a + l.durationMin, 0));
     eq('累计打卡次数包含历史全部记录', home.totalCheckins, homeLogs.length);
     eq('今日已打卡', home.todayChecked, true);
-    eq('连续打卡按日期算（今天/昨天/前天连成 3 天）', home.streak, 3);
+    // 连续天数的期望值不能写死：当「前天」正好是上周日时，上周那条记录会把连续接上，
+    // 于是 Mon/Tue/Wed 跑这套测试会得到 3+1 天。改成从今天往前逐日数，任何日期都成立。
+    let expectStreak = 0;
+    for (let i = 0; ; i++) {
+      const d = addDays(TODAY, -i);
+      if (!homeLogs.some((l) => l.date === d)) break;
+      expectStreak++;
+    }
+    eq(`连续打卡按日期算（从今天起连续 ${expectStreak} 天）`, home.streak, expectStreak);
     eq('回传本周一日期（页面算进度用）', home.weekStart, thisWeekStart);
 
     // 无任何记录：全部归零，不能出现 undefined / NaN

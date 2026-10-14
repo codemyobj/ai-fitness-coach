@@ -163,6 +163,13 @@ Page({
     wx.switchTab({ url: '/pages/training/training' });
   },
 
+  // 「最近训练」点进单次记录详情（组明细 / 每组重量 / 比上次）
+  goRecord(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id) return;
+    wx.navigateTo({ url: `/packageA/record/record?id=${id}` });
+  },
+
   // ---------- 分享 ----------
   // 看板对陌生用户是空的，所以落地页给首页；分享文案讲累计与最长连续，
   // 「最长连续」比「当前连续」更适合传播——它只会越来越大，不会因为断卡而归零。

@@ -353,6 +353,15 @@ async function getRecentLogs(limit = 10) {
     });
 }
 
+// 按 _id 取单条训练记录（记录详情页用）
+// 复用 listLogs(365) 的 30s 缓存 → 从看板点进来时 0 次额外云查询。
+// 注意：只覆盖最近一年，更早的记录返回 null（由页面显示「记录不存在或已超过一年」）
+async function getLogById(id) {
+  if (!id) return null;
+  const logs = await listLogs(365);
+  return logs.find((l) => l._id === id) || null;
+}
+
 module.exports = {
   getOverview,
   getHomeSummary,
@@ -361,7 +370,12 @@ module.exports = {
   getCalendar,
   getHeatmap,
   getRecentLogs,
+  getLogById,
   invalidateCache,
+  // 原始记录列表（带 exercises 明细、限一年内、30s 缓存）。
+  // 渐进超负荷建议与记录详情都要按动作/日期翻历史，共用这一份缓存，
+  // 不要各自去查库——否则同一个页面上会出现两种口径的历史。
+  listLogs,
   // 单条记录的组数/容量聚合：看板汇总与「打卡结算卡」共用同一份口径，
   // 否则同一个数字会在两个页面对不上（统计口径只能有一个真源）
   sumSets,

@@ -163,10 +163,13 @@
         <view class="btn-primary" bindtap="goTrainingTab">去训练</view>
       </view>
 
+      <!-- 整行可点：进「这一天的训练详情」（看了几组/每组多少重量/比上次如何） -->
       <view
         wx:for="{{recentLogs}}"
         wx:key="_id"
         class="log-row"
+        data-id="{{item._id}}"
+        bindtap="goRecord"
       >
         <view class="log-date">{{item.date}}</view>
         <view class="log-main">
@@ -176,6 +179,7 @@
             <text wx:if="{{item.volume > 0}}"> · {{item.volumeText}}</text>
           </view>
         </view>
+        <view class="log-arrow">›</view>
       </view>
     </view>
 

@@ -1,0 +1,82 @@
+<!--packageA/record/record.wxml — 单次训练记录详情 -->
+<view class="page">
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="rec-state">
+    <view class="rec-state-icon">⏳</view>
+    <view>加载中…</view>
+  </view>
+
+  <!-- 加载失败 -->
+  <view wx:elif="{{loadError}}" class="rec-state">
+    <view class="rec-state-icon">⚠️</view>
+    <view class="rec-state-sub">{{loadError}}</view>
+    <view class="btn-ghost" bindtap="retry">重试</view>
+  </view>
+
+  <!-- 记录不存在（超出一年的记录会被清出缓存） -->
+  <view wx:elif="{{notFound}}" class="rec-state">
+    <view class="rec-state-icon">📄</view>
+    <view>找不到这条训练记录</view>
+    <view class="rec-state-sub">记录详情只保留最近一年，回看板看看别的吧</view>
+    <view class="btn-ghost" bindtap="goStats">回数据看板</view>
+  </view>
+
+  <block wx:else>
+    <!-- 顶部：日期 + 训练部位 + 用时 -->
+    <view class="rec-hero">
+      <view class="rec-date">{{meta.dateText}}</view>
+      <view class="rec-focus">{{meta.focus}}</view>
+      <view class="rec-duration">{{meta.durationText}}</view>
+    </view>
+
+    <!-- 数据格 -->
+    <view class="rec-grid">
+      <view class="rec-cell">
+        <view class="rec-cell-value">{{meta.setsText}}</view>
+        <view class="rec-cell-label">完成组数</view>
+      </view>
+      <view class="rec-cell">
+        <view class="rec-cell-value">{{meta.volumeText}}</view>
+        <view class="rec-cell-label">训练容量</view>
+      </view>
+      <view class="rec-cell">
+        <view class="rec-cell-value">{{meta.exerciseCount}}</view>
+        <view class="rec-cell-label">动作数</view>
+      </view>
+    </view>
+
+    <!-- 动作明细 -->
+    <view
+      wx:for="{{exercises}}"
+      wx:for-item="ex"
+      wx:key="exerciseId"
+      class="rec-card"
+    >
+      <view class="rec-ex-head">
+        <view class="rec-ex-name">{{ex.name}}</view>
+        <view class="rec-ex-target">{{ex.targetText}}</view>
+      </view>
+
+      <view class="rec-ex-meta">
+        <text class="rec-ex-sets">{{ex.setsText}}</text>
+        <text wx:if="{{ex.compare.text}}" class="rec-cmp rec-cmp-{{ex.compare.tone}}">{{ex.compare.text}}</text>
+      </view>
+
+      <view class="rec-sets">
+        <view
+          wx:for="{{ex.sets}}"
+          wx:for-item="s"
+          wx:key="index"
+          class="rec-set {{s.done ? 'is-done' : ''}}"
+        >
+          <text class="rec-set-no">第 {{s.index}} 组</text>
+          <text class="rec-set-weight">{{s.weightText}}</text>
+          <text class="rec-set-tick">{{s.done ? '✓' : '·'}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="disclaimer">数据仅用于自我记录，不构成医疗建议</view>
+  </block>
+</view>
